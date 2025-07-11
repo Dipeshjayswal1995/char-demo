@@ -1,5 +1,27 @@
-import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
+import { Component, AfterViewInit } from '@angular/core';
+
+
+declare var Highcharts: any;
+
+interface MonthlyData {
+  income: number;
+  gdp_per_capita: number;
+  population: number;
+  area: number;
+}
+
+interface StateInfo {
+  name: string;
+  income: number;
+  gdp_per_capita: number;
+  population: number;
+  area: number;
+  monthlyData: { [key: string]: MonthlyData };
+}
+
+
 
 @Component({
   selector: 'app-root',
@@ -9,4 +31,5 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   protected title = 'chart-dashboard';
+
 }
