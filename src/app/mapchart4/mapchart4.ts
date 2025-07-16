@@ -114,7 +114,8 @@ export class Mapchart4 {
   searchStateText: string = '';
 
   // --- Constructor ---
-  constructor() { }
+  constructor() {
+  }
 
   // --- Lifecycle Hooks ---
   ngOnInit() {
@@ -382,7 +383,13 @@ export class Mapchart4 {
 
     let options: any;
     let chartTypeToRender: string;
-
+    console.log('filteredStatesData', filteredStatesData);
+    console.log('allColumns', allColumns);
+    console.log('seriesName', seriesName);
+    console.log('tooltipSuffix', tooltipSuffix);
+    console.log('dataClasses', dataClasses);
+    console.log('subtitleParts', subtitleParts);
+    console.log('filterActive', filterActive);
     switch (this.currentChartType) {
       case 'map':
         options = await this.getMapChartOptions(filteredStatesData, allColumns, seriesName, tooltipSuffix, dataClasses, subtitleParts, filterActive);

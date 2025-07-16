@@ -1,0 +1,160 @@
+{
+  "loginUser": {
+    "email": "ace.admin@gmail.com",
+    "password": "ace@Admin45"
+  },
+  "invalidLogin": {
+    "email": "invalid@example.com",
+    "password": "invalid"
+  },
+  "successfulLoginResponse": {
+    "isSuccess": true,
+    "statusCode": 200,
+    "message": "Login successfully",
+    "result": {
+      "token": "token",
+      "expiration": "token_expire_time"
+    }
+  },
+  "failedLoginResponse": {
+    "isSuccess": false,
+    "statusCode": 401,
+    "message": "Please enter valid credentials.",
+    "result": null
+  },
+  "createConsumer": {
+    "consumerName": "Rotaway",
+    "url": "www.rotawat.com",
+    "service": 1,
+    "dailyLimit": 100,
+    "isBlocked": false
+  },
+  "addConsumerSuccess": {
+    "isSuccess": true,
+    "message": "Consumer added successfully",
+    "result": true
+  },
+  "addConsumerDuplicate": {
+    "isSuccess": false,
+    "message": "Consumer already exists",
+    "result": null
+  },
+  "updateConsumer": {
+    "isSuccess": true,
+    "result": true,
+    "message": "Consumer updated successfully"
+  },
+  "errorResponse": {
+    "isSuccess": false,
+    "message": "Update failed",
+    "result": null
+  },
+  "getConsumer": {
+    "isSuccess": true,
+    "statusCode": 200,
+    "message": null,
+    "result": {
+      "consumerId": "6cee3eb7-2443-40a5-a243-8b6055a9de0c",
+      "consumerName": "Rotaway 121",
+      "allowedOrigin": "www.rotawat1.com",
+      "serviceId": 1,
+      "consumerAPIKey": "rl5w/+8UHf/2rf2gE7UyQARHzlxfHmghwt25tMBF4CE=",
+      "isBlocked": false,
+      "dailyLimit": 0,
+      "isDeleted": false,
+      "creationDate": "2025-06-30T13:04:31.9799507",
+      "modificationDate": "2025-06-30T13:05:15.9413839",
+      "services": null
+    }
+  },
+  "getConsumerList": {
+    "isSuccess": true,
+    "statusCode": 200,
+    "message": null,
+    "result": [
+      {
+        "consumerId": "6cee3eb7-2443-40a5-a243-8b6055a9de0c",
+        "consumerName": "Rotaway 121"
+      },
+      {
+        "consumerId": "88a57980-3d19-4a3c-baae-5d05f369c6fe",
+        "consumerName": "Rotaway"
+      }
+    ]
+  },
+  "deleteResponse": {
+      "isSuccess": true,
+      "result": true,
+      "message": "Deleted successfully"
+  },
+  "renerateKeyResponse": {
+    "isSuccess": true,
+    "result": {
+      "consumerAPIKey": "newKey"
+    },
+    "message": "Key regenerated"
+  },
+  "getConsumerListPageWise": {
+    "isSuccess": true,
+    "result": {
+      "totalCount": 1,
+      "data": [
+        {
+          "consumerId": "1",
+          "consumerName": "Test"
+        }
+      ]
+    }
+  },
+  "getServiceDetails": {
+    "isSuccess": true,
+    "result": {
+      "serviceId": 5,
+      "consumerId": 99,
+      "configJson": {
+        "key1": "value1",
+        "key2": "value2"
+      }
+    }
+  },
+  "getServiceType": {
+    "isSuccess": true,
+    "statusCode": 200,
+    "message": "",
+    "result": [
+      {
+        "serviceId": 1,
+        "serviceName": "SMS"
+      },
+      {
+        "serviceId": 2,
+        "serviceName": "Whatsapp"
+      }
+    ]
+  },
+  "addService": {
+    "serviceType": 1,
+    "consumer": "123123",
+    "properties": [
+      {
+        "key": "username",
+        "value": "dipesh"
+      }
+    ]
+  },
+  "addServiceSuccess": {
+    "isSuccess": true,
+    "message": "Services added successfully",
+    "result": true
+  },
+  "updateServiceSuccess": {
+    "isSuccess": true,
+    "message": "Services updated successfully",
+    "result": true
+  },
+  "duplicateServiceSuccess": {
+    "isSuccess": false,
+    "result": null,
+    "message": "Duplicate entry"
+  }
+}

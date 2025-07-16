@@ -1,0 +1,23 @@
+[
+  { "code": "fr", "name": "France", "value": 1234 },
+  { "code": "de", "name": "Germany", "value": 2345 },
+  { "code": "es", "name": "Spain", "value": 1450 },
+  { "code": "it", "name": "Italy", "value": 1320 },
+  { "code": "pt", "name": "Portugal", "value": 880 },
+  { "code": "nl", "name": "Netherlands", "value": 1100 },
+  { "code": "be", "name": "Belgium", "value": 950 },
+  { "code": "pl", "name": "Poland", "value": 1600 },
+  { "code": "se", "name": "Sweden", "value": 1400 },
+  { "code": "no", "name": "Norway", "value": 1300 },
+  { "code": "fi", "name": "Finland", "value": 1200 },
+  { "code": "ch", "name": "Switzerland", "value": 1000 },
+  { "code": "gr", "name": "Greece", "value": 870 },
+  { "code": "ie", "name": "Ireland", "value": 920 },
+  { "code": "cz", "name": "Czech Republic", "value": 970 },
+  { "code": "at", "name": "Austria", "value": 1010 },
+  { "code": "dk", "name": "Denmark", "value": 980 },
+  { "code": "hu", "name": "Hungary", "value": 760 },
+  { "code": "sk", "name": "Slovakia", "value": 740 },
+  { "code": "ro", "name": "Romania", "value": 680 },
+  { "code": "bg", "name": "Bulgaria", "value": 640 }
+]

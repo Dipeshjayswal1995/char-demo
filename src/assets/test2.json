@@ -1,0 +1,72 @@
+[
+  {
+    "Category": "Accessories",
+    "Product": "Helmet",
+    "Revenue": 12000,
+    "RevenueTarget": 15000,
+    "UnitsSold": 400,
+    "UnitsSoldTarget": 500,
+    "State": "CA",
+    "CurrentDate": "2025-06-01"
+  },
+  {
+    "Category": "Accessories",
+    "Product": "Water Bottle",
+    "Revenue": 8000,
+    "RevenueTarget": 10000,
+    "UnitsSold": 300,
+    "UnitsSoldTarget": 400,
+    "State": "NY",
+    "CurrentDate": "2025-06-01"
+  },
+  {
+    "Category": "Bikes",
+    "Product": "Road Bike",
+    "Revenue": 45000,
+    "RevenueTarget": 50000,
+    "UnitsSold": 150,
+    "UnitsSoldTarget": 170,
+    "State": "TX",
+    "CurrentDate": "2025-06-01"
+  },
+  {
+    "Category": "Bikes",
+    "Product": "Mountain Bike",
+    "Revenue": 55000,
+    "RevenueTarget": 60000,
+    "UnitsSold": 180,
+    "UnitsSoldTarget": 200,
+    "State": "CA",
+    "CurrentDate": "2025-06-01"
+  },
+  {
+    "Category": "Clothing",
+    "Product": "Jersey",
+    "Revenue": 10000,
+    "RevenueTarget": 12000,
+    "UnitsSold": 220,
+    "UnitsSoldTarget": 250,
+    "State": "WA",
+    "CurrentDate": "2025-06-01"
+  },
+  {
+    "Category": "Components",
+    "Product": "Brake Set",
+    "Revenue": 25000,
+    "RevenueTarget": 30000,
+    "UnitsSold": 350,
+    "UnitsSoldTarget": 400,
+    "State": "FL",
+    "CurrentDate": "2025-06-01"
+  },
+  {
+    "Category": "Components",
+    "Product": "Chain",
+    "Revenue": 18000,
+    "RevenueTarget": 22000,
+    "UnitsSold": 290,
+    "UnitsSoldTarget": 320,
+    "State": "TX",
+    "CurrentDate": "2025-06-01"
+  }
+]

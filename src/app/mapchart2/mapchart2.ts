@@ -17,7 +17,7 @@ export class Mapchart2 {
   columns: any[] = [];
   mapData: any;
   selectedView: 'map' | 'pie' = 'map';
-  
+
 
   async ngAfterViewInit() {
     await this.loadMapData();
@@ -83,25 +83,45 @@ export class Mapchart2 {
 
 
     const postalCodes = Object.keys(this.stateData);
+    console.log("postalCodes===> ", postalCodes);
     const names = postalCodes.map(code => this.stateData[code].name);
+    console.log("postalCodes===> ", names);
     const incomes = postalCodes.map(code => this.stateData[code].income);
+    console.log("postalCodes===> ", incomes);
     const gdps = postalCodes.map(code => this.stateData[code].gdp);
     const qtd = incomes.map(val => Math.round(val * 0.7));
+    console.log("qtd===> ", qtd);
     const qtdTarget = gdps.map(val => Math.round(val * 0.65));
+    console.log("qtd===> ", qtdTarget);
     this.columns = [postalCodes, names, incomes, gdps, qtd, qtdTarget];
-    console.log(this.columns);
+    console.log("this.columns===> ",this.columns);
   }
 
   updateMapData() {
     const filterMap = { income: 2, gdp: 3, qtd: 4, qtdTarget: 5 };
     const index = filterMap[this.selectedFilter];
-    const data = this.columns[0].map((code: string, i: number) => ({
-      'postal-code': code,
-      name: this.columns[1][i],
-      value: this.columns[index][i],
-      labelText: `$${(this.columns[index][i] / 1000).toFixed(1)}K`,
-      row: i
-    }));
+    const data = this.columns[0].map((code: string, i: number) => {
+      const dataPoint = {
+        'postal-code': code,
+        name: this.columns[1][i],
+        value: this.columns[index][i],
+        labelText: `$${(this.columns[index][i] / 1000).toFixed(1)}K`,
+        row: i
+      };
+
+      console.log('Mapped Data Point:', this.columns[index][i]); // <-- Console log here
+
+      return dataPoint;
+    });
+    console.log(data);
+    //   this.columns[0].map((code: string, i: number) => ({
+    //     'postal-code': code,
+    //     name: this.columns[1][i],
+    //     value: this.columns[index][i],
+    //     labelText: `$${(this.columns[index][i] / 1000).toFixed(1)}K`,
+    //     row: i
+    //   }
+    // ));
 
     const mapOptions = {
       chart: {

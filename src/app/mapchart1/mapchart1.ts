@@ -37,9 +37,6 @@ export class Mapchart1 {
 
 
   stateData: Record<string, StateInfo> = {
-    // Keep your full stateData here as defined previously.
-    // I'm omitting it for brevity in this example, but it should be present.
-    // Example for CA (California) which we'll filter:
     "AL": { "name": "Alabama", "income": 60660, "gdp_per_capita": 67786, "population": 5097000, "area": 52420, "monthlyData": {} },
     "AK": { "name": "Alaska", "income": 113934, "gdp_per_capita": 95147, "population": 733000, "area": 665384, "monthlyData": {} },
     "AZ": { "name": "Arizona", "income": 77315, "gdp_per_capita": 78201, "population": 7431000, "area": 113990, "monthlyData": {} },
@@ -94,6 +91,12 @@ export class Mapchart1 {
 
   constructor() {
     this.generateMonthlyData();
+    for (const [code, state] of Object.entries(this.stateData)) {
+      const sql = `INSERT INTO States (StateCode, Name, Income, GDPPerCapita, Population, Area)
+VALUES ('${code}', '${state.name.replace(/'/g, "''")}', ${state.income}, ${state.gdp_per_capita}, ${state.population}, ${state.area});`;
+
+      console.log(sql);
+    }
   }
 
   generateMonthlyData() {
@@ -779,7 +782,7 @@ export class Mapchart1 {
             },
             legend: {
               enabled: true,
-              align: 'center',   
+              align: 'center',
               verticalAlign: 'bottom',
               layout: 'horizontal',
               itemWidth: 300,
