@@ -26,7 +26,7 @@ export class Mapchart6 {
   selectedArgumentField = '';
   selectedSeriesField = '';
   selectedMatchValue = '';
-  selectedMapOption : {
+  selectedMapOption: {
     name: string;
     json_file: string;
     uniqueValueMatch: string;
@@ -40,7 +40,6 @@ export class Mapchart6 {
     isVisiableArgumentField: boolean;
     isVisiableSeriesField: boolean;
   } | null = null;
-  // chartType: 'column' | 'bar' | 'line' | 'pie' | 'donut' | 'map' = 'column';
   currentChart: any;
   chartOption = [
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true },
@@ -57,11 +56,17 @@ export class Mapchart6 {
     { name: 'EUROPE', json_file: 'https://code.highcharts.com/mapdata/custom/europe.topo.json', uniqueValueMatch: 'iso-a2' },
   ]
 
+  topBottomOptions = [3, 5, 10];
+  selectedTopN: number | '' = '';
+  selectedBottomN: number | '' = '';
+
+
+
   constructor(private readonly http: HttpClient) { }
 
   ngOnInit() { }
 
-  changeChart(){
+  changeChart() {
     console.log(this.selectedChartType);
   }
 
@@ -101,6 +106,26 @@ export class Mapchart6 {
     });
   }
 
+  private applyTopBottomFilter(data: any[]): any[] {
+    if (!this.selectedValueField) return data;
+
+    const sortedData = [...data].sort((a, b) => {
+      const aVal = Number(a[this.selectedValueField]) || 0;
+      const bVal = Number(b[this.selectedValueField]) || 0;
+      return bVal - aVal;
+    });
+
+    if (this.selectedTopN) {
+      return sortedData.slice(0, Number(this.selectedTopN));
+    }
+
+    if (this.selectedBottomN) {
+      return sortedData.reverse().slice(0, Number(this.selectedBottomN));
+    }
+
+    return data;
+  }
+
   renderChart(): void {
     if (!this.selectedValueField || !this.selectedArgumentField) return;
 
@@ -113,7 +138,9 @@ export class Mapchart6 {
       return;
     }
 
-    const grouped = this.groupData();
+    const filteredData = this.applyTopBottomFilter(this.rawData);
+
+    const grouped = this.groupData(filteredData);
     const categories = Object.keys(grouped);
     const seriesNames = new Set<string>();
 
@@ -170,16 +197,15 @@ export class Mapchart6 {
   }
 
   renderMapChart(): void {
-    console.log(this.selectedValueField);
-    // const mapUrl = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
-    // const mapUrl = 'https://code.highcharts.com/mapdata/custom/asia.geo.json';
-    const mapUrl:any = this.selectedMapOption?.json_file;
+    const mapUrl: any = this.selectedMapOption?.json_file;
 
 
     fetch(mapUrl)
       .then(res => res.json())
       .then(topology => {
-        const mapData = this.rawData.map(row => ({
+        const filtered = this.applyTopBottomFilter(this.rawData); // ✅ Apply top/bottom N
+
+        const mapData = filtered.map(row => ({
           code: (row[this.selectedMatchValue] || '').toUpperCase(),
           value: row[this.selectedValueField],
         }));
@@ -235,71 +261,9 @@ export class Mapchart6 {
       });
   }
 
-  // renderMapChart123(): void {
-  //   const mapUrl = 'https://code.highcharts.com/mapdata/custom/europe.topo.json';
-
-  //   fetch(mapUrl)
-  //     .then(res => res.json())
-  //     .then(topology => {
-  //       const mapData = this.rawData.map(row => ({
-  //         code: row[this.selectedMatchValue].toLowerCase(),  // match against "id" from map JSON
-  //         value: Number(row[this.selectedValueField])
-  //       }));
-
-  //       console.log('Map Data:', mapData);
-
-  //       if (!mapData.length) {
-  //         console.error('❌ Map data is empty.');
-  //         return;
-  //       }
-
-  //       this.currentChart = Highcharts.mapChart('chart-container', {
-  //         chart: {
-  //           map: topology,
-  //           backgroundColor: 'transparent'
-  //         },
-  //         title: {
-  //           text: `Map of ${this.selectedValueField} by ${this.selectedMatchValue}`
-  //         },
-  //         mapNavigation: {
-  //           enabled: true
-  //         },
-  //         colorAxis: {
-  //           min: 1,
-  //           type: 'logarithmic',
-  //           minColor: '#EEEEFF',
-  //           maxColor: '#000022',
-  //           stops: [
-  //             [0, '#EFEFFF'],
-  //             [0.67, '#4444FF'],
-  //             [1, '#000022']
-  //           ]
-  //         },
-  //         series: [{
-  //           data: mapData,
-  //           joinBy: ['iso-a2', 'code'],
-  //           name: this.selectedValueField,
-  //           dataLabels: {
-  //             enabled: true,
-  //             formatter: function (this: any) {
-  //               return `${this.point.value ?? ''}`;
-  //             }
-  //           },
-  //           tooltip: {
-  //             pointFormat: '{point.code}: {point.value}'
-  //           }
-  //         }]
-  //       });
-  //     })
-  //     .catch(err => {
-  //       console.error('Map load error:', err);
-  //     });
-  // }
-
-
-  private groupData(): any {
+  private groupData(filteredData: any[] = this.rawData): any {
     const grouped: any = {};
-    this.rawData.forEach(item => {
+    filteredData.forEach(item => {
       const category = item[this.selectedArgumentField];
       const series = this.selectedSeriesField ? item[this.selectedSeriesField] : 'Default';
 

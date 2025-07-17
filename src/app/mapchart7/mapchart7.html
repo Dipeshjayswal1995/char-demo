@@ -31,25 +31,42 @@
             </ng-container>
 
             <ng-container *ngIf="selectedChartType?.isVisialbeValueFeild">
-                <label>Value Field</label>
+                <label>X-axis</label>
                 <select [(ngModel)]="selectedValueField" (change)="renderChart()">
                     <option *ngFor="let f of valueFields" [value]="f">{{ f }}</option>
                 </select>
             </ng-container>
 
             <ng-container *ngIf="selectedChartType?.isVisiableArgumentField">
-                <label>Argument Field</label>
+                <label>Y-Axis</label>
                 <select [(ngModel)]="selectedArgumentField" (change)="renderChart()">
                     <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
                 </select>
             </ng-container>
 
-            <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
+            <!-- <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
                 <label>Series (Group By)</label>
                 <select [(ngModel)]="selectedSeriesField" (change)="renderChart()">
                     <option value="">None</option>
                     <option *ngFor="let f of seriesFields" [value]="f">{{ f }}</option>
                 </select>
+            </ng-container> -->
+            <div>
+                <label>Enabled Data label:</label>
+                <input type="checkbox" [(ngModel)]="dataLabel" (change)="renderChart()">
+            </div>
+
+            <div>
+                <label>Enable Mouse Tracking:</label>
+                <input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()">
+            </div>
+
+            <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
+                <label>Series Fields:</label>
+                <div *ngFor="let key of allFields">
+                    <input type="checkbox" [value]="key" (change)="onSeriesFieldToggle(key, $event)">
+                    {{ key }}
+                </div>
             </ng-container>
 
             <label>Top N</label>
