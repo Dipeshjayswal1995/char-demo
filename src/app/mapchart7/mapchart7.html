@@ -63,6 +63,15 @@
                 </select>
             </div>
 
+            <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
+                <label>Colunm and bar chart Option</label>
+                <select [(ngModel)]="barColunmchartOption" (change)="renderChart()">
+                    <option value="">none</option>
+                    <option value="x">x-axis</option>
+                    <option value="y">y-axis</option>
+                </select>
+            </div>
+
             <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
                 <label>Type of area</label>
                 <select [(ngModel)]="typeofareaChart" (change)="renderChart()">

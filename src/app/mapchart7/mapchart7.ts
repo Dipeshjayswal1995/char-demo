@@ -79,6 +79,7 @@ export class Mapchart7 {
   zomming: string = '';
 
   typeofareaChart: string = '';
+  barColunmchartOption: string = '';
 
 
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
