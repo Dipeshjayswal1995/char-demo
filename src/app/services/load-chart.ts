@@ -279,6 +279,93 @@ export class LoadChart {
     };
   }
 
+  getBarChartOptions(
+    rawData: any[],
+    selectedValueField: string,
+    selectedArgumentField: string,
+    selectedSeriesFields: string[],
+    dataLabel: boolean = true,
+    tooltipUnit: string = ' millions',
+    chartTitle: string = '',
+    chartSubtitle: string = '',
+    isTransparent: boolean = true,
+    markerSymbol: string = 'circle',
+    zooming: string = '',
+  ): any {
+    const categories = rawData.map(item => item[selectedArgumentField]);
+
+    const series = selectedSeriesFields.map(field => ({
+      name: field,
+      data: rawData.map(item => item[field] ?? null)
+    }));
+
+    return {
+      chart: {
+        type: 'bar',
+        backgroundColor: isTransparent ? 'transparent' : undefined,
+        zooming: {
+          type: zooming
+        }
+      },
+      title: {
+        text: chartTitle || 'Historic World Population by Region'
+      },
+      subtitle: {
+        text:
+          chartSubtitle ||
+          'Source: <a href="https://en.wikipedia.org/wiki/List_of_continents_and_continental_subregions_by_population" target="_blank">Wikipedia.org</a>'
+      },
+      xAxis: {
+        categories,
+        title: {
+          text: null
+        },
+        gridLineWidth: 1,
+        lineWidth: 0
+      },
+      yAxis: {
+        min: 0,
+        title: {
+          text: selectedValueField,
+          align: 'high'
+        },
+        labels: {
+          overflow: 'justify'
+        },
+        gridLineWidth: 0
+      },
+      tooltip: {
+        valueSuffix: tooltipUnit
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: '50%',
+          symbol: markerSymbol,
+          dataLabels: {
+            enabled: dataLabel
+          },
+          groupPadding: 0.1
+        }
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'top',
+        x: -40,
+        y: 80,
+        floating: true,
+        borderWidth: 1,
+        backgroundColor: 'var(--highcharts-background-color, #ffffff)',
+        shadow: true
+      },
+      credits: {
+        enabled: false
+      },
+      series
+    };
+  }
+
+
 
 
 

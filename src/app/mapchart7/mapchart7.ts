@@ -49,15 +49,14 @@ export class Mapchart7 {
   } | null = null;
   currentChart: any;
   chartOption = [
-    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart : false },
+    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false },
     { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true },
-    { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart : true },
-    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
-    { name: 'bar', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
-    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
-    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
-    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
-    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
+    { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true },
+    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: false },
+    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
+    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
+    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
+    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
 
   ]
   mapOption = [
@@ -160,6 +159,9 @@ export class Mapchart7 {
       case 'area-chart':
         this.areayChartRender();
         break;
+      case 'column':
+        this.coloumChartrender();
+        break;
       case 'pie':
       case 'donut':
         this.renderPieOrDonutChart(chartType);
@@ -171,6 +173,27 @@ export class Mapchart7 {
       default:
         this.renderStandardChart(chartType);
     }
+  }
+
+  coloumChartrender() {
+    if (!this.selectedArgumentField) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    const chartOptions = this.chartBuilderService.getBarChartOptions(
+      this.rawData,
+      this.selectedValueField,
+      this.selectedArgumentField,
+      this.selectedSeriesFields,
+      this.dataLabel,
+      ' millions',
+      'Column chart',
+      'Column chart',
+      true,
+      this.selectSymbol,
+      this.zomming
+    );
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
 
@@ -217,6 +240,7 @@ export class Mapchart7 {
         this.selectSymbol,
         this.zomming
       );
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
     }
   }
 

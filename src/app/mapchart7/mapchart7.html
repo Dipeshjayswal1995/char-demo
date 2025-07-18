@@ -64,7 +64,7 @@
             </div>
 
             <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
-                <label>Zooming</label>
+                <label>Type of area</label>
                 <select [(ngModel)]="typeofareaChart" (change)="renderChart()">
                     <option value="">none</option>
                     <option value="normal">Stacked area</option>
