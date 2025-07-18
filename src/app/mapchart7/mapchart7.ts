@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { LoadChart } from '../services/load-chart';
 
 declare var Highcharts: any;
 
@@ -39,16 +40,24 @@ export class Mapchart7 {
     isVisialbeValueFeild: boolean;
     isVisiableArgumentField: boolean;
     isVisiableSeriesField: boolean;
+    dataLabel: boolean;
+    enableMouseTracking: boolean;
+    markerSymbols: boolean;
+    zooming: boolean;
+    typeofareaChart: boolean;
+
   } | null = null;
   currentChart: any;
   chartOption = [
-    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true },
-    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true },
-    { name: 'bar', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true },
-    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true },
-    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false },
-    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false },
-    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false },
+    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart : false },
+    { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true },
+    { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart : true },
+    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
+    { name: 'bar', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
+    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
+    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
+    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
+    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart : false },
 
   ]
   mapOption = [
@@ -56,6 +65,9 @@ export class Mapchart7 {
     { name: 'ASIA', json_file: 'https://code.highcharts.com/mapdata/custom/asia.geo.json', uniqueValueMatch: 'iso-a2' },
     { name: 'EUROPE', json_file: 'https://code.highcharts.com/mapdata/custom/europe.topo.json', uniqueValueMatch: 'iso-a2' },
   ]
+  markerSymbols = ['circle', 'square', 'diamond', 'triangle', 'triangle-down', 'url(https://www.highcharts.com/samples/graphics/sun.png)'];
+  selectSymbol: string = '';
+
 
   topBottomOptions = [3, 5, 10];
   selectedTopN: number | '' = '';
@@ -64,10 +76,13 @@ export class Mapchart7 {
   enableMouseTracking: boolean = false;
   selectedSeriesFields: string[] = [];    // Multiple dynamic series fields
 
+  enableCustomAnimation = true;
+  zomming: string = '';
+
+  typeofareaChart: string = '';
 
 
-
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
 
   ngOnInit() { }
 
@@ -100,6 +115,13 @@ export class Mapchart7 {
       this.isLoading = false;
       console.error('API error:', error);
     });
+  }
+
+  toggleCustomAnimation(ev: any) {
+    this.enableCustomAnimation = ev.target.checked;
+    (window as any).enableCustomAnimation = ev.target.checked;
+
+    this.renderChart(); // re-render chart with/without animation
   }
 
   private applyTopBottomFilter(data: any[]): any[] {
@@ -135,17 +157,23 @@ export class Mapchart7 {
       case 'map':
         this.renderMapChart();
         break;
+      case 'area-chart':
+        this.areayChartRender();
+        break;
       case 'pie':
       case 'donut':
         this.renderPieOrDonutChart(chartType);
         break;
       case 'line-time':
-        this.renderTimeSeriesLineChart(); // new method
+      case 'spline-with-inverted-axes':
+        this.renderTimeSeriesLineChart(chartType); // new method
         break;
       default:
         this.renderStandardChart(chartType);
     }
   }
+
+
 
   onSeriesFieldToggle(field: string, e: any): void {
     if (e.target?.checked) {
@@ -156,83 +184,62 @@ export class Mapchart7 {
     this.renderChart();
   }
 
-  renderTimeSeriesLineChart(): void {
-    if (!this.selectedArgumentField || this.selectedSeriesFields.length === 0) {
+  renderTimeSeriesLineChart(chartType: string): void {
+    if (!this.selectedArgumentField) {
       console.warn('Select at least one series field and argument field');
       return;
     }
+    let chartOptions: any = null;
+    if (chartType === 'line-time') {
+      chartOptions = this.chartBuilderService.getLineChartOptions(
+        this.rawData,
+        this.selectedValueField,
+        this.selectedArgumentField,
+        this.selectedSeriesFields,
+        this.dataLabel,
+        this.enableMouseTracking,
+        this.selectSymbol,
+        this.zomming
+      );
+    } else {
+      chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson(
+        this.rawData,
+        this.selectedArgumentField,   // xField
+        this.selectedValueField,      // yField
+        this.selectedValueField,      // seriesName
+        this.selectedArgumentField,   // xTitle
+        this.selectedValueField,      // yTitle
+        `Trend of ${this.selectedValueField}`,          // chartTitle
+        `By ${this.selectedArgumentField}`,             // chartSubtitle
+        '',
+        '',
+        this.dataLabel,
+        this.selectSymbol,
+        this.zomming
+      );
+    }
+  }
 
-    const categories = this.rawData.map(r => r[this.selectedArgumentField]);
 
-    // Build dynamic series from selectedSeriesFields
-    const series = this.selectedSeriesFields.map(field => ({
-      name: field,
-      marker: {
-        symbol: 'url(https://www.highcharts.com/samples/graphics/sun.png)'
-      },
-      data: this.rawData.map(r => r[field] ?? null)
-    }));
-
-    const chartOptions = {
-      chart: {
-        type: 'line',
-        backgroundColor: 'transparent'
-      },
-      title: {
-        text: `Trend of ${this.selectedValueField}`,
-        align: 'left'
-      },
-      subtitle: {
-        text: `By ${this.selectedArgumentField}`,
-        align: 'left'
-      },
-      yAxis: {
-        title: {
-          text: this.selectedValueField
-        }
-      },
-      xAxis: {
-        categories,
-        accessibility: {
-          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
-        }
-      },
-      legend: {
-        layout: 'vertical',
-        align: 'right',
-        verticalAlign: 'middle'
-      },
-      plotOptions: {
-        line: {
-          dataLabels: {
-            enabled: this.dataLabel
-          },
-          enableMouseTracking: this.enableMouseTracking
-        },
-        series: {
-          label: {
-            connectorAllowed: true
-          }
-        }
-      },
-      series,
-      responsive: {
-        rules: [{
-          condition: {
-            maxWidth: 500
-          },
-          chartOptions: {
-            legend: {
-              layout: 'horizontal',
-              align: 'center',
-              verticalAlign: 'bottom'
-            }
-          }
-        }]
-      }
-    };
-
+  areayChartRender() {
+    const chartOptions = this.chartBuilderService.getAreaChartOptions(
+      this.rawData,
+      this.selectedValueField,   // xField
+      this.selectedArgumentField,
+      this.selectedSeriesFields,     // yField
+      this.dataLabel,
+      this.enableMouseTracking,    // yTitle
+      this.selectSymbol,  // chartTitle
+      this.zomming,
+      '',
+      '',
+      '',
+      '',
+      true,
+      this.typeofareaChart
+    );
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
+
   }
 
 
@@ -376,8 +383,84 @@ export class Mapchart7 {
     };
   }
 
+  addCustomAnimationPlugin() {
+    (function (H) {
+      const animateSVGPath = (
+        svgElem: any,
+        animation: any,
+        callback?: () => void // ✅ Make the callback explicitly optional
+      ) => {
+        const length = svgElem.element.getTotalLength();
+        svgElem.attr({
+          'stroke-dasharray': length,
+          'stroke-dashoffset': length,
+          opacity: 1
+        });
+        svgElem.animate(
+          {
+            'stroke-dashoffset': 0
+          },
+          animation,
+          callback // ✅ Now valid
+        );
+      };
+
+      // Animate lines (like series.graph) using stroke-dash
+      H.seriesTypes.line.prototype.animate = function (init: any) {
+        const series = this,
+          animation = H.animObject(series.options.animation);
+
+        if (!init && (window as any).enableCustomAnimation !== false) {
+          animateSVGPath(series.graph, animation);
+        }
+      };
+
+      // Axis and plot line animation
+      H.addEvent(H.Axis, 'afterRender', function (this: any) {
+        const axis = this,
+          chart = axis.chart,
+          animation = H.animObject(chart.renderer.globalAnimation);
+
+        if ((window as any).enableCustomAnimation === false) return;
+
+        // Animate axis group
+        axis.axisGroup
+          .attr({ opacity: 0, rotation: -3, scaleY: 0.9 })
+          .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
+
+        // Animate label group
+        if (axis.horiz) {
+          axis.labelGroup
+            .attr({ opacity: 0, rotation: 3, scaleY: 0.5 })
+            .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
+        } else {
+          axis.labelGroup
+            .attr({ opacity: 0, rotation: 3, scaleX: -0.5 })
+            .animate({ opacity: 1, rotation: 0, scaleX: 1 }, animation);
+        }
+
+        // Animate plot lines/bands with SVG path effect
+        if (axis.plotLinesAndBands) {
+          axis.plotLinesAndBands.forEach((plotLine: any) => {
+            const anim = H.animObject(plotLine.options.animation);
+
+            plotLine.label?.attr({ opacity: 0 });
+
+            animateSVGPath(plotLine.svgElem, anim, () => {
+              plotLine.label?.animate({ opacity: 1 });
+            });
+          });
+        }
+      });
+    })(Highcharts);
+  }
 
 
+  loadChart() {
+    (window as any).enableCustomAnimation = this.enableCustomAnimation;
+    this.addCustomAnimationPlugin();
+    this.renderChart();
+  }
 
   // renderChart(): void {
   //   if (!this.selectedValueField || !this.selectedArgumentField) return;

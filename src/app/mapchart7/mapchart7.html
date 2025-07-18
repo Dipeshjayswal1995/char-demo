@@ -7,79 +7,114 @@
             <span *ngIf="!isLoading">🔄 Fetch Data</span>
             <span *ngIf="isLoading">⏳ Loading...</span>
         </button>
+        <button class="load-chart-btn" (click)="loadChart()">📊 Load Chart</button>
     </div>
 
     <div class="layout">
         <aside class="sidebar">
-            <label>Chart Type</label>
-            <select [(ngModel)]="selectedChartType" (change)="changeChart()">
-                <option *ngFor="let f of chartOption" [ngValue]="f">{{f.name}}</option>
-            </select>
+            <div class="sidebar-section">
+                <label>Chart Type</label>
+                <select [(ngModel)]="selectedChartType" (change)="changeChart()">
+                    <option *ngFor="let f of chartOption" [ngValue]="f">{{ f.name }}</option>
+                </select>
+            </div>
 
-            <ng-container *ngIf="selectedChartType?.isVisableMapOption">
+            <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
                 <label>Load Map</label>
                 <select [(ngModel)]="selectedMapOption">
                     <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
                 </select>
-            </ng-container>
+            </div>
 
-            <ng-container *ngIf="selectedChartType?.isVisableMatchFeild">
+            <div class="sidebar-section" *ngIf="selectedChartType?.markerSymbols">
+                <label>Symbol</label>
+                <select [(ngModel)]="selectSymbol">
+                    <option *ngFor="let f of markerSymbols" [ngValue]="f">{{ f }}</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMatchFeild">
                 <label>Match Field</label>
                 <select [(ngModel)]="selectedMatchValue" (change)="renderChart()">
                     <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
                 </select>
-            </ng-container>
+            </div>
 
-            <ng-container *ngIf="selectedChartType?.isVisialbeValueFeild">
-                <label>X-axis</label>
+            <div class="sidebar-section" *ngIf="selectedChartType?.isVisialbeValueFeild">
+                <label>X-Axis</label>
                 <select [(ngModel)]="selectedValueField" (change)="renderChart()">
                     <option *ngFor="let f of valueFields" [value]="f">{{ f }}</option>
                 </select>
-            </ng-container>
+            </div>
 
-            <ng-container *ngIf="selectedChartType?.isVisiableArgumentField">
+            <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableArgumentField">
                 <label>Y-Axis</label>
                 <select [(ngModel)]="selectedArgumentField" (change)="renderChart()">
                     <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
                 </select>
-            </ng-container>
+            </div>
 
-            <!-- <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
-                <label>Series (Group By)</label>
-                <select [(ngModel)]="selectedSeriesField" (change)="renderChart()">
-                    <option value="">None</option>
-                    <option *ngFor="let f of seriesFields" [value]="f">{{ f }}</option>
+            <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
+                <label>Zooming</label>
+                <select [(ngModel)]="zomming" (change)="renderChart()">
+                    <option value="">none</option>
+                    <option value="x">x-axis</option>
+                    <option value="y">y-axis</option>
                 </select>
-            </ng-container> -->
-            <div>
-                <label>Enabled Data label:</label>
-                <input type="checkbox" [(ngModel)]="dataLabel" (change)="renderChart()">
             </div>
 
-            <div>
-                <label>Enable Mouse Tracking:</label>
-                <input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()">
+            <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
+                <label>Zooming</label>
+                <select [(ngModel)]="typeofareaChart" (change)="renderChart()">
+                    <option value="">none</option>
+                    <option value="normal">Stacked area</option>
+                    <option value="percent">Percentage area</option>
+                </select>
             </div>
 
-            <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
-                <label>Series Fields:</label>
-                <div *ngFor="let key of allFields">
-                    <input type="checkbox" [value]="key" (change)="onSeriesFieldToggle(key, $event)">
-                    {{ key }}
+            <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableSeriesField">
+                <label>Series Fields</label>
+                <div class="checkbox-list">
+                    <div *ngFor="let key of allFields">
+                        <input type="checkbox" [value]="key" (change)="onSeriesFieldToggle(key, $event)" />
+                        {{ key }}
+                    </div>
                 </div>
-            </ng-container>
+            </div>
 
-            <label>Top N</label>
-            <select [(ngModel)]="selectedTopN" (change)="renderChart()">
-                <option value="">None</option>
-                <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
-            </select>
+            <div class="sidebar-section">
+                <label>
+                    <input type="checkbox" [checked]="enableCustomAnimation" (change)="toggleCustomAnimation($event)">
+                    Enable Custom Animation
+                </label>
+            </div>
 
-            <label>Bottom N</label>
-            <select [(ngModel)]="selectedBottomN" (change)="renderChart()">
-                <option value="">None</option>
-                <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
-            </select>
+
+
+            <div class="sidebar-section" *ngIf="selectedChartType?.dataLabel">
+                <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>
+            </div>
+
+            <div class="sidebar-section" *ngIf="selectedChartType?.enableMouseTracking">
+                <label><input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()" /> Enable Mouse
+                    Tracking</label>
+            </div>
+
+            <div class="sidebar-section">
+                <label>Top N</label>
+                <select [(ngModel)]="selectedTopN" (change)="renderChart()">
+                    <option value="">None</option>
+                    <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <label>Bottom N</label>
+                <select [(ngModel)]="selectedBottomN" (change)="renderChart()">
+                    <option value="">None</option>
+                    <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
+                </select>
+            </div>
         </aside>
 
         <main class="chart-area">
