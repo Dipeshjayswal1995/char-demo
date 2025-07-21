@@ -45,18 +45,19 @@ export class Mapchart7 {
     markerSymbols: boolean;
     zooming: boolean;
     typeofareaChart: boolean;
+    barColunmchartOption: boolean;
 
   } | null = null;
   currentChart: any;
   chartOption = [
-    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false },
-    { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true },
-    { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true },
-    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: false },
-    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
-    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
-    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
-    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false },
+    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
+    { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: false },
+    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
+    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
 
   ]
   mapOption = [
@@ -80,6 +81,7 @@ export class Mapchart7 {
 
   typeofareaChart: string = '';
   barColunmchartOption: string = '';
+  selectedWidthField: string = '';
 
 
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
@@ -181,19 +183,50 @@ export class Mapchart7 {
       console.warn('Select at least one series field and argument field');
       return;
     }
-    const chartOptions = this.chartBuilderService.getBarChartOptions(
-      this.rawData,
-      this.selectedValueField,
-      this.selectedArgumentField,
-      this.selectedSeriesFields,
-      this.dataLabel,
-      ' millions',
-      'Column chart',
-      'Column chart',
-      true,
-      this.selectSymbol,
-      this.zomming
-    );
+    let chartOptions: any;
+    if (this.barColunmchartOption === 'columnrange') {
+      chartOptions = this.chartBuilderService.getColumnRangeChartOptions(
+        this.rawData,
+        this.selectedValueField,
+        this.selectedArgumentField,
+        this.selectedValueField,
+        this.dataLabel,
+        '',
+        '',
+        '',
+        true,
+        this.zomming,
+        this.barColunmchartOption
+      );
+      console.log(chartOptions)
+    } else if (this.barColunmchartOption === 'variwide') {
+      chartOptions = this.chartBuilderService.getVariwideChartOptions(
+        this.rawData,
+        this.selectedArgumentField,    
+        this.selectedValueField,   
+        this.selectedWidthField,
+        '',
+        '',
+        ''
+      );
+    } else {
+      chartOptions = this.chartBuilderService.getBarChartOptions(
+        this.barColunmchartOption,
+        this.rawData,
+        this.selectedValueField,
+        this.selectedArgumentField,
+        this.selectedSeriesFields,
+        this.dataLabel,
+        ' millions',
+        'Column chart',
+        'Column chart',
+        true,
+        this.selectSymbol,
+        this.zomming,
+        this.typeofareaChart
+      );
+    }
+
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 

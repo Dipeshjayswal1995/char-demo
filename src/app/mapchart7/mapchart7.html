@@ -19,6 +19,17 @@
                 </select>
             </div>
 
+            <div class="sidebar-section" *ngIf="selectedChartType?.barColunmchartOption">
+                <label>Colunm and bar chart Option</label>
+                <select [(ngModel)]="barColunmchartOption">
+                    <option value="">none</option>
+                    <option value="column">Column</option>
+                    <option value="bar">Bar</option>
+                    <option value="columnrange">Column Range</option>
+                    <option value="variwide">variwide</option>
+                </select>
+            </div>
+
             <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
                 <label>Load Map</label>
                 <select [(ngModel)]="selectedMapOption">
@@ -54,18 +65,16 @@
                 </select>
             </div>
 
-            <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
-                <label>Zooming</label>
-                <select [(ngModel)]="zomming" (change)="renderChart()">
-                    <option value="">none</option>
-                    <option value="x">x-axis</option>
-                    <option value="y">y-axis</option>
+            <div class="sidebar-section">
+                <label>z-Axis</label>
+                <select [(ngModel)]="selectedWidthField" (change)="renderChart()">
+                    <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
                 </select>
             </div>
 
             <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
-                <label>Colunm and bar chart Option</label>
-                <select [(ngModel)]="barColunmchartOption" (change)="renderChart()">
+                <label>Zooming</label>
+                <select [(ngModel)]="zomming" (change)="renderChart()">
                     <option value="">none</option>
                     <option value="x">x-axis</option>
                     <option value="y">y-axis</option>

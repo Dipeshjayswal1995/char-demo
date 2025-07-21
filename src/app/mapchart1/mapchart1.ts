@@ -363,236 +363,197 @@ VALUES ('${code}', '${state.name.replace(/'/g, "''")}', ${state.income}, ${state
   }
 
   chartForth() {
+    // Highcharts.chart('container4',
+    //   {
+    //     fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
+
+    //   });
+
     Highcharts.chart('container4', {
-      fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
+
       chart: {
-        type: 'bar',
-        height: '210',
-        spacingTop: 0,
-        spacingBottom: 0,
-        marginBottom: 0,
-        marginTop: 175,
+        type: 'columnrange',
+        inverted: true
       },
+
+      accessibility: {
+        description: 'Image description: A column range chart compares the ' +
+          'monthly temperature variations throughout 2023 in Vik i Sogn, ' +
+          'Norway. The chart is interactive and displays the temperature ' +
+          'range for each month when hovering over the data. The ' +
+          'temperature is measured in degrees Celsius on the X-axis and ' +
+          'the months are plotted on the Y-axis. The lowest temperature is ' +
+          'recorded in March at minus 13.1 Celsius. The lowest range of ' +
+          'temperatures is found in September ranging from a low of 9.6 ' +
+          'to a high of 23.0 Celsius. The highest temperature is found in ' +
+          'June at 28.4 Celsius, and has the highest range of temperatures ' +
+          'from 3.1 up to 28.4'
+      },
+
       title: {
-        useHTML: true,
-        text: `<div style="line-height: 1.2;">
-             <span style="font-size: 2.5rem; color: #243857;">113<span style="font-size: 0.938rem;color: #243857;margin-left: 0.4rem;">Total Registrations</span></span><br>
-           </div>`,
-        align: 'left',
-        style: {
-          fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
+        text: 'Temperature variation by month'
+      },
+
+      subtitle: {
+        text: 'Observed in Vik i Sogn, Norway, 2023 | ' +
+          'Source: <a href="https://www.vikjavev.no/ver/" target="_blank">Vikjavev</a>'
+      },
+
+      xAxis: {
+        categories: [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ]
+      },
+
+      yAxis: {
+        title: {
+          text: 'Temperature ( °C )'
         }
       },
+
       tooltip: {
-        useHTML: true,
-        formatter: function (this: any) {
-          const point = this.point;
-          const count = point.custom?.count || '';
-          const status = point.custom?.status || '';
-          const percent = point.percentage?.toFixed(1) + '%' || '';
-          return `<strong>${status}</strong><br/>
-              Count: ${count}<br/>
-              Percent: ${percent}`;
-        }
+        valueSuffix: '°C'
       },
-      exporting: {
-        enabled: true,
-        filename: 'Event_Attendance'
-      },
-      credits: {
-        enabled: false
-      },
+
       plotOptions: {
-        series: {
-          grouping: false,
-          pointPadding: 0.5,
-          groupPadding: 0.1,
-          borderWidth: 5
-        },
-        bar: {
-          stacking: 'percent',
-          pointWidth: 20,
-          pointPadding: 0.5,
-          groupPadding: 0.05,
+        columnrange: {
+          borderRadius: '50%',
           dataLabels: {
             enabled: true,
-            useHTML: true,
-            align: 'left',
-            crop: false,
-            overflow: 'allow',
-            verticalAlign: 'top',
-            y: -104,
-            x: -3,
-            formatter: function (this: any) {
-              const count = this.point.custom?.count || '';
-              const percent = this.y + '%';
-              const status = this.point.custom?.status || '';
-              return `<div style="text-align:left;border-left: 2px solid #d8d8d8;padding-left:0.6rem;line-height:1;bottom: 0.9rem;position: relative;padding-bottom: 0.6rem;">
-                    <span class="fonts-28 txt-243857">  ${count} </span> <br/><br/><br/><br/></br>
-                     <span class="fonts-20 txt-243857 semibold">${percent}</span><br/>
-                      <span class="fonts-12 txt-243857 regular" style="line-height:1.5;letter-spacing: 0.4px;">${status}</span>
-                  </div>`;
-            },
-            style: {
-              fontSize: '10px',
-              color: '#000'
-            }
-          },
-          accessibility: {
-            exposeAsGroupOnly: true
+            format: '{y}°C'
           }
         }
       },
-      yAxis: {
-        reversedStacks: false,
-        opposite: true,
-        labels: {
-          enabled: false
-        },
-        gridLineWidth: 0,
-        title: null,
-        stackLabels: {
-          enabled: false
-        },
-        startOnTick: false,
-        endOnTick: false
-      },
-      xAxis: {
-        visible: false,
-        title: null,
-        lineWidth: 1,
-      },
+
       legend: {
         enabled: false
       },
-      series: [
-        {
-          name: 'Attended',
-          color: '#00C49F',
-          data: [{
-            y: 70,
-            custom: {
-              count: 79,
-              status: 'Attended'
-            }
-          }]
-        },
-        {
-          name: 'Not Attended',
-          color: '#FF7F50',
-          data: [{
-            y: 30,
-            custom: {
-              count: 34,
-              status: 'Not Attended'
-            }
-          }]
-        }
-      ]
+
+      series: [{
+        name: 'Temperatures',
+        data: [
+          [-9.5, 8.0],
+          [-7.8, 8.3],
+          [-13.1, 9.2],
+          [-4.4, 15.7],
+          [-1.0, 20.8],
+          [3.1, 28.4],
+          [8.9, 27.0],
+          [9.6, 23.0],
+          [4.9, 19.3],
+          [-5.2, 11.6],
+          [-10.5, 12.0],
+          [-12.1, 8.5]
+        ]
+      }]
+
     });
+
 
   }
 
   chartTwo() {
-    Highcharts.chart('container2', {
-      chart: {
-        type: 'pie',
-        events: {
-          render: function () {
-            const chart = this as any;
+    Highcharts.chart('container2',
+      {
+        chart: {
+          type: 'pie',
+          events: {
+            render: function () {
+              const chart = this as any;
 
-            // Calculate total value from all points
-            const total = chart.series[0].data.reduce((sum: any, point: any) => sum + point.y, 0);
+              // Calculate total value from all points
+              const total = chart.series[0].data.reduce((sum: any, point: any) => sum + point.y, 0);
 
-            // Create the label if it doesn't exist
-            if (!chart.customLabel) {
-              chart.customLabel = chart.renderer
-                .label('', 0, 0)
-                .css({
-                  color: '#000',
-                  textAlign: 'center'
-                })
-                .add();
-            }
-
-            // Position label in center of donut
-            const series = chart.series[0];
-            const x = series.center[0] + chart.plotLeft;
-            const y = series.center[1] + chart.plotTop - chart.customLabel.getBBox().height / 2;
-
-            // chart.customLabel.attr({
-            //   x: x,
-            //   y: y,
-            //   text: 'Total<br/><strong>' + Highcharts.numberFormat(total, 0, '.', ' ') + '</strong>'
-            // });
-
-            chart.customLabel.css({
-              fontSize: (series.center[2] / 12) + 'px'
-            });
-          }
-        }
-      },
-
-      title: {
-        text: '2023 Norway car registrations'
-      },
-
-      // subtitle: {
-      //   text: 'Source: <a href="https://www.ssb.no/">SSB</a>'
-      // },
-      credits: {
-        enabled: false
-      },
-
-      tooltip: {
-        pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
-      },
-
-      accessibility: {
-        point: {
-          valueSuffix: '%'
-        }
-      },
-
-      legend: {
-        enabled: false
-      },
-
-      plotOptions: {
-        pie: {
-          // allowPointSelect: true,
-          cursor: 'pointer',
-          borderRadius: 8,
-          innerSize: '75%',
-          dataLabels: [
-            {
-              enabled: true,
-              distance: 20,
-              format: '{point.name}'
-            },
-            {
-              enabled: true,
-              distance: -15,
-              format: '{point.percentage:.0f}%',
-              style: {
-                fontSize: '0.9em'
+              // Create the label if it doesn't exist
+              if (!chart.customLabel) {
+                chart.customLabel = chart.renderer
+                  .label('', 0, 0)
+                  .css({
+                    color: '#000',
+                    textAlign: 'center'
+                  })
+                  .add();
               }
-            }
-          ]
-        }
-      },
 
-      series: [{
-        name: 'Registrations',
-        colorByPoint: true,
-        data: [
-          { name: 'EV', y: 23.9 },
-          { name: 'Hybrids', y: 12.6 },
-          { name: 'Diesel', y: 37.0 },
-          { name: 'Petrol', y: 26.4 }
-        ]
-      }]
-    });
+              // Position label in center of donut
+              const series = chart.series[0];
+              const x = series.center[0] + chart.plotLeft;
+              const y = series.center[1] + chart.plotTop - chart.customLabel.getBBox().height / 2;
+
+              // chart.customLabel.attr({
+              //   x: x,
+              //   y: y,
+              //   text: 'Total<br/><strong>' + Highcharts.numberFormat(total, 0, '.', ' ') + '</strong>'
+              // });
+
+              chart.customLabel.css({
+                fontSize: (series.center[2] / 12) + 'px'
+              });
+            }
+          }
+        },
+
+        title: {
+          text: '2023 Norway car registrations'
+        },
+
+        // subtitle: {
+        //   text: 'Source: <a href="https://www.ssb.no/">SSB</a>'
+        // },
+        credits: {
+          enabled: false
+        },
+
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
+        },
+
+        accessibility: {
+          point: {
+            valueSuffix: '%'
+          }
+        },
+
+        legend: {
+          enabled: false
+        },
+
+        plotOptions: {
+          pie: {
+            // allowPointSelect: true,
+            cursor: 'pointer',
+            borderRadius: 8,
+            innerSize: '75%',
+            dataLabels: [
+              {
+                enabled: true,
+                distance: 20,
+                format: '{point.name}'
+              },
+              {
+                enabled: true,
+                distance: -15,
+                format: '{point.percentage:.0f}%',
+                style: {
+                  fontSize: '0.9em'
+                }
+              }
+            ]
+          }
+        },
+
+        series: [{
+          name: 'Registrations',
+          colorByPoint: true,
+          data: [
+            { name: 'EV', y: 23.9 },
+            { name: 'Hybrids', y: 12.6 },
+            { name: 'Diesel', y: 37.0 },
+            { name: 'Petrol', y: 26.4 }
+          ]
+        }]
+      });
   }
 
   chartTree() {
@@ -952,140 +913,141 @@ VALUES ('${code}', '${state.name.replace(/'/g, "''")}', ${state.income}, ${state
       const maxVotes = data.reduce((max, row: any) => Math.max(max, row[5]), 0);
 
       // Build the chart
-      const chart = Highcharts.mapChart('container6', {
+      const chart = Highcharts.mapChart('container6',
+        {
 
-        chart: {
-          animation: false // Disable animation, especially for zooming
-        },
-        credits: {
-          enabled: false
-        },
+          chart: {
+            animation: false // Disable animation, especially for zooming
+          },
+          credits: {
+            enabled: false
+          },
 
-        accessibility: {
-          description: 'Complex map demo showing voting results for US ' +
-            'states, where each state has a pie chart overlaid showing ' +
-            'the vote distribution.'
-        },
-
-        colorAxis: {
-          dataClasses: [{
-            from: -1,
-            to: 0,
-            color: 'rgba(244,91,91,0.5)',
-            name: 'Republican'
-          }, {
-            from: 0,
-            to: 1,
-            color: 'rgba(124,181,236,0.5)',
-            name: 'Democrat'
-          }, {
-            from: 2,
-            to: 3,
-            name: 'Libertarian',
-            color: libColor
-          }, {
-            from: 3,
-            to: 4,
-            name: 'Green',
-            color: grnColor
-          }]
-        },
-
-        mapNavigation: {
-          enabled: true
-        },
-
-        title: {
-          text: 'USA 2016 Presidential Election Results',
-          align: 'center'
-        },
-
-        // Default options for the pies
-        plotOptions: {
-          pie: {
-            borderWidth: 1,
-            clip: true,
-            dataLabels: {
-              enabled: false
-            },
-            states: {
-              hover: {
-                halo: {
-                  size: 5
-                }
-              }
-            },
-            tooltip: {
-              headerFormat: ''
-            }
-          }
-        },
-
-        series: [{
-          mapData,
-          data: data,
-          name: 'States',
           accessibility: {
-            point: {
-              descriptionFormatter(point: any) {
-                const party = point.value > 0 ?
-                  'democrat' : 'republican';
-                return point.name +
-                  ', ' + party + '. Total votes: ' + point.sumVotes +
-                  '. Democrat votes: ' + point.demVotes +
-                  '. Republican votes: ' + point.repVotes +
-                  '. Libertarian votes: ' + point.libVotes +
-                  '. Green votes: ' + point.grnVotes + '.';
+            description: 'Complex map demo showing voting results for US ' +
+              'states, where each state has a pie chart overlaid showing ' +
+              'the vote distribution.'
+          },
+
+          colorAxis: {
+            dataClasses: [{
+              from: -1,
+              to: 0,
+              color: 'rgba(244,91,91,0.5)',
+              name: 'Republican'
+            }, {
+              from: 0,
+              to: 1,
+              color: 'rgba(124,181,236,0.5)',
+              name: 'Democrat'
+            }, {
+              from: 2,
+              to: 3,
+              name: 'Libertarian',
+              color: libColor
+            }, {
+              from: 3,
+              to: 4,
+              name: 'Green',
+              color: grnColor
+            }]
+          },
+
+          mapNavigation: {
+            enabled: true
+          },
+
+          title: {
+            text: 'USA 2016 Presidential Election Results',
+            align: 'center'
+          },
+
+          // Default options for the pies
+          plotOptions: {
+            pie: {
+              borderWidth: 1,
+              clip: true,
+              dataLabels: {
+                enabled: false
+              },
+              states: {
+                hover: {
+                  halo: {
+                    size: 5
+                  }
+                }
+              },
+              tooltip: {
+                headerFormat: ''
               }
             }
           },
-          borderColor: 'var(--highcharts-background-color, white)',
-          joinBy: ['name', 'id'],
-          keys: [
-            'id', 'demVotes', 'repVotes', 'libVotes', 'grnVotes',
-            'sumVotes', 'value', 'pieOffset'
-          ],
-          tooltip: {
-            headerFormat: '',
-            pointFormatter(this: any) {
-              const hoverVotes = this.hoverVotes; // Used by pie only
-              return '<b>' + this.id + ' votes</b><br/>' +
-                [
-                  ['Democrats', this.demVotes, demColor],
-                  ['Republicans', this.repVotes, repColor],
-                  ['Libertarians', this.libVotes, libColor],
-                  ['Green', this.grnVotes, grnColor]
-                ]
-                  .sort((a, b) => b[1] - a[1]) // Sort tooltip by
-                  // most votes
-                  .map(
-                    line => '<span style="color:' + line[2] +
-                      // Colorized bullet
-                      '">\u25CF</span> ' +
-                      // Party and votes
-                      (line[0] === hoverVotes ? '<b>' : '') +
-                      line[0] + ': ' +
-                      Highcharts.numberFormat(line[1], 0) +
-                      (line[0] === hoverVotes ? '</b>' : '') +
-                      '<br/>'
-                  )
-                  .join('') +
-                '<hr/>Total: ' +
-                Highcharts.numberFormat(this.sumVotes, 0);
+
+          series: [{
+            mapData,
+            data: data,
+            name: 'States',
+            accessibility: {
+              point: {
+                descriptionFormatter(point: any) {
+                  const party = point.value > 0 ?
+                    'democrat' : 'republican';
+                  return point.name +
+                    ', ' + party + '. Total votes: ' + point.sumVotes +
+                    '. Democrat votes: ' + point.demVotes +
+                    '. Republican votes: ' + point.repVotes +
+                    '. Libertarian votes: ' + point.libVotes +
+                    '. Green votes: ' + point.grnVotes + '.';
+                }
+              }
+            },
+            borderColor: 'var(--highcharts-background-color, white)',
+            joinBy: ['name', 'id'],
+            keys: [
+              'id', 'demVotes', 'repVotes', 'libVotes', 'grnVotes',
+              'sumVotes', 'value', 'pieOffset'
+            ],
+            tooltip: {
+              headerFormat: '',
+              pointFormatter(this: any) {
+                const hoverVotes = this.hoverVotes; // Used by pie only
+                return '<b>' + this.id + ' votes</b><br/>' +
+                  [
+                    ['Democrats', this.demVotes, demColor],
+                    ['Republicans', this.repVotes, repColor],
+                    ['Libertarians', this.libVotes, libColor],
+                    ['Green', this.grnVotes, grnColor]
+                  ]
+                    .sort((a, b) => b[1] - a[1]) // Sort tooltip by
+                    // most votes
+                    .map(
+                      line => '<span style="color:' + line[2] +
+                        // Colorized bullet
+                        '">\u25CF</span> ' +
+                        // Party and votes
+                        (line[0] === hoverVotes ? '<b>' : '') +
+                        line[0] + ': ' +
+                        Highcharts.numberFormat(line[1], 0) +
+                        (line[0] === hoverVotes ? '</b>' : '') +
+                        '<br/>'
+                    )
+                    .join('') +
+                  '<hr/>Total: ' +
+                  Highcharts.numberFormat(this.sumVotes, 0);
+              }
             }
-          }
-        }, {
-          name: 'Connectors',
-          type: 'mapline',
-          color: 'rgba(130, 130, 130, 0.5)',
-          zIndex: 5,
-          showInLegend: false,
-          enableMouseTracking: false,
-          accessibility: {
-            enabled: false
-          }
-        }]
-      });
+          }, {
+            name: 'Connectors',
+            type: 'mapline',
+            color: 'rgba(130, 130, 130, 0.5)',
+            zIndex: 5,
+            showInLegend: false,
+            enableMouseTracking: false,
+            accessibility: {
+              enabled: false
+            }
+          }]
+        });
 
       // When clicking legend items, also toggle connectors and pies
       chart.legend.allItems.forEach((item: any) => {

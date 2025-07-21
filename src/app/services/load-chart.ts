@@ -280,6 +280,7 @@ export class LoadChart {
   }
 
   getBarChartOptions(
+    chartOption: string = 'bar',
     rawData: any[],
     selectedValueField: string,
     selectedArgumentField: string,
@@ -291,6 +292,7 @@ export class LoadChart {
     isTransparent: boolean = true,
     markerSymbol: string = 'circle',
     zooming: string = '',
+    typeofareaChart: string = '',
   ): any {
     const categories = rawData.map(item => item[selectedArgumentField]);
 
@@ -298,10 +300,11 @@ export class LoadChart {
       name: field,
       data: rawData.map(item => item[field] ?? null)
     }));
-
+    console.log("serires", series);
+    console.log("categoryu", categories);
     return {
       chart: {
-        type: 'bar',
+        type: chartOption,
         backgroundColor: isTransparent ? 'transparent' : undefined,
         zooming: {
           type: zooming
@@ -344,8 +347,18 @@ export class LoadChart {
           dataLabels: {
             enabled: dataLabel
           },
+          groupPadding: 0.1,
+          stacking: typeofareaChart,
+        },
+        column: {
+          borderRadius: '50%',
+          symbol: markerSymbol,
+          stacking: typeofareaChart,
+          dataLabels: {
+            enabled: dataLabel
+          },
           groupPadding: 0.1
-        }
+        },
       },
       legend: {
         layout: 'vertical',
@@ -364,6 +377,129 @@ export class LoadChart {
       series
     };
   }
+
+  getColumnRangeChartOptions(
+    rawData: any[],
+    lowField: string,
+    highField: string,
+    categoryField: string = '',
+    dataLabel: boolean = true,
+    tooltipUnit: string = '',
+    chartTitle: string = '',
+    chartSubtitle: string = '',
+    isTransparent: boolean = true,
+    zooming: string = '',
+    chartType: string = '',
+  ): any {
+
+    const categories = rawData.map(d => d[categoryField] ?? '');
+
+    const data: [number, number][] = rawData
+      .map(d => [Number(d[lowField]), Number(d[highField])] as [number, number])
+      .filter(([x, y]) => !isNaN(x) && !isNaN(y));
+    console.log(chartType);
+    return {
+      chart: {
+        type: chartType,
+        inverted: true,
+        backgroundColor: isTransparent ? 'transparent' : undefined,
+      },
+      accessibility: {
+        description: ''
+      },
+      title: {
+        text: chartTitle
+      },
+      subtitle: {
+        text: chartSubtitle
+      },
+      xAxis: {
+        categories: categories,
+        title: {
+          text: categoryField || undefined
+        }
+      },
+      yAxis: {
+        title: {
+          text: `${lowField} - ${highField}`
+        }
+      },
+      tooltip: {
+        valueSuffix: tooltipUnit
+      },
+      plotOptions: {
+        columnrange: {
+          borderRadius: '50%',
+          dataLabels: {
+            enabled: dataLabel,
+            format: `{y}${tooltipUnit}`
+          }
+        }
+      },
+      legend: {
+        enabled: false
+      },
+      series: [{
+        name: 'Temperatures',
+        data: data
+      }]
+    };
+  }
+
+
+  getVariwideChartOptions(
+    rawData: any[],
+    selectedArgumentField: string,
+    selectedValueField: string,
+    selectedWidthField: string,
+    chartTitle: string = '',
+    chartSubtitle: string = '',
+    tooltipUnit: string = '€/h'
+  ): any {
+    const data: (string | number)[][] = rawData.map(item => [
+      item[selectedArgumentField],   // e.g., 'Norway'
+      item[selectedValueField],      // e.g., 51.9
+      item[selectedWidthField]       // e.g., 448716
+    ]);
+    console.log('data', data);
+    return {
+      chart: {
+        type: 'variwide'
+      },
+      title: {
+        text: chartTitle || 'Variwide Chart'
+      },
+      subtitle: {
+        text: chartSubtitle
+      },
+      xAxis: {
+        type: 'category'
+      },
+      caption: {
+        text: 'Column widths are proportional to ' + selectedWidthField
+      },
+      legend: {
+        enabled: false
+      },
+      series: [{
+        type: 'variwide',
+        name: selectedValueField,
+        data,
+        colorByPoint: true,
+        borderRadius: 3,
+        dataLabels: {
+          enabled: true,
+          format: `${tooltipUnit}{{point.y:.0f}}`
+        },
+        tooltip: {
+          pointFormat: `${selectedValueField}: <b>${tooltipUnit} {{point.y}}</b><br>` +
+            `${selectedWidthField}: <b>{{point.z}}</b><br>`
+        }
+      }]
+    };
+  }
+
+
 
 
 
