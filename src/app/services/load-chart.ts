@@ -198,7 +198,8 @@ export class LoadChart {
 
     return {
       chart: {
-        type: 'area',
+        type: 'area', // streamgraph, areaspline
+        // inverted: true, // streamgraph 
         backgroundColor: isTransparent ? 'transparent' : undefined,
         zooming: {
           type: zooming
@@ -225,6 +226,36 @@ export class LoadChart {
         },
         labels: {
           format: `{value}${tooltipUnit}`
+        }
+      },
+      areaspline: {
+        stacking: 'percent',
+        lineColor: '#666666',
+        pointInterval: 100,
+        lineWidth: 1,
+        marker: {
+          enabled: false,
+          symbol: 'circle',
+          fillColor: '#666666',
+          lineColor: '#666666',
+          radius: 1,
+          states: {
+            hover: {
+              enabled: false
+            }
+          }
+        },
+        label: {
+          style: {
+            fontSize: '16px'
+          }
+        },
+        states: {
+          hover: {
+            halo: {
+              size: 0
+            }
+          }
         }
       },
       tooltip: {
@@ -279,6 +310,104 @@ export class LoadChart {
     };
   }
 
+  getAreaRangeChartOptions(
+    rawData: any[],
+    argumentField: string,        // typically a date/time field
+    minValueField: string,        // e.g. "minTemp"
+    maxValueField: string,        // e.g. "maxTemp"
+    chartTitle: string = '',
+    chartSubtitle: string = '',
+    tooltipUnit: string = '°C',
+    isTransparent: boolean = true,
+    xAxisType: string = ''
+  ): any {
+    // const caregory = rawData.map(row => [
+    //   new Date(row[argumentField]).getTime(), // x-axis datetime
+    // ]);
+    // const categories = rawData.map(r => r[argumentField]);
+    // let categories: any[] = [];
+    const categories = this.getCategoriesFromRaw(rawData, argumentField, xAxisType)
+    // if (xAxisType === 'datetime') {
+    //   categories = rawData.map(r => new Date(r[argumentField]).getTime());
+    // } else if (xAxisType === 'numeric' || xAxisType === 'linear' || xAxisType === 'logarithmic') {
+    //   categories = rawData.map(r => parseFloat(r[argumentField]));
+    // } else {
+    //   categories = rawData.map(r => r[argumentField]); // category (default)
+    // }
+    console.log('argumentField', argumentField);
+    const seriesData = rawData.map(row => [
+      row[minValueField],
+      row[maxValueField]
+    ]);
+    console.log(seriesData);
+    return {
+      chart: {
+        type: 'arearange',
+        // inverted: true,
+        zooming: {
+          type: 'x'
+        },
+        backgroundColor: isTransparent ? 'transparent' : undefined,
+        scrollablePlotArea: {
+          minWidth: 600,
+          scrollPositionX: 1
+        }
+      },
+      title: {
+        text: chartTitle || 'Temperature variation by day',
+        align: 'left'
+      },
+      subtitle: {
+        text: chartSubtitle || '',
+        align: 'left'
+      },
+      xAxis: {
+        type: xAxisType,
+        categories,
+        accessibility: {
+          rangeDescription: 'Range based on selected date field'
+        }
+      },
+      labels: {
+        format: '{value:%b %Y}' // This will show "Jan 2023", "Feb 2023", etc.
+      },
+      dateTimeLabelFormats: {
+        month: '%b %Y',
+        year: '%Y'
+      },
+      yAxis: {
+        title: {
+          text: null
+        }
+      },
+      tooltip: {
+        shared: true,
+        valueSuffix: tooltipUnit,
+        crosshairs: true,
+        xDateFormat: '%A, %b %e'
+      },
+      legend: {
+        enabled: false
+      },
+      series: [{
+        name: 'Temperatures',
+        data: seriesData,
+        color: {
+          linearGradient: {
+            x1: 0,
+            x2: 0,
+            y1: 0,
+            y2: 1
+          },
+          stops: [
+            [0, '#ff6666'],
+            [1, '#6666ff']
+          ]
+        }
+      }]
+    };
+  }
+
   getBarChartOptions(
     chartOption: string = 'bar',
     rawData: any[],
@@ -327,7 +456,7 @@ export class LoadChart {
         lineWidth: 0
       },
       yAxis: {
-        min: 0,
+        // min: 0,
         title: {
           text: selectedValueField,
           align: 'high'
@@ -355,7 +484,17 @@ export class LoadChart {
           symbol: markerSymbol,
           stacking: typeofareaChart,
           dataLabels: {
-            enabled: dataLabel
+            enabled: dataLabel,
+            rotation: -90,
+            color: '#FFFFFF',
+            inside: true,
+            verticalAlign: 'top',
+            format: '{point.y:.1f}', // one decimal
+            y: 10, // 10 pixels down from the top
+            style: {
+              fontSize: '13px',
+              fontFamily: 'Verdana, sans-serif'
+            }
           },
           groupPadding: 0.1
         },
@@ -501,6 +640,15 @@ export class LoadChart {
 
 
 
+  getCategoriesFromRaw(rawData: any[], argumentField: string, xAxisType: string): any[] {
+    if (xAxisType === 'datetime') {
+      return rawData.map(r => new Date(r[argumentField]).getTime());
+    } else if (xAxisType === 'numeric' || xAxisType === 'linear' || xAxisType === 'logarithmic') {
+      return rawData.map(r => parseFloat(r[argumentField]));
+    } else {
+      return rawData.map(r => r[argumentField]);
+    }
+  }
 
 
 

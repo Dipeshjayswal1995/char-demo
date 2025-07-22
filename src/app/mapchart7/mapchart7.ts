@@ -54,7 +54,6 @@ export class Mapchart7 {
     { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
     { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: false },
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
-    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
     { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
     { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
     { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
@@ -68,6 +67,8 @@ export class Mapchart7 {
   markerSymbols = ['circle', 'square', 'diamond', 'triangle', 'triangle-down', 'url(https://www.highcharts.com/samples/graphics/sun.png)'];
   selectSymbol: string = '';
 
+
+  xAxisData: string = '';
 
   topBottomOptions = [3, 5, 10];
   selectedTopN: number | '' = '';
@@ -86,38 +87,128 @@ export class Mapchart7 {
 
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+  }
 
   changeChart() {
     console.log(this.selectedChartType);
   }
 
-  fetchData() {
-    this.isLoading = true;
-    this.http.get<any[]>(this.apiUrl).subscribe(data => {
-      this.isLoading = false;
-      this.rawData = data;
+  async fetchAndConvertCSVtoJSON123(csvUrl: string): Promise<any[]> {
+    const response = await fetch(csvUrl);
+    let csvText = await response.text();
 
-      if (!data || data.length === 0) {
-        console.error('No data found');
-        return;
+    // Clean up the CSV
+    csvText = csvText.replace(/\n\n/g, '\n');
+
+    const [headerLine, ...lines] = csvText.trim().split('\n');
+    const headers = headerLine.split(',');
+
+    const json = lines.map(line => {
+      const values = line.split(',');
+
+      // Declare entry as an object with string keys and any values
+      const entry: { [key: string]: any } = {};
+
+      headers.forEach((header, i) => {
+        const value = values[i];
+        // Parse numeric values, keep strings as-is
+        entry[header] = isNaN(Number(value)) ? value : Number(value);
+      });
+
+      return entry;
+    });
+
+    return json;
+  }
+
+  loadJsonData() {
+    // this.fetchAndConvertCSVtoJSON123('https://cdn.jsdelivr.net/gh/highcharts/highcharts@b99fc27c/samples/data/temp-florida-bergen-2023.csv')
+    //   .then(res => {
+    //     console.log('res', res)
+    //   });
+  }
+
+  async fetchAndConvertCSVtoJSON(csvUrl: string): Promise<any[]> {
+    const response = await fetch(csvUrl);
+    let csvText = await response.text();
+
+    csvText = csvText.replace(/\n\n/g, '\n').trim();
+    const lines = csvText.split('\n');
+
+    if (lines.length < 2) {
+      throw new Error('CSV has no data rows');
+    }
+
+    const headers = lines[0].split(',').map(h => h.trim());
+
+    const data = lines.slice(1).map((line, index) => {
+      const values = line.split(',');
+
+      if (values.length !== headers.length) {
+        console.warn(`Row ${index + 2} column count mismatch.`);
+        return null;
       }
 
-      this.allFields = Object.keys(data[0]);
-      this.valueFields = this.allFields;
-      this.argumentFields = this.allFields;
+      const entry: { [key: string]: any } = {};
+      headers.forEach((h, i) => {
+        const val = values[i]?.trim();
+        entry[h] = isNaN(Number(val)) ? val : Number(val);
+      });
 
-      this.seriesFields = this.allFields;
+      return entry;
+    }).filter(e => e !== null);
 
-      this.selectedValueField = this.valueFields[0] || '';
-      this.selectedArgumentField = this.argumentFields[0] || '';
-      this.selectedSeriesField = '';
-
-    }, error => {
-      this.isLoading = false;
-      console.error('API error:', error);
-    });
+    return data;
   }
+
+  fetchData() {
+    this.isLoading = true;
+
+    // Check file type by extension
+    const isCSV = this.apiUrl.trim().toLowerCase().endsWith('.csv');
+    const isJSON = this.apiUrl.trim().toLowerCase().endsWith('.json');
+
+    if (isCSV) {
+      this.fetchAndConvertCSVtoJSON(this.apiUrl).then(data => {
+        this.handleLoadedData(data);
+      }).catch(error => {
+        this.isLoading = false;
+        console.error('CSV Load Error:', error);
+      });
+    } else if (isJSON) {
+      this.http.get<any[]>(this.apiUrl).subscribe(data => {
+        this.handleLoadedData(data);
+      }, error => {
+        this.isLoading = false;
+        console.error('JSON Load Error:', error);
+      });
+    } else {
+      // fallback if unknown file type
+      this.isLoading = false;
+      console.error('Unsupported file type. Only .csv or .json allowed.');
+    }
+  }
+
+  handleLoadedData(data: any[]) {
+    this.isLoading = false;
+    this.rawData = data;
+    console.log(this.rawData);
+    if (!data || data.length === 0) {
+      console.error('No data found');
+      return;
+    }
+
+    this.allFields = Object.keys(data[0]);
+    this.valueFields = this.allFields;
+    this.argumentFields = this.allFields;
+    this.seriesFields = this.allFields;
+
+    this.selectedValueField = this.valueFields[0] || '';
+    this.selectedArgumentField = this.argumentFields[0] || '';
+    this.selectedSeriesField = '';
+  }
+
 
   toggleCustomAnimation(ev: any) {
     this.enableCustomAnimation = ev.target.checked;
@@ -202,8 +293,8 @@ export class Mapchart7 {
     } else if (this.barColunmchartOption === 'variwide') {
       chartOptions = this.chartBuilderService.getVariwideChartOptions(
         this.rawData,
-        this.selectedArgumentField,    
-        this.selectedValueField,   
+        this.selectedArgumentField,
+        this.selectedValueField,
         this.selectedWidthField,
         '',
         '',
@@ -280,22 +371,38 @@ export class Mapchart7 {
 
 
   areayChartRender() {
-    const chartOptions = this.chartBuilderService.getAreaChartOptions(
-      this.rawData,
-      this.selectedValueField,   // xField
-      this.selectedArgumentField,
-      this.selectedSeriesFields,     // yField
-      this.dataLabel,
-      this.enableMouseTracking,    // yTitle
-      this.selectSymbol,  // chartTitle
-      this.zomming,
-      '',
-      '',
-      '',
-      '',
-      true,
-      this.typeofareaChart
-    );
+    let chartOptions: any;
+
+    if (this.typeofareaChart === 'arearange') {
+      chartOptions = this.chartBuilderService.getAreaRangeChartOptions(
+        this.rawData,
+        this.selectedValueField,   // xField
+        this.selectedArgumentField,
+        this.selectedWidthField,     // yField
+        '',
+        '',    // yTitle
+        '',  // chartTitle
+        true,
+        this.xAxisData
+      );
+    } else {
+      chartOptions = this.chartBuilderService.getAreaChartOptions(
+        this.rawData,
+        this.selectedValueField,   // xField
+        this.selectedArgumentField,
+        this.selectedSeriesFields,     // yField
+        this.dataLabel,
+        this.enableMouseTracking,    // yTitle
+        this.selectSymbol,  // chartTitle
+        this.zomming,
+        '',
+        '',
+        '',
+        '',
+        true,
+        this.typeofareaChart
+      );
+    }
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
 
   }

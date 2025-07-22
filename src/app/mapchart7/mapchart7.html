@@ -30,6 +30,17 @@
                 </select>
             </div>
 
+            <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
+                <label>Type of area</label>
+                <select [(ngModel)]="typeofareaChart" (change)="renderChart()">
+                    <option value="">none</option>
+                    <option value="normal">Stacked area</option>
+                    <option value="percent">Percentage area</option>
+                    <option value="arearange" *ngIf="selectedChartType?.name === 'area-chart'">Range</option>
+                    <option value="areaspline" *ngIf="selectedChartType?.name === 'area-chart'">areaspline</option>
+                </select>
+            </div>
+
             <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
                 <label>Load Map</label>
                 <select [(ngModel)]="selectedMapOption">
@@ -48,6 +59,17 @@
                 <label>Match Field</label>
                 <select [(ngModel)]="selectedMatchValue" (change)="renderChart()">
                     <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <label>X-axis Data Type</label>
+                <select [(ngModel)]="xAxisData">
+                    <option  value="numeric">numeric</option>
+                    <option  value="logarithmic">logarithmic</option>
+                    <option  value="category">category</option>
+                    <option  value="datetime">datetime</option>
+                    <option  value="linear">linear</option>
                 </select>
             </div>
 
@@ -81,14 +103,6 @@
                 </select>
             </div>
 
-            <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
-                <label>Type of area</label>
-                <select [(ngModel)]="typeofareaChart" (change)="renderChart()">
-                    <option value="">none</option>
-                    <option value="normal">Stacked area</option>
-                    <option value="percent">Percentage area</option>
-                </select>
-            </div>
 
             <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableSeriesField">
                 <label>Series Fields</label>
