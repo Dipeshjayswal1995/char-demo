@@ -38,7 +38,7 @@ export const routes: Routes = [
     },
     {
         path: '',
-        redirectTo: 'map',
+        redirectTo: 'map7',
         pathMatch: 'full'
     },
 ];

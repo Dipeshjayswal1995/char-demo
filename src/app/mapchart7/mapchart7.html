@@ -13,6 +13,11 @@
     <div class="layout">
         <aside class="sidebar">
             <div class="sidebar-section">
+                <input type="text" [(ngModel)]="title" placeholder="Enter Chart Title" />
+                <input type="text" [(ngModel)]="subTitle" placeholder="Enter Chart Subtitle" />
+            </div>
+
+            <div class="sidebar-section">
                 <label>Chart Type</label>
                 <select [(ngModel)]="selectedChartType" (change)="changeChart()">
                     <option *ngFor="let f of chartOption" [ngValue]="f">{{ f.name }}</option>
@@ -28,6 +33,16 @@
                     <option value="columnrange">Column Range</option>
                     <option value="variwide">variwide</option>
                 </select>
+            </div>
+
+            <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
+                <input type="text" [(ngModel)]="pieInnerSize" placeholder="Please enter 1 to 100 between" />
+            </div>
+            <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
+                <input type="number" [(ngModel)]="pieStartAngal" placeholder="Please enter 1 to 100 between" />
+            </div>
+            <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
+                <input type="number" [(ngModel)]="pieENDAngal" placeholder="Please enter 1 to 100 between" />
             </div>
 
             <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
@@ -65,11 +80,11 @@
             <div class="sidebar-section">
                 <label>X-axis Data Type</label>
                 <select [(ngModel)]="xAxisData">
-                    <option  value="numeric">numeric</option>
-                    <option  value="logarithmic">logarithmic</option>
-                    <option  value="category">category</option>
-                    <option  value="datetime">datetime</option>
-                    <option  value="linear">linear</option>
+                    <option value="numeric">numeric</option>
+                    <option value="logarithmic">logarithmic</option>
+                    <option value="category">category</option>
+                    <option value="datetime">datetime</option>
+                    <option value="linear">linear</option>
                 </select>
             </div>
 
@@ -121,7 +136,9 @@
                 </label>
             </div>
 
-
+            <div class="sidebar-section">
+                <label><input type="checkbox" [(ngModel)]="showLengend" /> Show Lengend</label>
+            </div>
 
             <div class="sidebar-section" *ngIf="selectedChartType?.dataLabel">
                 <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>

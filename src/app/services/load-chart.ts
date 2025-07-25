@@ -638,7 +638,128 @@ export class LoadChart {
     };
   }
 
+  getPieChartOption(
+    type: string = '',
+    title: string = '',
+    subTitle: string = '',
+    rawData: any[],
+    selectedArgumentField: string,
+    selectedValueField: string,
+    innerSize: string = '',
+    showLengend: boolean = false,
+    startAngle: number = 0,
+    endAngle: number = 0
+  ) {
+    console.log(startAngle);
+    console.log(endAngle);
+    const self = this;
+    return {
+      chart: {
+        type: type,
+        backgroundColor: 'transparent',
+        events: {
+          load() {
+            self.pieChartSliceAnimation(this);
+          }
+        }
+        // zooming: {
+        //   type: 'xy'
+        // },
+        // panning: {
+        //   enabled: true,
+        //   type: 'xy'
+        // },
+        // panKey: 'shift'
+      },
+      title: {
+        text: title,
+        align: 'left'
+      },
+      subtitle: {
+        text: subTitle,
+        align: 'left'
+      },
+      tooltip: {
+        pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})'
+      },
+      accessibility: {
+        point: {
+          valueSuffix: '%'
+        }
+      },
+      plotOptions: {
+        pie: {
+          allowPointSelect: true,
+          cursor: 'pointer',
+          dataLabels: {
+            enabled: true,
+            format: '<b>{point.name}</b>: {point.percentage:.1f}%'
+          },
+          startAngle: startAngle,
+          endAngle: endAngle,
+          showInLegend: showLengend
+          // We are using in ferature
+          //     allowPointSelect: true,
+          //     cursor: 'pointer',
+          //     dataLabels: [{
+          //         enabled: true,
+          //         distance: 20
+          //     }, {
+          //         enabled: true,
+          //         distance: -40,
+          //         format: '<b>{point.name}</b>: {point.y}',
+          //         style: {
+          //             fontSize: '1.2em',
+          //             textOutline: 'none',
+          //             opacity: 0.7
+          //         },
+          //         filter: {
+          //             operator: '>',
+          //             property: 'percentage',
+          //             value: 10
+          //         }
+          //     }]
+        }
+      },
+      series: [{
+        innerSize: innerSize === '' ? 0 : innerSize + '%',
+        name: selectedValueField,
+        colorByPoint: true,
+        data: rawData.map(item => ({
+          name: item[selectedArgumentField],
+          y: Number(item[selectedValueField])
+        }))
+      }]
+    };
+  }
 
+  pieChartSliceAnimation(chart: any) {
+    const series = chart.series[0];
+    series.points.forEach((point: any, index: any) => {
+      if (point.graphic) {
+        point.graphic.attr({
+          opacity: 0,
+          scaleX: 0.5,
+          scaleY: 0.5
+        });
+        setTimeout(() => {
+          if (point.graphic) {
+            point.graphic.animate(
+              {
+                opacity: 1,
+                scaleX: 1,
+                scaleY: 1
+              },
+              {
+                duration: 600,
+                easing: 'easeOutBounce'
+              }
+            );
+          }
+        }, index * 150);
+      }
+    });
+  }
 
   getCategoriesFromRaw(rawData: any[], argumentField: string, xAxisType: string): any[] {
     if (xAxisType === 'datetime') {

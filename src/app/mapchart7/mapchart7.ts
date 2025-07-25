@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LoadChart } from '../services/load-chart';
 
-declare var Highcharts: any;
+declare const Highcharts: any;
 
 @Component({
   selector: 'app-mapchart7',
@@ -49,8 +49,11 @@ export class Mapchart7 {
 
   } | null = null;
   currentChart: any;
+  title: string = '';
+  subTitle: string = '';
+  showLengend : boolean = false;
   chartOption = [
-    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
     { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
     { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: false },
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
@@ -84,7 +87,9 @@ export class Mapchart7 {
   barColunmchartOption: string = '';
   selectedWidthField: string = '';
 
-
+  pieInnerSize: string = '';
+  pieStartAngal: number = 0;
+  pieENDAngal: number = 0;
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
 
   ngOnInit() {
@@ -198,12 +203,10 @@ export class Mapchart7 {
       console.error('No data found');
       return;
     }
-
     this.allFields = Object.keys(data[0]);
     this.valueFields = this.allFields;
     this.argumentFields = this.allFields;
     this.seriesFields = this.allFields;
-
     this.selectedValueField = this.valueFields[0] || '';
     this.selectedArgumentField = this.argumentFields[0] || '';
     this.selectedSeriesField = '';
@@ -317,7 +320,6 @@ export class Mapchart7 {
         this.typeofareaChart
       );
     }
-
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
@@ -339,6 +341,7 @@ export class Mapchart7 {
     }
     let chartOptions: any = null;
     if (chartType === 'line-time') {
+      console.log('Load the line-time charts');
       chartOptions = this.chartBuilderService.getLineChartOptions(
         this.rawData,
         this.selectedValueField,
@@ -349,6 +352,7 @@ export class Mapchart7 {
         this.selectSymbol,
         this.zomming
       );
+      console.log(chartOptions);
     } else {
       chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson(
         this.rawData,
@@ -365,8 +369,9 @@ export class Mapchart7 {
         this.selectSymbol,
         this.zomming
       );
-      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+      console.log('this.chat', this.currentChart);
     }
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
 
@@ -410,34 +415,46 @@ export class Mapchart7 {
 
   // For pie or donut
   renderPieOrDonutChart(type: string): void {
-    const filteredData = this.applyTopBottomFilter(this.rawData);
-    const grouped = this.groupData(filteredData);
-    const categories = Object.keys(grouped);
-
-    const pieData = categories.map(cat => {
-      const value = Object.values(grouped[cat]).reduce((a: any, b: any) => a + b, 0);
-      return { name: cat, y: value };
-    });
-
-    const chartOptions = this.getBaseChartOptions(
-      `Chart of ${this.selectedValueField} by ${this.selectedArgumentField}`,
-      'pie'
+    const chartOptions = this.chartBuilderService.getPieChartOption(
+      type,
+      this.title,
+      this.subTitle,
+      this.rawData,
+      this.selectedValueField,
+      this.selectedArgumentField,
+      this.pieInnerSize,
+      this.showLengend,
+      this.pieStartAngal,
+      this.pieENDAngal
     );
+    // const filteredData = this.applyTopBottomFilter(this.rawData);
+    // const grouped = this.groupData(filteredData);
+    // const categories = Object.keys(grouped);
+    // console.log("grouped data ===> ", grouped);
+    // const pieData = categories.map(cat => {
+    //   const value = Object.values(grouped[cat]).reduce((a: any, b: any) => a + b, 0);
+    //   return { name: cat, y: value };
+    // });
+    // console.log(pieData);
+    // const chartOptions = this.getBaseChartOptions(
+    //   `Chart of ${this.selectedValueField} by ${this.selectedArgumentField}`,
+    //   'pie'
+    // );
 
-    chartOptions.plotOptions.pie = {
-      innerSize: type === 'donut' ? '60%' : '0%',
-      dataLabels: {
-        enabled: true,
-        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-      }
-    };
+    // chartOptions.plotOptions.pie = {
+    //   innerSize: type === 'donut' ? '60%' : '0%',
+    //   dataLabels: {
+    //     enabled: true,
+    //     format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+    //   }
+    // };
 
-    chartOptions.series = [{
-      name: this.selectedValueField,
-      data: pieData,
-      type: 'pie'
-    }];
-
+    // chartOptions.series = [{
+    //   name: this.selectedValueField,
+    //   data: pieData,
+    //   type: 'pie'
+    // }];
+    console.log(chartOptions);
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
@@ -626,144 +643,6 @@ export class Mapchart7 {
     this.addCustomAnimationPlugin();
     this.renderChart();
   }
-
-  // renderChart(): void {
-  //   if (!this.selectedValueField || !this.selectedArgumentField) return;
-
-  //   if (this.currentChart) {
-  //     this.currentChart.destroy();
-  //   }
-
-  //   if (this.selectedChartType?.name === 'map') {
-  //     this.renderMapChart();
-  //     return;
-  //   }
-
-  //   const filteredData = this.applyTopBottomFilter(this.rawData);
-
-  //   const grouped = this.groupData(filteredData);
-  //   const categories = Object.keys(grouped);
-  //   const seriesNames = new Set<string>();
-
-  //   Object.values(grouped).forEach((entry: any) => {
-  //     Object.keys(entry).forEach(key => seriesNames.add(key));
-  //   });
-
-  //   const seriesData = Array.from(seriesNames).map(seriesName => ({
-  //     name: seriesName,
-  //     data: categories.map(cat => grouped[cat][seriesName] || 0)
-  //   }));
-
-  //   const isPieOrDonut = this.selectedChartType?.name === 'pie' || this.selectedChartType?.name === 'donut';
-  //   const chartOptions: any = {
-  //     chart: {
-  //       type: isPieOrDonut ? 'pie' : this.selectedChartType?.name,
-  //       backgroundColor: 'transparent'
-  //     },
-  //     title: {
-  //       text: `Chart of ${this.selectedValueField} by ${this.selectedArgumentField}`
-  //     },
-  //     series: [],
-  //     plotOptions: {},
-  //   };
-
-  //   if (isPieOrDonut) {
-  //     const pieData = categories.map(cat => {
-  //       const value = Object.values(grouped[cat]).reduce((a: any, b: any) => a + b, 0);
-  //       return { name: cat, y: value };
-  //     });
-
-  //     chartOptions.plotOptions.pie = {
-  //       innerSize: this.selectedChartType?.name === 'donut' ? '60%' : '0%',
-  //       dataLabels: {
-  //         enabled: true,
-  //         format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-  //       }
-  //     };
-
-  //     chartOptions.series = [{
-  //       name: this.selectedValueField,
-  //       data: pieData,
-  //       type: 'pie'
-  //     }];
-  //   } else {
-  //     chartOptions.xAxis = { categories };
-  //     chartOptions.yAxis = {
-  //       title: { text: this.selectedValueField }
-  //     };
-  //     chartOptions.series = seriesData;
-  //   }
-
-  //   this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  // }
-
-  // renderMapChart(): void {
-  //   console.log(this.selectedValueField);
-  //   // const mapUrl = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
-  //   // const mapUrl = 'https://code.highcharts.com/mapdata/custom/asia.geo.json';
-  //   const mapUrl: any = this.selectedMapOption?.json_file;
-
-
-  //   fetch(mapUrl)
-  //     .then(res => res.json())
-  //     .then(topology => {
-  //       const filtered = this.applyTopBottomFilter(this.rawData); // ✅ Apply top/bottom N
-
-  //       const mapData = filtered.map(row => ({
-  //         code: (row[this.selectedMatchValue] || '').toUpperCase(),
-  //         value: row[this.selectedValueField],
-  //       }));
-  //       console.log("this.rawData===>", this.rawData);
-  //       console.log("this.rawData===>", mapData);
-  //       if (!mapData.length) {
-  //         console.error('Map data is empty.');
-  //         return;
-  //       }
-  //       console.log(mapData);
-  //       this.currentChart = Highcharts.mapChart('chart-container', {
-  //         chart: {
-  //           map: topology,
-  //           backgroundColor: 'transparent'
-  //         },
-  //         title: {
-  //           text: `Map of ${this.selectedValueField} by ${this.selectedArgumentField}`
-  //         },
-  //         mapNavigation: {
-  //           enabled: true
-  //         },
-  //         colorAxis: {
-  //           min: 1,
-  //           type: 'logarithmic',
-  //           minColor: '#EEEEFF',
-  //           maxColor: '#000022',
-  //           stops: [
-  //             [0, '#EFEFFF'],
-  //             [0.67, '#4444FF'],
-  //             [1, '#000022']
-  //           ]
-  //         },
-  //         series: [{
-  //           data: mapData,
-  //           joinBy: [this.selectedMapOption?.uniqueValueMatch, 'code'],
-  //           name: this.selectedValueField,
-
-  //           dataLabels: {
-  //             enabled: true,
-  //             formatter: function (this: any) {
-  //               return `${this.point.value ? this.point.value : ''}`; // Value only
-  //             }
-  //             // format: '{point.value}'
-  //           },
-  //           tooltip: {
-  //             pointFormat: '{point.code}: {point.value}'
-  //           }
-  //         }]
-  //       });
-  //     })
-  //     .catch(err => {
-  //       console.error('Map load error:', err);
-  //     });
-  // }
 
   private groupData(filteredData: any[] = this.rawData): any {
     const grouped: any = {};

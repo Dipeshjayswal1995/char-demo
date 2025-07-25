@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { error } from 'highcharts';
 import { CommonModule } from '@angular/common';
 
 declare var Highcharts: any;

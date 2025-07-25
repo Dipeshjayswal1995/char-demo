@@ -71,6 +71,22 @@ h2 {
   gap: 0.3rem;
 }
 
+.sidebar-section input[type="text"] {
+  flex: 1;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.sidebar-section input[type="number"] {
+  flex: 1;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
 .sidebar label {
   font-weight: 600;
   color: #333;
