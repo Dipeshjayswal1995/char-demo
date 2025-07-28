@@ -39,10 +39,10 @@
                 <input type="text" [(ngModel)]="pieInnerSize" placeholder="Please enter 1 to 100 between" />
             </div>
             <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
-                <input type="number" [(ngModel)]="pieStartAngal" placeholder="Please enter 1 to 100 between" />
+                <input type="number" [(ngModel)]="pieStartAngal" placeholder="Please enter StartAngale" />
             </div>
             <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
-                <input type="number" [(ngModel)]="pieENDAngal" placeholder="Please enter 1 to 100 between" />
+                <input type="number" [(ngModel)]="pieENDAngal" placeholder="Please enter StartAngal" />
             </div>
 
             <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
@@ -103,8 +103,15 @@
             </div>
 
             <div class="sidebar-section">
-                <label>z-Axis</label>
-                <select [(ngModel)]="selectedWidthField" (change)="renderChart()">
+                <label>Third-Argument</label>
+                <select [(ngModel)]="selectedThirdArgument" (change)="renderChart()">
+                    <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section" *ngIf="selectedChartType?.name === 'bubble'">
+                <label>Buble Inside Name</label>
+                <select [(ngModel)]="passedInSideDisplayName" (change)="renderChart()">
                     <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
                 </select>
             </div>

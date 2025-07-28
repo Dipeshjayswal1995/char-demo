@@ -590,15 +590,15 @@ export class LoadChart {
     rawData: any[],
     selectedArgumentField: string,
     selectedValueField: string,
-    selectedWidthField: string,
+    selectedThirdArgument: string,
     chartTitle: string = '',
     chartSubtitle: string = '',
     tooltipUnit: string = '€/h'
   ): any {
     const data: (string | number)[][] = rawData.map(item => [
-      item[selectedArgumentField],   // e.g., 'Norway'
-      item[selectedValueField],      // e.g., 51.9
-      item[selectedWidthField]       // e.g., 448716
+      item[selectedValueField],   // e.g., 'Norway'
+      item[selectedArgumentField],      // e.g., 51.9
+      item[selectedThirdArgument]      // e.g., 448716
     ]);
     console.log('data', data);
     return {
@@ -615,7 +615,7 @@ export class LoadChart {
         type: 'category'
       },
       caption: {
-        text: 'Column widths are proportional to ' + selectedWidthField
+        text: 'Column widths are proportional to ' + selectedThirdArgument
       },
       legend: {
         enabled: false
@@ -632,7 +632,7 @@ export class LoadChart {
         },
         tooltip: {
           pointFormat: `${selectedValueField}: <b>${tooltipUnit} {{point.y}}</b><br>` +
-            `${selectedWidthField}: <b>{{point.z}}</b><br>`
+            `${selectedThirdArgument}: <b>{{point.z}}</b><br>`
         }
       }]
     };
@@ -759,6 +759,82 @@ export class LoadChart {
         }, index * 150);
       }
     });
+  }
+
+  bubbleChartSetup(
+    type: string = '',
+    title: string = '',
+    subTitle: string = '',
+    rawData: any[],
+    selectedArgumentField: string,
+    selectedValueField: string,
+    selectedThirdArgument: string,
+    passedInSideDisplayName: string,
+  ) {
+
+    const categories = rawData.map(item => item[selectedArgumentField]);
+
+    // Prepare Highcharts data format: { x: index, y, z, name }
+    const bubbleData = rawData.map((item, index) => ({
+      x: item[selectedArgumentField], // numeric position
+      y: item[selectedValueField],
+      z: item[selectedThirdArgument],
+      name: item[passedInSideDisplayName] // use category label for tooltip/label
+    }));
+    console.log(bubbleData);
+    return {
+      chart: {
+        type: type,
+        plotBorderWidth: 1,
+        zooming: { type: 'xy' }
+      },
+      title: { text: title, align: 'left' },
+      subtitle: {
+        text: subTitle,
+        align: 'left'
+      },
+
+      xAxis: {
+        title: { text: selectedArgumentField },
+        // tickInterval: 1,
+        labels: {
+          format: '{value}'
+          // formatter: function (this: any) {
+          //   return categories;
+          // }
+        }
+      },
+      yAxis: {
+        title: { text: selectedValueField },
+        labels: {
+          format: '{value}'
+        },
+      },
+      tooltip: {
+        useHTML: true,
+        headerFormat: '<table>',
+        pointFormat: `
+          <tr><th colspan="2"><h3>{point.name}</h3></th></tr>
+          <tr><th><b>${selectedValueField}:</b></th><td>{point.y}</td></tr>
+          <tr><th><b>${selectedArgumentField}:</b></th><td>{point.x}</td></tr>
+          <tr><th><b>${selectedThirdArgument}:</b></th><td>{point.z}</td></tr>
+        `,
+        footerFormat: '</table>',
+        followPointer: true
+      },
+      plotOptions: {
+        series: {
+          dataLabels: {
+            enabled: true,
+            format: '{point.name}'
+          }
+        }
+      },
+      series: [{
+        data: bubbleData,
+        colorByPoint: true
+      }]
+    };
   }
 
   getCategoriesFromRaw(rawData: any[], argumentField: string, xAxisType: string): any[] {

@@ -51,14 +51,15 @@ export class Mapchart7 {
   currentChart: any;
   title: string = '';
   subTitle: string = '';
-  showLengend : boolean = false;
+  showLengend: boolean = false;
   chartOption = [
     { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
     { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
     { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: false },
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
     { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'donut', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'bubble', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'scatter', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
     { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
 
   ]
@@ -85,7 +86,8 @@ export class Mapchart7 {
 
   typeofareaChart: string = '';
   barColunmchartOption: string = '';
-  selectedWidthField: string = '';
+  selectedThirdArgument: string = '';
+  passedInSideDisplayName: string = '';
 
   pieInnerSize: string = '';
   pieStartAngal: number = 0;
@@ -260,8 +262,10 @@ export class Mapchart7 {
         this.coloumChartrender();
         break;
       case 'pie':
-      case 'donut':
         this.renderPieOrDonutChart(chartType);
+        break;
+      case 'bubble':
+        this.renderBubleChart(chartType);
         break;
       case 'line-time':
       case 'spline-with-inverted-axes':
@@ -270,6 +274,25 @@ export class Mapchart7 {
       default:
         this.renderStandardChart(chartType);
     }
+  }
+
+  renderBubleChart(chartType: string) {
+    if (!this.selectedArgumentField) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    let chartOptions: any;
+    chartOptions = this.chartBuilderService.bubbleChartSetup(
+      chartType,
+      this.title,
+      this.subTitle,
+      this.rawData,
+      this.selectedValueField,
+      this.selectedArgumentField,
+      this.selectedThirdArgument,
+      this.passedInSideDisplayName
+    );
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
   coloumChartrender() {
@@ -298,7 +321,7 @@ export class Mapchart7 {
         this.rawData,
         this.selectedArgumentField,
         this.selectedValueField,
-        this.selectedWidthField,
+        this.selectedThirdArgument,
         '',
         '',
         ''
@@ -383,7 +406,7 @@ export class Mapchart7 {
         this.rawData,
         this.selectedValueField,   // xField
         this.selectedArgumentField,
-        this.selectedWidthField,     // yField
+        this.selectedThirdArgument,     // yField
         '',
         '',    // yTitle
         '',  // chartTitle
