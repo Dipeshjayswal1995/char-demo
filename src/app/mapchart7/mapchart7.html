@@ -1,14 +1,36 @@
 <div class="chart-dashboard">
     <h2>📡 API Data Loader</h2>
 
-    <div class="form-row">
-        <input type="text" [(ngModel)]="apiUrl" placeholder="Enter API URL or path" />
-        <button (click)="fetchData()" [disabled]="isLoading">
-            <span *ngIf="!isLoading">🔄 Fetch Data</span>
-            <span *ngIf="isLoading">⏳ Loading...</span>
-        </button>
-        <button class="load-chart-btn" (click)="loadChart()">📊 Load Chart</button>
+    <div class="form-container">
+        <h2>🧠 API Data Loader</h2>
+
+        <!-- Load from API -->
+        <div class="form-group">
+            <label><span class="icon">🔗</span> Load from API:</label>
+            <input type="text" [(ngModel)]="apiUrl" placeholder="Enter API URL or path" />
+        </div>
+
+        <!-- OR separator -->
+        <div class="or-separator">— OR —</div>
+
+        <!-- Load from Excel -->
+        <div class="form-group">
+            <label><span class="icon">📁</span> Load from Excel:</label>
+            <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button (click)="fetchData()" [disabled]="isLoading">
+                <span *ngIf="!isLoading">🔄 Fetch Data</span>
+                <span *ngIf="isLoading">⏳ Loading...</span>
+            </button>
+
+            <button class="load-chart-btn" (click)="loadChart()">📊 Load Chart</button>
+        </div>
     </div>
+
+
 
     <div class="layout">
         <aside class="sidebar">
@@ -52,7 +74,7 @@
                     <option value="normal">Stacked area</option>
                     <option value="percent">Percentage area</option>
                     <option value="arearange" *ngIf="selectedChartType?.name === 'area-chart'">Range</option>
-                    <option value="areaspline" *ngIf="selectedChartType?.name === 'area-chart'">areaspline</option>
+                    <!-- <option value="areaspline" *ngIf="selectedChartType?.name === 'area-chart'">areaspline</option> -->
                 </select>
             </div>
 

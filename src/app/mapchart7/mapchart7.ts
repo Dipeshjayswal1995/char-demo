@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LoadChart } from '../services/load-chart';
+import * as XLSX from 'xlsx';
+
 
 declare const Highcharts: any;
 
@@ -59,7 +61,7 @@ export class Mapchart7 {
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
     { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
     { name: 'bubble', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'scatter', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'scatter',isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false},
     { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
 
   ]
@@ -92,9 +94,57 @@ export class Mapchart7 {
   pieInnerSize: string = '';
   pieStartAngal: number = 0;
   pieENDAngal: number = 0;
+  uploadedExcelData: any[] | null = null;
+
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
 
   ngOnInit() {
+  }
+
+  onFileChange(event: any): void {
+    const target: DataTransfer = <DataTransfer>(event.target);
+
+    if (target.files.length !== 1) {
+      console.error('Please select a single Excel file.');
+      return;
+    }
+
+    const file: File = target.files[0];
+    const reader: FileReader = new FileReader();
+
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+      // Assuming data is in the first worksheet
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+
+      // Read sheet as raw 2D array (header + rows)
+      const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+      // Remove completely empty rows
+      const filteredRows = data.filter(row => row.some(cell => cell !== ''));
+
+      // Separate headers from rows
+      const [headerRow, ...rows] = filteredRows;
+
+      // Build clean JSON
+      const cleanJson = rows.map(row => {
+        const obj: any = {};
+        headerRow.forEach((header, i) => {
+          obj[header] = row[i];
+        });
+        return obj;
+      });
+
+      // console.log('✅ Clean Excel JSON:', cleanJson);
+      this.uploadedExcelData = cleanJson;
+      // this.handleLoadedData(cleanJson);
+      // Now you can use `cleanJson` to display, upload, etc.
+    };
+
+    reader.readAsBinaryString(file);
   }
 
   changeChart() {
@@ -127,13 +177,6 @@ export class Mapchart7 {
     });
 
     return json;
-  }
-
-  loadJsonData() {
-    // this.fetchAndConvertCSVtoJSON123('https://cdn.jsdelivr.net/gh/highcharts/highcharts@b99fc27c/samples/data/temp-florida-bergen-2023.csv')
-    //   .then(res => {
-    //     console.log('res', res)
-    //   });
   }
 
   async fetchAndConvertCSVtoJSON(csvUrl: string): Promise<any[]> {
@@ -171,6 +214,12 @@ export class Mapchart7 {
 
   fetchData() {
     this.isLoading = true;
+
+    if (this.uploadedExcelData) {
+      this.handleLoadedData(this.uploadedExcelData);
+      this.isLoading = false;
+      return;
+    }
 
     // Check file type by extension
     const isCSV = this.apiUrl.trim().toLowerCase().endsWith('.csv');
@@ -267,6 +316,9 @@ export class Mapchart7 {
       case 'bubble':
         this.renderBubleChart(chartType);
         break;
+      case 'scatter':
+        this.renderScatterChart(chartType);
+        break;
       case 'line-time':
       case 'spline-with-inverted-axes':
         this.renderTimeSeriesLineChart(chartType); // new method
@@ -334,7 +386,7 @@ export class Mapchart7 {
         this.selectedArgumentField,
         this.selectedSeriesFields,
         this.dataLabel,
-        ' millions',
+        '',
         'Column chart',
         'Column chart',
         true,
@@ -367,8 +419,9 @@ export class Mapchart7 {
       console.log('Load the line-time charts');
       chartOptions = this.chartBuilderService.getLineChartOptions(
         this.rawData,
+        this.title,
+        this.subTitle,
         this.selectedValueField,
-        this.selectedArgumentField,
         this.selectedSeriesFields,
         this.dataLabel,
         this.enableMouseTracking,
@@ -397,6 +450,24 @@ export class Mapchart7 {
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
+  renderScatterChart(chartType: string): void {
+    if (!this.selectedArgumentField) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    let chartOptions: any = null;
+    console.log('Load the line-time charts');
+    chartOptions = this.chartBuilderService.getScatterChartOptions(
+      this.rawData,
+      this.title,
+      this.subTitle,
+      this.selectedValueField,
+      this.selectedSeriesFields,
+    );
+    console.log(chartOptions);
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+  }
+
 
   areayChartRender() {
     let chartOptions: any;
@@ -416,18 +487,14 @@ export class Mapchart7 {
     } else {
       chartOptions = this.chartBuilderService.getAreaChartOptions(
         this.rawData,
-        this.selectedValueField,   // xField
-        this.selectedArgumentField,
-        this.selectedSeriesFields,     // yField
+        this.title,
+        this.subTitle,
+        this.selectedValueField,
+        this.selectedSeriesFields,
         this.dataLabel,
-        this.enableMouseTracking,    // yTitle
-        this.selectSymbol,  // chartTitle
+        this.enableMouseTracking,
+        this.selectSymbol,
         this.zomming,
-        '',
-        '',
-        '',
-        '',
-        true,
         this.typeofareaChart
       );
     }

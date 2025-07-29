@@ -10,7 +10,8 @@ export class LoadChart {
 
   getLineChartOptions(
     rawData: any[],
-    selectedValueField: string,
+    title: string = '',
+    subTitle: string = '',
     selectedArgumentField: string,
     selectedSeriesFields: string[],
     dataLabel: boolean,
@@ -35,11 +36,11 @@ export class LoadChart {
         }
       },
       title: {
-        text: `Trend of ${selectedValueField}`,
+        text: title,
         align: 'left'
       },
       subtitle: {
-        text: `By ${selectedArgumentField}`,
+        text: subTitle,
         align: 'left'
       },
       // yAxis: {
@@ -175,18 +176,14 @@ export class LoadChart {
 
   getAreaChartOptions(
     rawData: any[],
-    selectedValueField: string,
+    title: string = '',
+    subTitle: string = '',
     selectedArgumentField: string,
     selectedSeriesFields: string[],
     dataLabel: boolean = false,
     enableMouseTracking: boolean = true,
     markerSymbol: string = 'circle',
     zooming: string = '',
-    chartTitle: string = '',
-    chartSubtitle: string = '',
-    tooltipUnit: string = '',
-    tooltipXAxisLabel: string = '',
-    isTransparent: boolean = true,
     typeofareaChart: string = ''
   ): any {
     const categories = rawData.map(r => r[selectedArgumentField]);
@@ -200,17 +197,17 @@ export class LoadChart {
       chart: {
         type: 'area', // streamgraph, areaspline
         // inverted: true, // streamgraph 
-        backgroundColor: isTransparent ? 'transparent' : undefined,
+        backgroundColor: 'transparent',
         zooming: {
           type: zooming
         }
       },
       title: {
-        text: chartTitle || `Trend of ${selectedValueField}`,
+        text: title,
         align: 'left'
       },
       subtitle: {
-        text: chartSubtitle || `By ${selectedArgumentField}`,
+        text: subTitle,
         align: 'left'
       },
       xAxis: {
@@ -221,11 +218,11 @@ export class LoadChart {
         }
       },
       yAxis: {
-        title: {
-          text: selectedValueField
-        },
+        // title: {
+        //   text: selectedValueField
+        // },
         labels: {
-          format: `{value}${tooltipUnit}`
+          format: `{value}`
         }
       },
       areaspline: {
@@ -260,7 +257,6 @@ export class LoadChart {
       },
       tooltip: {
         pointFormat: '{series.name} had <b>{point.y:,.0f}</b>' +
-          (tooltipUnit ? ` ${tooltipUnit}` : '') +
           ' in {point.x}'
       },
       legend: {
@@ -423,7 +419,7 @@ export class LoadChart {
     zooming: string = '',
     typeofareaChart: string = '',
   ): any {
-    const categories = rawData.map(item => item[selectedArgumentField]);
+    const categories = rawData.map(item => item[selectedValueField]);
 
     const series = selectedSeriesFields.map(field => ({
       name: field,
@@ -458,7 +454,7 @@ export class LoadChart {
       yAxis: {
         // min: 0,
         title: {
-          text: selectedValueField,
+          text: selectedArgumentField,
           align: 'high'
         },
         labels: {
@@ -658,9 +654,9 @@ export class LoadChart {
         type: type,
         backgroundColor: 'transparent',
         events: {
-          load() {
-            self.pieChartSliceAnimation(this);
-          }
+          // load() {
+          //   self.pieChartSliceAnimation(this);
+          // }
         }
         // zooming: {
         //   type: 'xy'
@@ -833,6 +829,104 @@ export class LoadChart {
       series: [{
         data: bubbleData,
         colorByPoint: true
+      }]
+    };
+  }
+
+
+  getScatterChartOptions(
+    rawData: any[],
+    title: string = '',
+    subTitle: string = '',
+    selectedArgumentField: string,
+    selectedSeriesFields: string[],
+    markerSymbol: string = '',
+  ): any {
+    const categories = rawData.map(r => r[selectedArgumentField]);
+
+    const series = selectedSeriesFields.map(field => ({
+      name: field,
+      data: rawData.map(r => r[field] ?? null),
+
+    }));
+    console.log('makerSym', markerSymbol);
+    return {
+      chart: {
+        type: 'scatter',
+        backgroundColor: 'transparent',
+        zooming: {
+          type: 'xy'
+        }
+      },
+      title: {
+        text: title,
+        align: 'left'
+      },
+      subtitle: {
+        text: subTitle,
+        align: 'left'
+      },
+      // yAxis: {
+      //   title: {
+      //     text: selectedValueField
+      //   }
+      // },
+      xAxis: {
+        categories,
+        labels: {
+          format: '{value}'
+        },
+        accessibility: {
+          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
+        }
+      },
+      yAxis: {
+        labels: {
+          format: '{value}'
+        }
+      },
+      legend: {
+        enabled: false,
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+      },
+      plotOptions: {
+        scatter: {
+          marker: {
+            radius: 2.5,
+            symbol: 'circle',
+            states: {
+              hover: {
+                enabled: true,
+                lineColor: 'rgb(100,100,100)'
+              }
+            }
+          },
+          states: {
+            hover: {
+              marker: {
+                enabled: false
+              }
+            }
+          },
+          jitter: {
+            x: 0.005
+          }
+        }
+      },
+      series,
+      responsive: [{
+        condition: {
+          maxWidth: 500
+        },
+        chartOptions: {
+          legend: {
+            layout: 'horizontal',
+            align: 'center',
+            verticalAlign: 'bottom'
+          }
+        }
       }]
     };
   }
