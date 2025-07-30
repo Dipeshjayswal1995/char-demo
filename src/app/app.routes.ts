@@ -6,6 +6,7 @@ import { Mapchart4 } from './mapchart4/mapchart4';
 import { Mapchart5 } from './mapchart5/mapchart5';
 import { Mapchart6 } from './mapchart6/mapchart6';
 import { Mapchart7 } from './mapchart7/mapchart7';
+import { Mapchart8 } from './mapchart8/mapchart8';
 
 export const routes: Routes = [
     {
@@ -35,6 +36,10 @@ export const routes: Routes = [
     {
         path: 'map7',
         component: Mapchart7
+    },
+    {
+        path: 'map8',
+        component: Mapchart8
     },
     {
         path: '',

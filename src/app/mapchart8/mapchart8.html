@@ -1,0 +1,68 @@
+<div class="form-container">
+  <h2>📊 Dynamic Chart Builder</h2>
+
+  <div *ngIf="showLoadOptions">
+    <!-- Load from API -->
+    <div class="form-group">
+      <label><span class="icon">🔗</span> Load from API:</label>
+      <input type="text" [(ngModel)]="apiUrl" placeholder="Enter API URL" />
+    </div>
+
+    <div class="or-separator">— OR —</div>
+
+    <!-- Load from Excel -->
+    <div class="form-group">
+      <label><span class="icon">📁</span> Load from Excel:</label>
+      <input type="file" (change)="onFileChange($event)" accept=".xlsx,.xls" />
+    </div>
+
+    <!-- Fetch Button -->
+    <div class="button-group">
+      <button (click)="fetchData()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">🔄 Fetch Data</span>
+        <span *ngIf="isLoading">⏳ Loading...</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Builder Section -->
+  <div *ngIf="showBuilder" class="builder">
+    <div class="form-group">
+      <label>Select X-Axis Field:</label>
+      <select [(ngModel)]="selectedXField">
+        <option *ngFor="let field of xFields" [value]="field">{{ field }}</option>
+      </select>
+    </div>
+
+    <div class="series-builder">
+      <h4>Add Series</h4>
+      <div class="form-row">
+        <select #yField>
+          <option *ngFor="let field of yFields" [value]="field">{{ field }}</option>
+        </select>
+
+        <select #chartType>
+          <option *ngFor="let type of availableChartTypes" [value]="type">{{ type }}</option>
+        </select>
+
+        <button (click)="addSeries(yField.value, chartType.value)">➕ Add Series</button>
+      </div>
+    </div>
+
+    <div class="selected-series" *ngIf="selectedSeries.length > 0">
+      <h5>Selected Series:</h5>
+      <ul>
+        <li *ngFor="let s of selectedSeries">
+          {{ s.yField }} ({{ s.chartType }}) → Y-Axis {{ s.yAxisIndex + 1 }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="button-group">
+      <button class="load-chart-btn" (click)="loadChart()">📈 Load Chart</button>
+      <button class="reset-btn" (click)="reset()">🔁 Reset</button>
+    </div>
+  </div>
+
+  <div id="chartContainer" class="chart-area"></div>
+</div>

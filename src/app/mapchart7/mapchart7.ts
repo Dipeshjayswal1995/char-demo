@@ -61,9 +61,9 @@ export class Mapchart7 {
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
     { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
     { name: 'bubble', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'scatter',isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false},
+    { name: 'scatter', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
     { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
-
+    { name: 'multiDiminssional', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
   ]
   mapOption = [
     { name: 'USA-ALL', json_file: 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', uniqueValueMatch: 'postal-code' },
@@ -75,6 +75,8 @@ export class Mapchart7 {
 
 
   xAxisData: string = '';
+
+  yAxes: { title: string; field: string, chartType: string }[] = [];
 
   topBottomOptions = [3, 5, 10];
   selectedTopN: number | '' = '';
@@ -95,10 +97,20 @@ export class Mapchart7 {
   pieStartAngal: number = 0;
   pieENDAngal: number = 0;
   uploadedExcelData: any[] | null = null;
+  showOptions = false;
 
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
 
   ngOnInit() {
+  }
+
+  addYAxis(): void {
+    this.yAxes.push({ title: '', field: '', chartType: '' });
+    console.log(this.yAxes);
+  }
+
+  removeYAxis(index: number): void {
+    this.yAxes.splice(index, 1);
   }
 
   onFileChange(event: any): void {
@@ -145,6 +157,12 @@ export class Mapchart7 {
     };
 
     reader.readAsBinaryString(file);
+  }
+
+  resetOptions() {
+    this.showOptions = true;
+    this.rawData = [];
+    // this.apiUrl = '';
   }
 
   changeChart() {
@@ -248,6 +266,7 @@ export class Mapchart7 {
 
   handleLoadedData(data: any[]) {
     this.isLoading = false;
+    this.showOptions = false;
     this.rawData = data;
     console.log(this.rawData);
     if (!data || data.length === 0) {
@@ -323,9 +342,28 @@ export class Mapchart7 {
       case 'spline-with-inverted-axes':
         this.renderTimeSeriesLineChart(chartType); // new method
         break;
+      case 'multiDiminssional':
+        this.multiDiminonalChart(); // new method
+        break;
       default:
         this.renderStandardChart(chartType);
     }
+  }
+
+  multiDiminonalChart() {
+    if (!this.selectedValueField) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    let chartOptions: any;
+    chartOptions = this.chartBuilderService.multiDiminonalChart(
+      this.title,
+      this.subTitle,
+      this.rawData,
+      this.selectedValueField,
+      this.yAxes
+    );
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
   renderBubleChart(chartType: string) {

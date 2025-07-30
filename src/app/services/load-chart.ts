@@ -24,9 +24,8 @@ export class LoadChart {
     const series = selectedSeriesFields.map(field => ({
       name: field,
       data: rawData.map(r => r[field] ?? null),
-
     }));
-    console.log('makerSym', markerSymbol);
+    console.log('makerSym', selectedSeriesFields);
     return {
       chart: {
         type: 'line',
@@ -769,7 +768,6 @@ export class LoadChart {
   ) {
 
     const categories = rawData.map(item => item[selectedArgumentField]);
-
     // Prepare Highcharts data format: { x: index, y, z, name }
     const bubbleData = rawData.map((item, index) => ({
       x: item[selectedArgumentField], // numeric position
@@ -833,6 +831,23 @@ export class LoadChart {
     };
   }
 
+  multiDiminonalChart(
+    chatTitle: string = '',
+    subTitle: string = '',
+    rawData: any[],
+    selectedArgumentField: string,
+    yAxis: any[]
+  ) {
+    const categories = rawData.map(item => item[selectedArgumentField]);
+     const series = yAxis.map(field => ({
+      name: field.title,
+      type: field.chartType,
+      data: rawData.map(r => r[field.field] ?? null),
+    }));
+    console.log(categories);
+    console.log(series);
+    // return
+  }
 
   getScatterChartOptions(
     rawData: any[],

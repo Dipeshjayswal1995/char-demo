@@ -1,0 +1,88 @@
+.form-container {
+  max-width: 700px;
+  margin: 30px auto;
+  background: #f4f4f4;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .form-group, .form-row {
+    margin-bottom: 15px;
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input[type="text"], select, input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  }
+
+  .or-separator {
+    text-align: center;
+    margin: 15px 0;
+    color: #888;
+    font-weight: bold;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+
+    button {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #0056b3;
+      }
+
+      &.reset-btn {
+        background-color: #6c757d;
+
+        &:hover {
+          background-color: #495057;
+        }
+      }
+    }
+  }
+
+  .builder {
+    margin-top: 20px;
+
+    .series-builder {
+      margin-bottom: 20px;
+    }
+
+    .selected-series ul {
+      list-style: none;
+      padding-left: 0;
+
+      li {
+        margin-bottom: 6px;
+      }
+    }
+  }
+
+  .chart-area {
+    margin-top: 40px;
+  }
+}
