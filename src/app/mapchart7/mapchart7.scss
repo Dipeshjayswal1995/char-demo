@@ -152,6 +152,50 @@
   }
 }
 
+.theme-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Segoe UI', sans-serif;
+  margin-bottom: 1rem;
+}
+
+.theme-color-field label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.theme-color-field .required {
+  color: #888;
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.theme-color-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-color-text {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+}
+
+.theme-color-picker {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+
 .chart-area {
   flex: 1;
   min-width: 600px;
@@ -166,6 +210,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -177,6 +222,7 @@
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);

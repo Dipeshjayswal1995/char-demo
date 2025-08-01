@@ -49,6 +49,8 @@
                     <option *ngFor="let f of chartOption" [ngValue]="f">{{ f.name }}</option>
                 </select>
             </div>
+
+
             <ng-container *ngIf="selectedChartType?.name == 'multiDiminssional'">
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisialbeValueFeild">
                     <label>X-Axis</label>
@@ -60,14 +62,37 @@
                     <label>Y-Axis Title:</label>
                     <input type="text" [(ngModel)]="axis.title" placeholder="Enter Y-Axis Title" />
 
+                    <label>Unit:</label>
+                    <input type="text" [(ngModel)]="axis.unit" placeholder="Enter Unit" />
+
+
+                    <div class="theme-color-field">
+                        <label for="themeColorInput">
+                            Theme color <span class="required">(i.e. #ffffff)<sup>*</sup></span>
+                        </label>
+
+                        <div class="theme-color-input-group">
+                            <input type="text" id="themeColorInput" [(ngModel)]="axis.color" placeholder="#ffffff"
+                                class="theme-color-text" />
+                            <input type="color" [(ngModel)]="axis.color" class="theme-color-picker" />
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <label><input type="checkbox" [(ngModel)]="axis.opposite" /> opposite </label>
+                    </div>
+
                     <div class="sidebar-section">
                         <label>Colunm and bar chart Option</label>
                         <select [(ngModel)]="axis.chartType">
                             <option value="">none</option>
                             <option value="column">Column</option>
                             <option value="spline">Spline</option>
+                            <option value="line">line</option>
+                            <option value="area">area</option>
                             <option value="bar">bar</option>
-                            <!-- <option value="variwide">variwide</option> -->
+                            <option value="scatter">Scatter</option>
+                            <option value="bubble">bubble</option>
                         </select>
                     </div>
 
@@ -82,6 +107,8 @@
                 <button (click)="addYAxis()">➕ Add Y-Axis</button>
 
             </ng-container>
+
+
             <ng-container *ngIf="selectedChartType?.name !== 'multiDiminssional'">
                 <div class="sidebar-section" *ngIf="selectedChartType?.barColunmchartOption">
                     <label>Colunm and bar chart Option</label>

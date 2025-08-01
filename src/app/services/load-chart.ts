@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+declare const Highcharts: any;
 
 @Injectable({
   providedIn: 'root'
@@ -832,21 +833,77 @@ export class LoadChart {
   }
 
   multiDiminonalChart(
-    chatTitle: string = '',
-    subTitle: string = '',
+    chatTitle: string,
+    subTitle: string,
     rawData: any[],
     selectedArgumentField: string,
     yAxis: any[]
   ) {
     const categories = rawData.map(item => item[selectedArgumentField]);
-     const series = yAxis.map(field => ({
+    const series = yAxis.map((field, index) => ({
       name: field.title,
       type: field.chartType,
+
+      yAxis: index,
+      tooltip: {
+        valueSuffix: ' ' + field.unit,
+      },
+      color: field.color,
       data: rawData.map(r => r[field.field] ?? null),
     }));
+    const yAxisData = yAxis.map((series, index) => ({
+      title: {
+        text: series.title,
+        style: {
+          color: series.color
+        }
+      },
+      labels: {
+        format: '{value}' + series.unit, // You can add unit if needed based on name
+        style: {
+          color: series.color
+        }
+      },
+      opposite: series.opposite
+    }));
+    console.log("yAxisData ===> ", yAxisData)
+
     console.log(categories);
     console.log(series);
-    // return
+    return {
+      chart: {
+        zooming: {
+          type: 'xy'
+        }
+      },
+      title: {
+        text: chatTitle
+      },
+      subtitle: {
+        text: subTitle
+      },
+      xAxis: [{
+        categories: categories,
+        crosshair: true
+      }],
+      yAxis: yAxisData,
+      tooltip: {
+        shared: true
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'left',
+        x: 80,
+        verticalAlign: 'top',
+        y: 55,
+        floating: true,
+        backgroundColor:
+          Highcharts.defaultOptions.legend.backgroundColor || // theme
+          'rgba(255,255,255,0.25)'
+      },
+      series: series
+
+    }
   }
 
   getScatterChartOptions(

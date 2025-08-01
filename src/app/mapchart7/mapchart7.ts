@@ -76,7 +76,7 @@ export class Mapchart7 {
 
   xAxisData: string = '';
 
-  yAxes: { title: string; field: string, chartType: string }[] = [];
+  yAxes: { title: string; field: string, chartType: string, unit : string, opposite: boolean, color:string}[] = [];
 
   topBottomOptions = [3, 5, 10];
   selectedTopN: number | '' = '';
@@ -105,7 +105,7 @@ export class Mapchart7 {
   }
 
   addYAxis(): void {
-    this.yAxes.push({ title: '', field: '', chartType: '' });
+    this.yAxes.push({ title: '', field: '', chartType: '',unit :'', opposite: false, color:'' });
     console.log(this.yAxes);
   }
 
