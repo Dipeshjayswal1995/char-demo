@@ -1,7 +1,41 @@
-   <highcharts-chart
+<!-- <highcharts-chart
       [constructorType]="chartConstructor"
       [options]="chartOptions"
       [(update)]="updateFlag"
       [oneToOne]="oneToOneFlag"
       class="chart"
-    />
+    /> -->
+
+<!-- <div class="chart-dashboard">
+   <h2>📡 Data Loader</h2>
+
+   <div *ngIf="rawData.length && !showOptions" class="data-loaded-banner fade-in">
+      ✅ Data loaded successfully.
+      <button (click)="resetOptions()">🔁 Change Option</button>
+   </div>
+
+   <div *ngIf="!rawData.length || showOptions" class="form-container slide-in">
+      <div class="form-group">
+         <label><span class="icon">🔗</span> Load from API:</label>
+         <input type="text" [(ngModel)]="apiUrl" placeholder="Enter API URL or path" />
+      </div>
+
+      <div class="or-separator">— OR —</div>
+
+      <div class="form-group">
+         <label><span class="icon">📁</span> Load from Excel:</label>
+         <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      </div>
+
+      <div class="button-group">
+         <button (click)="fetchData()" [disabled]="isLoading">
+            <span *ngIf="!isLoading">🔄 Fetch Data</span>
+            <span *ngIf="isLoading">⏳ Loading...</span>
+         </button>
+      </div>
+   </div>
+
+   <div class="button-group fade-in">
+      <button class="load-chart-btn" (click)="loadChart()">📊 Load Chart</button>
+   </div>
+</div> -->

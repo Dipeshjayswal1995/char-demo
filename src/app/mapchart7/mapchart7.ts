@@ -34,7 +34,6 @@ export class Mapchart7 {
     json_file: string;
     uniqueValueMatch: string;
   } | null = null;
-
   selectedChartType: {
     name: string;
     isVisableMapOption: boolean;
@@ -48,7 +47,6 @@ export class Mapchart7 {
     zooming: boolean;
     typeofareaChart: boolean;
     barColunmchartOption: boolean;
-
   } | null = null;
   currentChart: any;
   title: string = '';
@@ -76,7 +74,7 @@ export class Mapchart7 {
 
   xAxisData: string = '';
 
-  yAxes: { title: string; field: string, chartType: string, unit : string, opposite: boolean, color:string}[] = [];
+  yAxes: { title: string; field: string, chartType: string, unit: string, opposite: boolean, color: string }[] = [];
 
   topBottomOptions = [3, 5, 10];
   selectedTopN: number | '' = '';
@@ -102,10 +100,136 @@ export class Mapchart7 {
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
 
   ngOnInit() {
+
   }
 
+  ngAfterViewInit(): void {
+    // let data = [],
+    //   n = 1000000;
+
+    // // Generate and position the datapoints in a tangent wave pattern
+    // for (let i = 0; i < n; i += 1) {
+    //   const theta = Math.random() * 2 * Math.PI;
+    //   const radius = Math.pow(Math.random(), 2) * 100;
+
+    //   const waveDeviation = (Math.random() - 0.5) * 70;
+    //   const waveValue = Math.tan(theta) * waveDeviation;
+
+    //   data.push([
+    //     50 + (radius + waveValue) * Math.cos(theta),
+    //     50 + (radius + waveValue) * Math.sin(theta)
+    //   ]);
+    // }
+
+    // if (!Highcharts.Series.prototype.renderCanvas) {
+    //   throw 'Module not loaded';
+    // }
+
+    // setTimeout(() => {
+    //       console.time('scatter');
+    // Highcharts.chart('container', {
+
+    //   chart: {
+    //     zooming: {
+    //       type: 'xy'
+    //     },
+    //     height: '100%'
+    //   },
+
+    //   boost: {
+    //     useGPUTranslations: true,
+    //     usePreAllocated: true
+    //   },
+
+    //   accessibility: {
+    //     screenReaderSection: {
+    //       beforeChartFormat: '<{headingTagName}>' +
+    //         '{chartTitle}</{headingTagName}><div>{chartLongdesc}</div>' +
+    //         '<div>{xAxisDescription}</div><div>{yAxisDescription}</div>'
+    //     }
+    //   },
+
+    //   xAxis: {
+    //     min: 0,
+    //     max: 100,
+    //     gridLineWidth: 1,
+    //     tickWidth: 0
+    //   },
+
+    //   yAxis: {
+    //     lineWidth: 1,
+    //     // Renders faster when we don't have to compute min and max
+    //     min: 0,
+    //     max: 100,
+    //     minPadding: 0,
+    //     maxPadding: 0,
+    //     title: {
+    //       text: null
+    //     }
+    //   },
+
+    //   title: {
+    //     text: 'Scatter chart with 1 million points',
+    //     align: 'left'
+    //   },
+
+    //   legend: {
+    //     enabled: false
+    //   },
+
+    //   series: [{
+    //     type: 'arearange',
+    //     color: 'rgba(222, 73, 138, 0.1)',
+    //     data: data,
+    //     marker: {
+    //       radius: 0.5
+    //     },
+    //     tooltip: {
+    //       followPointer: false,
+    //       pointFormat: '[{point.x:.1f}, {point.y:.1f}]'
+    //     }
+    //   }]
+
+    // });
+    // console.timeEnd('scatter');
+    // }, 5000);
+    const data = this.generateBigData(1000000);
+    console.log('Data ready:', data);
+
+    Highcharts.chart('container', {
+      chart: { type: 'area' },
+      title: { text: '1M Data Points' },
+      boost: {
+        useGPUTranslations: true,
+        usePreAllocated: true,
+      },
+      plotOptions: {
+        series: {
+          turboThreshold: 1_000_000,
+          boostThreshold: 5000,
+          marker: { enabled: false },
+          enableMouseTracking: false
+        }
+      },
+      series: [{
+        name: 'Test',
+        data: [1, 2, 3, 4, 69, 85, 25]
+      }]
+    });
+  }
+
+  generateBigData(count: number): number[] {
+    const result: number[] = [];
+    for (let i = 0; i < count; i++) {
+      const y = Math.sin(i / 1000) + Math.random();
+      result.push(y);
+    }
+    return result;
+  }
+
+
   addYAxis(): void {
-    this.yAxes.push({ title: '', field: '', chartType: '',unit :'', opposite: false, color:'' });
+    this.yAxes.push({ title: '', field: '', chartType: '', unit: '', opposite: false, color: '' });
     console.log(this.yAxes);
   }
 
@@ -436,8 +560,6 @@ export class Mapchart7 {
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
-
-
   onSeriesFieldToggle(field: string, e: any): void {
     if (e.target?.checked) {
       this.selectedSeriesFields.push(field);
@@ -509,7 +631,6 @@ export class Mapchart7 {
 
   areayChartRender() {
     let chartOptions: any;
-
     if (this.typeofareaChart === 'arearange') {
       chartOptions = this.chartBuilderService.getAreaRangeChartOptions(
         this.rawData,
@@ -555,33 +676,6 @@ export class Mapchart7 {
       this.pieStartAngal,
       this.pieENDAngal
     );
-    // const filteredData = this.applyTopBottomFilter(this.rawData);
-    // const grouped = this.groupData(filteredData);
-    // const categories = Object.keys(grouped);
-    // console.log("grouped data ===> ", grouped);
-    // const pieData = categories.map(cat => {
-    //   const value = Object.values(grouped[cat]).reduce((a: any, b: any) => a + b, 0);
-    //   return { name: cat, y: value };
-    // });
-    // console.log(pieData);
-    // const chartOptions = this.getBaseChartOptions(
-    //   `Chart of ${this.selectedValueField} by ${this.selectedArgumentField}`,
-    //   'pie'
-    // );
-
-    // chartOptions.plotOptions.pie = {
-    //   innerSize: type === 'donut' ? '60%' : '0%',
-    //   dataLabels: {
-    //     enabled: true,
-    //     format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-    //   }
-    // };
-
-    // chartOptions.series = [{
-    //   name: this.selectedValueField,
-    //   data: pieData,
-    //   type: 'pie'
-    // }];
     console.log(chartOptions);
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
@@ -693,82 +787,82 @@ export class Mapchart7 {
     };
   }
 
-  addCustomAnimationPlugin() {
-    (function (H) {
-      const animateSVGPath = (
-        svgElem: any,
-        animation: any,
-        callback?: () => void // ✅ Make the callback explicitly optional
-      ) => {
-        const length = svgElem.element.getTotalLength();
-        svgElem.attr({
-          'stroke-dasharray': length,
-          'stroke-dashoffset': length,
-          opacity: 1
-        });
-        svgElem.animate(
-          {
-            'stroke-dashoffset': 0
-          },
-          animation,
-          callback // ✅ Now valid
-        );
-      };
+  // addCustomAnimationPlugin() {
+  //   (function (H) {
+  //     const animateSVGPath = (
+  //       svgElem: any,
+  //       animation: any,
+  //       callback?: () => void // ✅ Make the callback explicitly optional
+  //     ) => {
+  //       const length = svgElem.element.getTotalLength();
+  //       svgElem.attr({
+  //         'stroke-dasharray': length,
+  //         'stroke-dashoffset': length,
+  //         opacity: 1
+  //       });
+  //       svgElem.animate(
+  //         {
+  //           'stroke-dashoffset': 0
+  //         },
+  //         animation,
+  //         callback // ✅ Now valid
+  //       );
+  //     };
 
-      // Animate lines (like series.graph) using stroke-dash
-      H.seriesTypes.line.prototype.animate = function (init: any) {
-        const series = this,
-          animation = H.animObject(series.options.animation);
+  //     // Animate lines (like series.graph) using stroke-dash
+  //     H.seriesTypes.line.prototype.animate = function (init: any) {
+  //       const series = this,
+  //         animation = H.animObject(series.options.animation);
 
-        if (!init && (window as any).enableCustomAnimation !== false) {
-          animateSVGPath(series.graph, animation);
-        }
-      };
+  //       if (!init && (window as any).enableCustomAnimation !== false) {
+  //         animateSVGPath(series.graph, animation);
+  //       }
+  //     };
 
-      // Axis and plot line animation
-      H.addEvent(H.Axis, 'afterRender', function (this: any) {
-        const axis = this,
-          chart = axis.chart,
-          animation = H.animObject(chart.renderer.globalAnimation);
+  //     // Axis and plot line animation
+  //     H.addEvent(H.Axis, 'afterRender', function (this: any) {
+  //       const axis = this,
+  //         chart = axis.chart,
+  //         animation = H.animObject(chart.renderer.globalAnimation);
 
-        if ((window as any).enableCustomAnimation === false) return;
+  //       if ((window as any).enableCustomAnimation === false) return;
 
-        // Animate axis group
-        axis.axisGroup
-          .attr({ opacity: 0, rotation: -3, scaleY: 0.9 })
-          .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
+  //       // Animate axis group
+  //       axis.axisGroup
+  //         .attr({ opacity: 0, rotation: -3, scaleY: 0.9 })
+  //         .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
 
-        // Animate label group
-        if (axis.horiz) {
-          axis.labelGroup
-            .attr({ opacity: 0, rotation: 3, scaleY: 0.5 })
-            .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
-        } else {
-          axis.labelGroup
-            .attr({ opacity: 0, rotation: 3, scaleX: -0.5 })
-            .animate({ opacity: 1, rotation: 0, scaleX: 1 }, animation);
-        }
+  //       // Animate label group
+  //       if (axis.horiz) {
+  //         axis.labelGroup
+  //           .attr({ opacity: 0, rotation: 3, scaleY: 0.5 })
+  //           .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
+  //       } else {
+  //         axis.labelGroup
+  //           .attr({ opacity: 0, rotation: 3, scaleX: -0.5 })
+  //           .animate({ opacity: 1, rotation: 0, scaleX: 1 }, animation);
+  //       }
 
-        // Animate plot lines/bands with SVG path effect
-        if (axis.plotLinesAndBands) {
-          axis.plotLinesAndBands.forEach((plotLine: any) => {
-            const anim = H.animObject(plotLine.options.animation);
+  //       // Animate plot lines/bands with SVG path effect
+  //       if (axis.plotLinesAndBands) {
+  //         axis.plotLinesAndBands.forEach((plotLine: any) => {
+  //           const anim = H.animObject(plotLine.options.animation);
 
-            plotLine.label?.attr({ opacity: 0 });
+  //           plotLine.label?.attr({ opacity: 0 });
 
-            animateSVGPath(plotLine.svgElem, anim, () => {
-              plotLine.label?.animate({ opacity: 1 });
-            });
-          });
-        }
-      });
-    })(Highcharts);
-  }
+  //           animateSVGPath(plotLine.svgElem, anim, () => {
+  //             plotLine.label?.animate({ opacity: 1 });
+  //           });
+  //         });
+  //       }
+  //     });
+  //   })(Highcharts);
+  // }
 
 
   loadChart() {
-    (window as any).enableCustomAnimation = this.enableCustomAnimation;
-    this.addCustomAnimationPlugin();
+    // (window as any).enableCustomAnimation = this.enableCustomAnimation;
+    // // this.addCustomAnimationPlugin();
     this.renderChart();
   }
 

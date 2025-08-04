@@ -69,7 +69,7 @@ export class LoadChart {
         },
         series: {
           label: {
-            connectorAllowed: true
+            connectorAllowed: false
           }
         }
       },
@@ -919,7 +919,6 @@ export class LoadChart {
     const series = selectedSeriesFields.map(field => ({
       name: field,
       data: rawData.map(r => r[field] ?? null),
-
     }));
     console.log('makerSym', markerSymbol);
     return {
@@ -1012,9 +1011,5 @@ export class LoadChart {
       return rawData.map(r => r[argumentField]);
     }
   }
-
-
-
-
 
 }
