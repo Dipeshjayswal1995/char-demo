@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LoadChart } from '../services/load-chart';
 import * as XLSX from 'xlsx';
+import { Aggregation } from '../services/aggregation';
 
 
 declare const Highcharts: any;
@@ -34,26 +35,26 @@ export class Mapchart7 {
     json_file: string;
     uniqueValueMatch: string;
   } | null = null;
-  selectedChartType: {
-    name: string;
-    isVisableMapOption: boolean;
-    isVisableMatchFeild: boolean;
-    isVisialbeValueFeild: boolean;
-    isVisiableArgumentField: boolean;
-    isVisiableSeriesField: boolean;
-    dataLabel: boolean;
-    enableMouseTracking: boolean;
-    markerSymbols: boolean;
-    zooming: boolean;
-    typeofareaChart: boolean;
-    barColunmchartOption: boolean;
-  } | null = null;
+  // selectedChartType: {
+  //   name: string;
+  //   isVisableMapOption: boolean;
+  //   isVisableMatchFeild: boolean;
+  //   isVisialbeValueFeild: boolean;
+  //   isVisiableArgumentField: boolean;
+  //   isVisiableSeriesField: boolean;
+  //   dataLabel: boolean;
+  //   enableMouseTracking: boolean;
+  //   markerSymbols: boolean;
+  //   zooming: boolean;
+  //   typeofareaChart: boolean;
+  //   barColunmchartOption: boolean;
+  // } | null = null;
   currentChart: any;
   title: string = '';
   subTitle: string = '';
   showLengend: boolean = false;
   chartOption = [
-    { name: 'line-time', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
+    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
     { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
     { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: false },
     { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
@@ -63,6 +64,8 @@ export class Mapchart7 {
     { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
     { name: 'multiDiminssional', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
   ]
+
+
   mapOption = [
     { name: 'USA-ALL', json_file: 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', uniqueValueMatch: 'postal-code' },
     { name: 'ASIA', json_file: 'https://code.highcharts.com/mapdata/custom/asia.geo.json', uniqueValueMatch: 'iso-a2' },
@@ -97,125 +100,38 @@ export class Mapchart7 {
   uploadedExcelData: any[] | null = null;
   showOptions = false;
 
-  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart) { }
+  lineOption: string = 'line';
 
-  ngOnInit() {
+  chartCategories: any[] = [];
+  selectedChartCate: any = null;
+  selectedChartType: any = null;
+  selectedXAxis = '';
+  selectedYAxis = '';
+  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation) {
 
   }
 
+
+
+  ngOnInit() {
+    this.loadChartCategories();
+  }
+
+  loadChartCategories(): void {
+    this.http.get<any>('assets/common.json').subscribe(
+      data => {
+        this.chartCategories = data;
+        console.log('Loaded chart categories:', this.chartCategories);
+      },
+      error => {
+        console.error('Error loading common.json:', error);
+      }
+    );
+  }
+
+
+
   ngAfterViewInit(): void {
-    // let data = [],
-    //   n = 1000000;
-
-    // // Generate and position the datapoints in a tangent wave pattern
-    // for (let i = 0; i < n; i += 1) {
-    //   const theta = Math.random() * 2 * Math.PI;
-    //   const radius = Math.pow(Math.random(), 2) * 100;
-
-    //   const waveDeviation = (Math.random() - 0.5) * 70;
-    //   const waveValue = Math.tan(theta) * waveDeviation;
-
-    //   data.push([
-    //     50 + (radius + waveValue) * Math.cos(theta),
-    //     50 + (radius + waveValue) * Math.sin(theta)
-    //   ]);
-    // }
-
-    // if (!Highcharts.Series.prototype.renderCanvas) {
-    //   throw 'Module not loaded';
-    // }
-
-    // setTimeout(() => {
-    //       console.time('scatter');
-    // Highcharts.chart('container', {
-
-    //   chart: {
-    //     zooming: {
-    //       type: 'xy'
-    //     },
-    //     height: '100%'
-    //   },
-
-    //   boost: {
-    //     useGPUTranslations: true,
-    //     usePreAllocated: true
-    //   },
-
-    //   accessibility: {
-    //     screenReaderSection: {
-    //       beforeChartFormat: '<{headingTagName}>' +
-    //         '{chartTitle}</{headingTagName}><div>{chartLongdesc}</div>' +
-    //         '<div>{xAxisDescription}</div><div>{yAxisDescription}</div>'
-    //     }
-    //   },
-
-    //   xAxis: {
-    //     min: 0,
-    //     max: 100,
-    //     gridLineWidth: 1,
-    //     tickWidth: 0
-    //   },
-
-    //   yAxis: {
-    //     lineWidth: 1,
-    //     // Renders faster when we don't have to compute min and max
-    //     min: 0,
-    //     max: 100,
-    //     minPadding: 0,
-    //     maxPadding: 0,
-    //     title: {
-    //       text: null
-    //     }
-    //   },
-
-    //   title: {
-    //     text: 'Scatter chart with 1 million points',
-    //     align: 'left'
-    //   },
-
-    //   legend: {
-    //     enabled: false
-    //   },
-
-    //   series: [{
-    //     type: 'arearange',
-    //     color: 'rgba(222, 73, 138, 0.1)',
-    //     data: data,
-    //     marker: {
-    //       radius: 0.5
-    //     },
-    //     tooltip: {
-    //       followPointer: false,
-    //       pointFormat: '[{point.x:.1f}, {point.y:.1f}]'
-    //     }
-    //   }]
-
-    // });
-    // console.timeEnd('scatter');
-    // }, 5000);
-    const data = this.generateBigData(1000000);
-    console.log('Data ready:', data);
-
-    Highcharts.chart('container', {
-      chart: { type: 'area' },
-      title: { text: '1M Data Points' },
-      boost: {
-        useGPUTranslations: true,
-        usePreAllocated: true,
-      },
-      plotOptions: {
-        series: {
-          turboThreshold: 1_000_000,
-          boostThreshold: 5000,
-          marker: { enabled: false },
-          enableMouseTracking: false
-        }
-      },
-      series: [{
-        name: 'Test',
-        data: [1, 2, 3, 4, 69, 85, 25]
-      }]
-    });
   }
 
   generateBigData(count: number): number[] {
@@ -290,7 +206,7 @@ export class Mapchart7 {
   }
 
   changeChart() {
-    console.log(this.selectedChartType);
+
   }
 
   async fetchAndConvertCSVtoJSON123(csvUrl: string): Promise<any[]> {
@@ -398,13 +314,15 @@ export class Mapchart7 {
       return;
     }
     this.allFields = Object.keys(data[0]);
-    this.valueFields = this.allFields;
-    this.argumentFields = this.allFields;
-    this.seriesFields = this.allFields;
-    this.selectedValueField = this.valueFields[0] || '';
-    this.selectedArgumentField = this.argumentFields[0] || '';
-    this.selectedSeriesField = '';
+    // this.valueFields = this.allFields;
+    // this.argumentFields = this.allFields;
+    // this.seriesFields = this.allFields;
+    // this.selectedValueField = this.valueFields[0] || '';
+    // this.selectedArgumentField = this.argumentFields[0] || '';
+    // this.selectedSeriesField = '';
   }
+
+
 
 
   toggleCustomAnimation(ev: any) {
@@ -435,14 +353,15 @@ export class Mapchart7 {
   }
 
   renderChart(): void {
-    if (!this.selectedChartType || !this.selectedValueField || !this.selectedArgumentField) return;
+    console.log('selectedChartType', this.selectedChartType);
+    // if (!this.selectedChartType || !this.selectedValueField || !this.selectedArgumentField) return;
 
     if (this.currentChart) {
       this.currentChart.destroy();
     }
 
-    const chartType = this.selectedChartType.name;
-
+    const chartType = this.selectedChartType?.type;
+    console.log('Rendering chart of type:', chartType);
     switch (chartType) {
       case 'map':
         this.renderMapChart();
@@ -464,6 +383,9 @@ export class Mapchart7 {
         break;
       case 'line-time':
       case 'spline-with-inverted-axes':
+        this.renderTimeSeriesLineChart(chartType); // new method
+        break;
+      case 'line':
         this.renderTimeSeriesLineChart(chartType); // new method
         break;
       case 'multiDiminssional':
@@ -570,22 +492,21 @@ export class Mapchart7 {
   }
 
   renderTimeSeriesLineChart(chartType: string): void {
-    if (!this.selectedArgumentField) {
+    if (!this.selectedXAxis && this.selectedYAxis) {
       console.warn('Select at least one series field and argument field');
       return;
     }
     let chartOptions: any = null;
-    if (chartType === 'line-time') {
-      console.log('Load the line-time charts');
+    if (chartType === 'line') {
+      // console.log('Load the line-time charts');
       chartOptions = this.chartBuilderService.getLineChartOptions(
         this.rawData,
         this.title,
         this.subTitle,
-        this.selectedValueField,
-        this.selectedSeriesFields,
+        this.selectedXAxis,
+        this.selectedYAxis,
         this.dataLabel,
         this.enableMouseTracking,
-        this.selectSymbol,
         this.zomming
       );
       console.log(chartOptions);

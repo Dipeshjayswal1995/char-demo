@@ -9,7 +9,7 @@ export class LoadChart {
   markerSymbols = ['circle', 'square', 'diamond', 'triangle', 'triangle-down'];
   constructor() { }
 
-  getLineChartOptions(
+  getLineChartOptions123(
     rawData: any[],
     title: string = '',
     subTitle: string = '',
@@ -56,6 +56,84 @@ export class LoadChart {
       },
       legend: {
         enabled: false,
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+      },
+      plotOptions: {
+        line: {
+          dataLabels: {
+            enabled: dataLabel
+          },
+          enableMouseTracking: enableMouseTracking
+        },
+        series: {
+          label: {
+            connectorAllowed: false
+          }
+        }
+      },
+      series,
+      responsive: [{
+        condition: {
+          maxWidth: 500
+        },
+        chartOptions: {
+          legend: {
+            layout: 'horizontal',
+            align: 'center',
+            verticalAlign: 'bottom'
+          }
+        }
+      }]
+    };
+  }
+
+  getLineChartOptions(
+    rawData: any[],
+    title: string,
+    subTitle: string,
+    xAxis: string,
+    selectedSeriesFields: string[] | string, // can be string or array
+    dataLabel: boolean = false,
+    enableMouseTracking: boolean = true,
+    zooming: string
+  ): any {
+    const categories = rawData.map(r => r[xAxis]);
+
+    const fieldsArray = Array.isArray(selectedSeriesFields)
+      ? selectedSeriesFields
+      : [selectedSeriesFields];
+
+    const series = fieldsArray.map(field => ({
+      name: field,
+      data: rawData.map(r => r[field] ?? null),
+    }));
+
+    return {
+      chart: {
+        type: 'line',
+        backgroundColor: 'transparent',
+        zooming: {
+          type: zooming
+        }
+      },
+      title: {
+        text: title,
+        align: 'left'
+      },
+      subtitle: {
+        text: subTitle,
+        align: 'left'
+      },
+      xAxis: {
+        categories,
+        accessibility: {
+          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
+        }
+      },
+      legend: {
+        enabled: series.length > 1, // show legend only if multiple series
         layout: 'vertical',
         align: 'right',
         verticalAlign: 'middle'
@@ -898,11 +976,10 @@ export class LoadChart {
         y: 55,
         floating: true,
         backgroundColor:
-          Highcharts.defaultOptions.legend.backgroundColor || // theme
-          'rgba(255,255,255,0.25)'
+          Highcharts.defaultOptions.legend.backgroundColor ||
+          'rgba(201, 123, 123, 0.25)'
       },
       series: series
-
     }
   }
 

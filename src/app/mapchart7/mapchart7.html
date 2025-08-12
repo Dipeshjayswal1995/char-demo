@@ -44,9 +44,16 @@
             </div>
 
             <div class="sidebar-section">
+                <label>Chart Caterory</label>
+                <select [(ngModel)]="selectedChartCate" (change)="changeChart()">
+                    <option *ngFor="let f of chartCategories" [ngValue]="f">{{ f.name }}</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
                 <label>Chart Type</label>
                 <select [(ngModel)]="selectedChartType" (change)="changeChart()">
-                    <option *ngFor="let f of chartOption" [ngValue]="f">{{ f.name }}</option>
+                    <option *ngFor="let f of selectedChartCate?.chartOption" [ngValue]="f">{{ f.name }}</option>
                 </select>
             </div>
 
@@ -110,6 +117,39 @@
 
 
             <ng-container *ngIf="selectedChartType?.name !== 'multiDiminssional'">
+
+                <!-- <div class="sidebar-section" *ngIf="selectedChartType?.markerSymbols">
+                    <label>Symbol</label>
+                    <select [(ngModel)]="selectSymbol">
+                        <option *ngFor="let f of markerSymbols" [ngValue]="f">{{ f }}</option>
+                    </select>
+                </div> -->
+
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.xAxis">
+                    <label>X-Axis</label>
+                    <select [(ngModel)]="selectedXAxis" (change)="renderChart()">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.yAxis">
+                    <label>Y-Axis</label>
+                    <select [(ngModel)]="selectedYAxis" (change)="renderChart()">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.zooming">
+                    <label>Zooming</label>
+                    <select [(ngModel)]="zomming" (change)="renderChart()">
+                        <option value="">none</option>
+                        <option value="x">x-axis</option>
+                        <option value="y">y-axis</option>
+                        <option value="xy">xy-axis</option>
+                    </select>
+                </div>
+
                 <div class="sidebar-section" *ngIf="selectedChartType?.barColunmchartOption">
                     <label>Colunm and bar chart Option</label>
                     <select [(ngModel)]="barColunmchartOption">
@@ -142,20 +182,6 @@
                     </select>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
-                    <label>Load Map</label>
-                    <select [(ngModel)]="selectedMapOption">
-                        <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
-                    </select>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.markerSymbols">
-                    <label>Symbol</label>
-                    <select [(ngModel)]="selectSymbol">
-                        <option *ngFor="let f of markerSymbols" [ngValue]="f">{{ f }}</option>
-                    </select>
-                </div>
-
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMatchFeild">
                     <label>Match Field</label>
                     <select [(ngModel)]="selectedMatchValue" (change)="renderChart()">
@@ -163,35 +189,18 @@
                     </select>
                 </div>
 
-                <div class="sidebar-section">
-                    <label>X-axis Data Type</label>
-                    <select [(ngModel)]="xAxisData">
-                        <option value="numeric">numeric</option>
-                        <option value="logarithmic">logarithmic</option>
-                        <option value="category">category</option>
-                        <option value="datetime">datetime</option>
-                        <option value="linear">linear</option>
+                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
+                    <label>Load Map</label>
+                    <select [(ngModel)]="selectedMapOption">
+                        <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
                     </select>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisialbeValueFeild">
-                    <label>X-Axis</label>
-                    <select [(ngModel)]="selectedValueField" (change)="renderChart()">
-                        <option *ngFor="let f of valueFields" [value]="f">{{ f }}</option>
-                    </select>
-                </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableArgumentField">
-                    <label>Y-Axis</label>
-                    <select [(ngModel)]="selectedArgumentField" (change)="renderChart()">
-                        <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
-                    </select>
-                </div>
-
-                <div class="sidebar-section">
+                <div class="sidebar-section" *ngIf="selectedChartCate?.yAxis">
                     <label>Third-Argument</label>
                     <select [(ngModel)]="selectedThirdArgument" (change)="renderChart()">
-                        <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
                     </select>
                 </div>
 
@@ -202,14 +211,6 @@
                     </select>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
-                    <label>Zooming</label>
-                    <select [(ngModel)]="zomming" (change)="renderChart()">
-                        <option value="">none</option>
-                        <option value="x">x-axis</option>
-                        <option value="y">y-axis</option>
-                    </select>
-                </div>
 
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableSeriesField">
@@ -240,8 +241,7 @@
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.enableMouseTracking">
                     <label><input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()" /> Enable
-                        Mouse
-                        Tracking</label>
+                        Mouse Tracking</label>
                 </div>
 
                 <div class="sidebar-section">

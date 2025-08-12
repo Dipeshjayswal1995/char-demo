@@ -1,0 +1,11 @@
+[
+  { "altitude": 0,  "temperature": 15 },
+  { "altitude": 10, "temperature": -50 },
+  { "altitude": 20, "temperature": -56.5 },
+  { "altitude": 30, "temperature": -46.5 },
+  { "altitude": 40, "temperature": -22.1 },
+  { "altitude": 50, "temperature": -2.5 },
+  { "altitude": 60, "temperature": -27.7 },
+  { "altitude": 70, "temperature": -55.7 },
+  { "altitude": 80, "temperature": -76.5 }
+]
