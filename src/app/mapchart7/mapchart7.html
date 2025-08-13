@@ -140,14 +140,29 @@
                     </select>
                 </div>
 
+
                 <div class="sidebar-section" *ngIf="selectedChartCate?.zooming">
                     <label>Zooming</label>
-                    <select [(ngModel)]="zomming" (change)="renderChart()">
+                    <select [(ngModel)]="zooming" (change)="renderChart()">
                         <option value="">none</option>
                         <option value="x">x-axis</option>
                         <option value="y">y-axis</option>
                         <option value="xy">xy-axis</option>
                     </select>
+                </div>
+
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.showLegend">
+                    <label><input type="checkbox" [(ngModel)]="showLengend" /> Show Lengend</label>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.dataLabel">
+                    <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.enableMouseTracking">
+                    <label><input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()" /> Enable
+                        Mouse Tracking</label>
                 </div>
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.barColunmchartOption">
@@ -231,18 +246,6 @@
                     </label>
                 </div>
 
-                <div class="sidebar-section">
-                    <label><input type="checkbox" [(ngModel)]="showLengend" /> Show Lengend</label>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.dataLabel">
-                    <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.enableMouseTracking">
-                    <label><input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()" /> Enable
-                        Mouse Tracking</label>
-                </div>
 
                 <div class="sidebar-section">
                     <label>Top N</label>
@@ -267,9 +270,5 @@
             <div id="chart-container" style="width: 100%; height: 600px;"></div>
         </main>
 
-        <main class="chart-area fade-in">
-            <!-- <div id="chart-container1" style="width: 100%; height: 600px;"></div> -->
-            <div id="container" style="width: 50%; height: 600px;"></div>
-        </main>
     </div>
 </div>

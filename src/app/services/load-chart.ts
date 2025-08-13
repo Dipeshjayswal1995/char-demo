@@ -90,14 +90,17 @@ export class LoadChart {
   }
 
   getLineChartOptions(
+    selectedChartCate: any,
+    selectedChartType: any,
     rawData: any[],
     title: string,
     subTitle: string,
     xAxis: string,
-    selectedSeriesFields: string[] | string, // can be string or array
+    selectedSeriesFields: string[] | string,
+    zooming: string,
+    showLegend: boolean = false,
     dataLabel: boolean = false,
     enableMouseTracking: boolean = true,
-    zooming: string
   ): any {
     const categories = rawData.map(r => r[xAxis]);
 
@@ -112,7 +115,7 @@ export class LoadChart {
 
     return {
       chart: {
-        type: 'line',
+        type: selectedChartType.type,
         backgroundColor: 'transparent',
         zooming: {
           type: zooming
@@ -133,13 +136,13 @@ export class LoadChart {
         }
       },
       legend: {
-        enabled: series.length > 1, // show legend only if multiple series
+        enabled: showLegend, // show legend only if multiple series
         layout: 'vertical',
         align: 'right',
         verticalAlign: 'middle'
       },
       plotOptions: {
-        line: {
+        [selectedChartType.type]: {
           dataLabels: {
             enabled: dataLabel
           },
@@ -151,23 +154,193 @@ export class LoadChart {
           }
         }
       },
-      series,
-      responsive: [{
-        condition: {
-          maxWidth: 500
-        },
-        chartOptions: {
-          legend: {
-            layout: 'horizontal',
-            align: 'center',
-            verticalAlign: 'bottom'
-          }
-        }
-      }]
+      series
     };
   }
 
   getInvertedSplineChartOptionsFromJson(
+    selectedChartCate: any,
+    selectedChartType: any,
+    rawData: any[],
+    title: string,
+    subTitle: string,
+    xAxis: string,
+    selectedSeriesFields: string,
+    zooming: string,
+    showLegend: boolean = false,
+    dataLabel: boolean = false,
+    enableMouseTracking: boolean = true,
+  ): any {
+    const dataPoints: [number, number][] = rawData
+      .map(d => [Number(d[xAxis]), Number(d[selectedSeriesFields])] as [number, number])
+      .filter(([x, y]) => !isNaN(x) && !isNaN(y));
+    console.log(dataPoints);
+
+    return {
+      chart: {
+        type: selectedChartType.type,
+        inverted: true,
+        backgroundColor: 'transparent',
+        zooming: {
+          type: zooming
+        }
+      },
+      title: {
+        text: title
+      },
+      subtitle: {
+        text: subTitle
+      },
+      xAxis: {
+        title: {
+          enabled: true,
+          text: xAxis
+        },
+        // labels: {
+        //   format: `{value} ${tooltipXAxisLabel}`
+        // },
+        maxPadding: 0.05,
+        showLastLabel: true
+      },
+      yAxis: {
+        title: {
+          text: selectedSeriesFields
+        },
+        // labels: {
+        //   format: `{value}${tooltipUnit}`
+        // },
+        accessibility: {
+          rangeDescription: `Auto Range`
+        },
+        lineWidth: 2
+      },
+      legend: {
+        enabled: false
+      },
+      // tooltip: {
+      //   headerFormat: '<b>{series.name}</b><br/>',
+      //   pointFormat: `{point.x} ${tooltipXAxisLabel}: {point.y}${tooltipUnit}`
+      // },
+      plotOptions: {
+        spline: {
+          dataLabels: {
+            enabled: dataLabel
+          },
+          // marker: {
+          //   enabled: true,
+          //   symbol: markerSymbol
+          // }
+        }
+      },
+      series: [{
+        name: selectedSeriesFields,
+        data: dataPoints
+      }]
+    };
+  }
+
+  getChartOptions(
+    selectedChartCate: any,
+    selectedChartType: any,
+    rawData: any[],
+    title: string,
+    subTitle: string,
+    xAxis: string,
+    selectedSeriesFields: string[] | string,
+    zooming: string,
+    showLegend: boolean = false,
+    dataLabel: boolean = false,
+    enableMouseTracking: boolean = true
+  ): any {
+    let categories: any[] = [];
+    let series: any[] = [];
+    let inverted = false;
+    let xAxisConfig: any = {};
+    let yAxisConfig: any = {};
+    let tooltip: any = {};
+    console.log(selectedChartCate);
+    // CATEGORY CHARTS: line, column, bar
+    if ([1].includes(selectedChartCate.id)) {
+      categories = rawData.map(r => r[xAxis]);
+      const fieldsArray = Array.isArray(selectedSeriesFields)
+        ? selectedSeriesFields
+        : [selectedSeriesFields];
+
+      series = fieldsArray.map(field => ({
+        name: field,
+        data: rawData.map(r => r[field] ?? null)
+      }));
+
+      xAxisConfig = {
+        categories,
+        accessibility: {
+          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
+        }
+      };
+      yAxisConfig = undefined; // default yAxis
+
+      // XY CHARTS: spline, scatter
+    } else if ([2].includes(selectedChartCate.id)) {
+      const field = Array.isArray(selectedSeriesFields)
+        ? selectedSeriesFields[0]
+        : selectedSeriesFields;
+
+      const dataPoints: [number, number][] = rawData
+        .map(d => [Number(d[xAxis]), Number(d[field])] as [number, number])
+        .filter(([x, y]) => !isNaN(x) && !isNaN(y));
+
+      series = [{
+        name: field,
+        data: dataPoints
+      }];
+
+      inverted = selectedChartType.type === "spline";
+      xAxisConfig = {
+        reversed: false,
+        title: { enabled: true, text: xAxis },
+      };
+      yAxisConfig = {
+        title: { text: field },
+        lineWidth: 2
+      };
+
+      tooltip = {
+        headerFormat: `<b>${xAxis} : ${Array.isArray(selectedSeriesFields) ? selectedSeriesFields.join(', ') : selectedSeriesFields}</b><br/>`,
+        pointFormat: '{point.x} : {point.y}'
+      }
+    }
+
+    // FINAL RETURN OBJECT
+    return {
+      chart: {
+        type: selectedChartType.type,
+        inverted,
+        backgroundColor: 'transparent',
+        zooming: { type: zooming }
+      },
+      title: { text: title, align: 'left' },
+      subtitle: { text: subTitle, align: 'left' },
+      xAxis: xAxisConfig,
+      yAxis: yAxisConfig,
+      tooltip,
+      legend: {
+        enabled: showLegend,
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+      },
+      plotOptions: {
+        [selectedChartType.type]: {
+          dataLabels: { enabled: dataLabel },
+          enableMouseTracking
+        }
+      },
+      series
+    };
+  }
+
+
+  getInvertedSplineChartOptionsFromJson123(
     data: any[],
     xField: string,
     yField: string,

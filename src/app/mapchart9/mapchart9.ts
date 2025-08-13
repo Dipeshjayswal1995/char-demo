@@ -470,7 +470,7 @@ export class Mapchart9 {
       );
       console.log(chartOptions);
     } else {
-      chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson(
+      chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson123(
         this.rawData,
         this.selectedArgumentField,   // xField
         this.selectedValueField,      // yField

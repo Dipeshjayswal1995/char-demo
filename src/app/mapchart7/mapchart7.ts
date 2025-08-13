@@ -87,7 +87,7 @@ export class Mapchart7 {
   selectedSeriesFields: string[] = [];    // Multiple dynamic series fields
 
   enableCustomAnimation = true;
-  zomming: string = '';
+  zooming: string = '';
 
   typeofareaChart: string = '';
   barColunmchartOption: string = '';
@@ -199,14 +199,10 @@ export class Mapchart7 {
     reader.readAsBinaryString(file);
   }
 
-  resetOptions() {
-    this.showOptions = true;
-    this.rawData = [];
-    // this.apiUrl = '';
-  }
+  
 
   changeChart() {
-
+    console.log('Selected chart type:', this.selectedChartType);
   }
 
   async fetchAndConvertCSVtoJSON123(csvUrl: string): Promise<any[]> {
@@ -381,11 +377,14 @@ export class Mapchart7 {
       case 'scatter':
         this.renderScatterChart(chartType);
         break;
-      case 'line-time':
-      case 'spline-with-inverted-axes':
+      // case 'line-time':
+      // case 'spline-with-inverted-axes':
+      //   this.renderTimeSeriesLineChart(chartType); // new method
+      //   break;
+      case 'line':
         this.renderTimeSeriesLineChart(chartType); // new method
         break;
-      case 'line':
+      case 'spline':
         this.renderTimeSeriesLineChart(chartType); // new method
         break;
       case 'multiDiminssional':
@@ -448,7 +447,7 @@ export class Mapchart7 {
         '',
         '',
         true,
-        this.zomming,
+        this.zooming,
         this.barColunmchartOption
       );
       console.log(chartOptions)
@@ -475,7 +474,7 @@ export class Mapchart7 {
         'Column chart',
         true,
         this.selectSymbol,
-        this.zomming,
+        this.zooming,
         this.typeofareaChart
       );
     }
@@ -497,37 +496,40 @@ export class Mapchart7 {
       return;
     }
     let chartOptions: any = null;
-    if (chartType === 'line') {
-      // console.log('Load the line-time charts');
-      chartOptions = this.chartBuilderService.getLineChartOptions(
-        this.rawData,
-        this.title,
-        this.subTitle,
-        this.selectedXAxis,
-        this.selectedYAxis,
-        this.dataLabel,
-        this.enableMouseTracking,
-        this.zomming
-      );
-      console.log(chartOptions);
-    } else {
-      chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson(
-        this.rawData,
-        this.selectedArgumentField,   // xField
-        this.selectedValueField,      // yField
-        this.selectedValueField,      // seriesName
-        this.selectedArgumentField,   // xTitle
-        this.selectedValueField,      // yTitle
-        `Trend of ${this.selectedValueField}`,          // chartTitle
-        `By ${this.selectedArgumentField}`,             // chartSubtitle
-        '',
-        '',
-        this.dataLabel,
-        this.selectSymbol,
-        this.zomming
-      );
-      console.log('this.chat', this.currentChart);
-    }
+    // if (chartType === 'line') {
+    // console.log('Load the line-time charts');
+    chartOptions = this.chartBuilderService.getChartOptions(
+      this.selectedChartCate,
+      this.selectedChartType,
+      this.rawData,
+      this.title,
+      this.subTitle,
+      this.selectedXAxis,
+      this.selectedYAxis,
+      this.zooming,
+      this.showLengend,
+      this.dataLabel,
+      this.enableMouseTracking,
+    );
+    console.log(chartOptions);
+    // } else {
+    // chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson(
+    //   this.rawData,
+    //   this.selectedArgumentField,   // xField
+    //   this.selectedValueField,      // yField
+    //   this.selectedValueField,      // seriesName
+    //   this.selectedArgumentField,   // xTitle
+    //   this.selectedValueField,      // yTitle
+    //   `Trend of ${this.selectedValueField}`,          // chartTitle
+    //   `By ${this.selectedArgumentField}`,             // chartSubtitle
+    //   '',
+    //   '',
+    //   this.dataLabel,
+    //   this.selectSymbol,
+    //   this.zooming
+    // );
+    console.log('this.chat', this.currentChart);
+    // }
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
@@ -574,7 +576,7 @@ export class Mapchart7 {
         this.dataLabel,
         this.enableMouseTracking,
         this.selectSymbol,
-        this.zomming,
+        this.zooming,
         this.typeofareaChart
       );
     }
@@ -800,5 +802,20 @@ export class Mapchart7 {
       grouped[category][series] += typeof value === 'number' ? value : 1;
     });
     return grouped;
+  }
+
+  resetAllValue(){
+    this.selectedChartCate = null;
+    this.selectedChartType = null;
+    this.allFields = [];
+    this.zooming = '';
+
+  }
+
+  resetOptions() {
+    this.showOptions = true;
+    this.rawData = [];
+    this.resetAllValue();
+    // this.apiUrl = '';
   }
 }

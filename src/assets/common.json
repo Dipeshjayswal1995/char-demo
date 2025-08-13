@@ -11,11 +11,15 @@
         "enableMouseTracking": true,
         "zooming": true,
         "tooltip": true,
+        "showLegend": true,
         "chartOption": [
             {
                 "type": "line",
-                "name": "Line Chart",
-                "dashStyle": "solid"
+                "name": "Line Chart"
+            },
+            {
+                "type": "spline",
+                "name": "Spline Chart"
             },
             {
                 "type": "bar",
@@ -34,7 +38,67 @@
                 "name": "Spline Chart"
             },
             {
-                "type" : "columnrange",
+                "type": "columnrange",
+                "name": "Column Range Chart"
+            },
+            {
+                "type": "arearange",
+                "name": "Area Range Chart"
+            },
+            {
+                "type": "scatter",
+                "name": "Scatter Chart"
+            },
+            {
+                "type": "pie",
+                "name": "Pie Chart"
+            },
+            {
+                "type": "bubble",
+                "name": "Bubble Chart"
+            }
+        ]
+    },
+    {
+        "name": "Two Level Charts",
+        "id": 1,
+        "isVisableMapOption": false,
+        "xAxis": true,
+        "yAxis": true,
+        "isVisialbeValueFeild": false,
+        "isVisiableSeriesField": false,
+        "dataLabel": true,
+        "enableMouseTracking": true,
+        "zooming": true,
+        "tooltip": true,
+        "showLegend": true,
+        "chartOption": [
+            {
+                "type": "line",
+                "name": "Line Chart"
+            },
+            {
+                "type": "spline",
+                "name": "Spline Chart"
+            },
+            {
+                "type": "bar",
+                "name": "Bar Chart"
+            },
+            {
+                "type": "column",
+                "name": "Column Chart"
+            },
+            {
+                "type": "area",
+                "name": "Area Chart"
+            },
+            {
+                "type": "spline",
+                "name": "Spline Chart"
+            },
+            {
+                "type": "columnrange",
                 "name": "Column Range Chart"
             },
             {
@@ -57,7 +121,7 @@
     },
     {
         "name": "Multi Dimminational Charts",
-        "id": 2,
+        "id": 3,
         "isVisableMapOption": false,
         "isVisableMatchFeild": false,
         "isVisialbeValueFeild": true,
@@ -72,7 +136,7 @@
     },
     {
         "name": "Map Charts",
-        "id": 3,
+        "id": 4,
         "isVisableMapOption": true,
         "isVisableMatchFeild": false,
         "isVisialbeValueFeild": true,
@@ -87,7 +151,7 @@
     },
     {
         "name": "Multi-Series Charts",
-        "id": 4,
+        "id": 5,
         "isVisableMapOption": false,
         "isVisableMatchFeild": false,
         "isVisialbeValueFeild": true,
