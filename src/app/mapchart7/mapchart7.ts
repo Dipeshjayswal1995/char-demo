@@ -35,24 +35,10 @@ export class Mapchart7 {
     json_file: string;
     uniqueValueMatch: string;
   } | null = null;
-  // selectedChartType: {
-  //   name: string;
-  //   isVisableMapOption: boolean;
-  //   isVisableMatchFeild: boolean;
-  //   isVisialbeValueFeild: boolean;
-  //   isVisiableArgumentField: boolean;
-  //   isVisiableSeriesField: boolean;
-  //   dataLabel: boolean;
-  //   enableMouseTracking: boolean;
-  //   markerSymbols: boolean;
-  //   zooming: boolean;
-  //   typeofareaChart: boolean;
-  //   barColunmchartOption: boolean;
-  // } | null = null;
   currentChart: any;
   title: string = '';
   subTitle: string = '';
-  showLengend: boolean = false;
+
   chartOption = [
     { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
     { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
@@ -82,8 +68,6 @@ export class Mapchart7 {
   topBottomOptions = [3, 5, 10];
   selectedTopN: number | '' = '';
   selectedBottomN: number | '' = '';
-  dataLabel: boolean = false;
-  enableMouseTracking: boolean = false;
   selectedSeriesFields: string[] = [];    // Multiple dynamic series fields
 
   enableCustomAnimation = true;
@@ -91,8 +75,6 @@ export class Mapchart7 {
 
   typeofareaChart: string = '';
   barColunmchartOption: string = '';
-  selectedThirdArgument: string = '';
-  passedInSideDisplayName: string = '';
 
   pieInnerSize: string = '';
   pieStartAngal: number = 0;
@@ -107,6 +89,12 @@ export class Mapchart7 {
   selectedChartType: any = null;
   selectedXAxis = '';
   selectedYAxis = '';
+  showLengend: boolean = false;
+  dataLabel: boolean = false;
+  enableMouseTracking: boolean = false;
+  selectedThirdArgument: string = '';
+  selectedForthArgument: string = '';
+
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation) {
 
   }
@@ -199,10 +187,11 @@ export class Mapchart7 {
     reader.readAsBinaryString(file);
   }
 
-  
+
 
   changeChart() {
     console.log('Selected chart type:', this.selectedChartType);
+
   }
 
   async fetchAndConvertCSVtoJSON123(csvUrl: string): Promise<any[]> {
@@ -310,12 +299,6 @@ export class Mapchart7 {
       return;
     }
     this.allFields = Object.keys(data[0]);
-    // this.valueFields = this.allFields;
-    // this.argumentFields = this.allFields;
-    // this.seriesFields = this.allFields;
-    // this.selectedValueField = this.valueFields[0] || '';
-    // this.selectedArgumentField = this.argumentFields[0] || '';
-    // this.selectedSeriesField = '';
   }
 
 
@@ -348,6 +331,7 @@ export class Mapchart7 {
     return data;
   }
 
+
   renderChart(): void {
     console.log('selectedChartType', this.selectedChartType);
     // if (!this.selectedChartType || !this.selectedValueField || !this.selectedArgumentField) return;
@@ -356,44 +340,105 @@ export class Mapchart7 {
       this.currentChart.destroy();
     }
 
-    const chartType = this.selectedChartType?.type;
-    console.log('Rendering chart of type:', chartType);
-    switch (chartType) {
-      case 'map':
-        this.renderMapChart();
+    console.log('Rendering chart of type:', this.selectedChartCate?.id);
+    switch (this.selectedChartCate?.id) {
+      case 1:
+      case 2:
+        this.renderSingleAndTwoLevelChart();
         break;
-      case 'area-chart':
-        this.areayChartRender();
+      case 3:
+        this.renderthreeAndFourLevelChart();
         break;
-      case 'column':
-        this.coloumChartrender();
-        break;
-      case 'pie':
-        this.renderPieOrDonutChart(chartType);
-        break;
-      case 'bubble':
-        this.renderBubleChart(chartType);
-        break;
-      case 'scatter':
-        this.renderScatterChart(chartType);
-        break;
-      // case 'line-time':
-      // case 'spline-with-inverted-axes':
-      //   this.renderTimeSeriesLineChart(chartType); // new method
-      //   break;
-      case 'line':
-        this.renderTimeSeriesLineChart(chartType); // new method
-        break;
-      case 'spline':
-        this.renderTimeSeriesLineChart(chartType); // new method
-        break;
-      case 'multiDiminssional':
-        this.multiDiminonalChart(); // new method
-        break;
-      default:
-        this.renderStandardChart(chartType);
     }
+    // switch (chartType) {
+    //   case 'map':
+    //     this.renderMapChart();
+    //     break;
+    //   case 'area-chart':
+    //     this.areayChartRender();
+    //     break;
+    //   case 'column':
+    //     this.renderTimeSeriesLineChart(chartType);
+    //     break;
+    //   case 'pie':
+    //     this.renderPieOrDonutChart(chartType);
+    //     break;
+    //   case 'bubble':
+    //     this.renderBubleChart(chartType);
+    //     break;
+    //   case 'scatter':
+    //     this.renderScatterChart(chartType);
+    //     break;
+    //   // case 'line-time':
+    //   // case 'spline-with-inverted-axes':
+    //   //   this.renderTimeSeriesLineChart(chartType); // new method
+    //   //   break;
+    //   case 'line':
+    //     this.renderTimeSeriesLineChart(chartType); // new method
+    //     break;
+    //   case 'spline':
+    //     this.renderTimeSeriesLineChart(chartType); // new method
+    //     break;
+    //   case 'area':
+    //     this.renderTimeSeriesLineChart(chartType); // new method
+    //     break;
+    //   case 'multiDiminssional':
+    //     this.multiDiminonalChart(); // new method
+    //     break;
+    //   default:
+    //     this.renderStandardChart(chartType);
+    // }
   }
+
+  renderSingleAndTwoLevelChart(): void {
+    if (!this.selectedXAxis && this.selectedYAxis) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    let chartOptions: any = null;
+    chartOptions = this.chartBuilderService.getChartOptions(
+      this.selectedChartCate,
+      this.selectedChartType,
+      this.rawData,
+      this.title,
+      this.subTitle,
+      this.selectedXAxis,
+      this.selectedYAxis,
+      this.zooming,
+      this.showLengend,
+      this.dataLabel,
+      this.enableMouseTracking,
+    );
+    console.log(chartOptions);
+    console.log('this.chat', this.currentChart);
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+  }
+
+  renderthreeAndFourLevelChart() {
+    if (!this.selectedXAxis && this.selectedYAxis) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    let chartOptions: any = null;
+    chartOptions = this.chartBuilderService.getVariwideChartOptions(
+      this.selectedChartCate,
+      this.selectedChartType,
+      this.rawData,
+      this.title,
+      this.subTitle,
+      this.selectedXAxis,
+      this.selectedYAxis,
+      this.selectedThirdArgument,
+      this.zooming,
+      this.showLengend,
+      this.dataLabel,
+      this.enableMouseTracking,
+    );
+    console.log(chartOptions);
+    console.log('this.chat', this.currentChart);
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+  }
+
 
   multiDiminonalChart() {
     if (!this.selectedValueField) {
@@ -425,7 +470,7 @@ export class Mapchart7 {
       this.selectedValueField,
       this.selectedArgumentField,
       this.selectedThirdArgument,
-      this.passedInSideDisplayName
+      this.selectedForthArgument
     );
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
@@ -452,15 +497,15 @@ export class Mapchart7 {
       );
       console.log(chartOptions)
     } else if (this.barColunmchartOption === 'variwide') {
-      chartOptions = this.chartBuilderService.getVariwideChartOptions(
-        this.rawData,
-        this.selectedArgumentField,
-        this.selectedValueField,
-        this.selectedThirdArgument,
-        '',
-        '',
-        ''
-      );
+      // chartOptions = this.chartBuilderService.getVariwideChartOptions(
+      //   this.rawData,
+      //   this.selectedArgumentField,
+      //   this.selectedValueField,
+      //   this.selectedThirdArgument,
+      //   '',
+      //   '',
+      //   ''
+      // );
     } else {
       chartOptions = this.chartBuilderService.getBarChartOptions(
         this.barColunmchartOption,
@@ -490,48 +535,6 @@ export class Mapchart7 {
     this.renderChart();
   }
 
-  renderTimeSeriesLineChart(chartType: string): void {
-    if (!this.selectedXAxis && this.selectedYAxis) {
-      console.warn('Select at least one series field and argument field');
-      return;
-    }
-    let chartOptions: any = null;
-    // if (chartType === 'line') {
-    // console.log('Load the line-time charts');
-    chartOptions = this.chartBuilderService.getChartOptions(
-      this.selectedChartCate,
-      this.selectedChartType,
-      this.rawData,
-      this.title,
-      this.subTitle,
-      this.selectedXAxis,
-      this.selectedYAxis,
-      this.zooming,
-      this.showLengend,
-      this.dataLabel,
-      this.enableMouseTracking,
-    );
-    console.log(chartOptions);
-    // } else {
-    // chartOptions = this.chartBuilderService.getInvertedSplineChartOptionsFromJson(
-    //   this.rawData,
-    //   this.selectedArgumentField,   // xField
-    //   this.selectedValueField,      // yField
-    //   this.selectedValueField,      // seriesName
-    //   this.selectedArgumentField,   // xTitle
-    //   this.selectedValueField,      // yTitle
-    //   `Trend of ${this.selectedValueField}`,          // chartTitle
-    //   `By ${this.selectedArgumentField}`,             // chartSubtitle
-    //   '',
-    //   '',
-    //   this.dataLabel,
-    //   this.selectSymbol,
-    //   this.zooming
-    // );
-    console.log('this.chat', this.currentChart);
-    // }
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
 
   renderScatterChart(chartType: string): void {
     if (!this.selectedArgumentField) {
@@ -804,12 +807,24 @@ export class Mapchart7 {
     return grouped;
   }
 
-  resetAllValue(){
+  resetAllValue() {
     this.selectedChartCate = null;
     this.selectedChartType = null;
     this.allFields = [];
     this.zooming = '';
+  }
 
+  changeCategory() {
+    // this.selectedChartType = null;
+    // this.allFields = [];
+    console.log('Selected chart category:', this.selectedChartCate);
+    this.selectedChartType = null;
+    this.selectedXAxis = '';
+    this.selectedYAxis = '';
+    this.showLengend = false;
+    this.dataLabel = false;
+    this.enableMouseTracking = false;
+    this.zooming = '';
   }
 
   resetOptions() {

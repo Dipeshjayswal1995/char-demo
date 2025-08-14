@@ -291,6 +291,7 @@ export class LoadChart {
 
       series = [{
         name: field,
+        label: { enabled: false },
         data: dataPoints
       }];
 
@@ -339,6 +340,121 @@ export class LoadChart {
     };
   }
 
+  getVariwideChartOptions(
+    selectedChartCate: any,
+    selectedChartType: any,
+    rawData: any[],
+    title: string,
+    subTitle: string,
+    xAxis: string,
+    yAxis: string,
+    thirdArgument: string,
+    zooming: string,
+    showLegend: boolean = false,
+    dataLabel: boolean = false,
+    enableMouseTracking: boolean = true
+  ): any {
+    const data: (string | number)[][] = rawData.map(item => [
+      item[xAxis],
+      item[yAxis],
+      item[thirdArgument]
+    ]);
+    console.log('data', data);
+    return {
+      chart: {
+        type: selectedChartType.type,
+        backgroundColor: 'transparent',
+        zooming: {
+          type: zooming
+        }
+      },
+      title: {
+        text: title,
+        align: 'left'
+      },
+      xAxis: {
+        type: 'category'
+      },
+      subtitle: {
+        text: subTitle,
+        align: 'left'
+      },
+      caption: {
+        text: 'Column widths are proportional to ' + thirdArgument
+      },
+      legend: {
+        enabled: showLegend
+      },
+      series: [{
+        type: selectedChartType.type,
+        name: xAxis,
+        data,
+        colorByPoint: true,
+        borderRadius: 3,
+        dataLabels: {
+          enabled: dataLabel,
+          format: `{point.y:.0f}`
+        },
+        tooltip: {
+          pointFormat: `${yAxis}: <b>{point.y}</b><br>` +
+            `${thirdArgument}: <b>{point.z}</b><br>`
+        }
+      }]
+    };
+  }
+
+  getVariwideChartOptions123(
+    rawData: any[],
+    selectedArgumentField: string,
+    selectedValueField: string,
+    selectedThirdArgument: string,
+    chartTitle: string = '',
+    chartSubtitle: string = '',
+    tooltipUnit: string = '€/h'
+  ): any {
+    const data: (string | number)[][] = rawData.map(item => [
+      item[selectedValueField],   // e.g., 'Norway'
+      item[selectedArgumentField],      // e.g., 51.9
+      item[selectedThirdArgument]      // e.g., 448716
+    ]);
+    console.log('data', data);
+    return {
+      chart: {
+        type: 'variwide'
+      },
+      title: {
+        text: chartTitle || 'Variwide Chart'
+      },
+      subtitle: {
+        text: chartSubtitle
+      },
+      xAxis: {
+        type: 'category'
+      },
+      caption: {
+        text: 'Column widths are proportional to ' + selectedThirdArgument
+      },
+      legend: {
+        enabled: false
+      },
+      series: [{
+        type: 'variwide',
+        name: selectedValueField,
+        data,
+        colorByPoint: true,
+        borderRadius: 3,
+        dataLabels: {
+          enabled: true,
+          format: `${tooltipUnit}{{point.y:.0f}}`
+        },
+        tooltip: {
+          pointFormat: `${selectedValueField}: <b>${tooltipUnit} {{point.y}}</b><br>` +
+            `${selectedThirdArgument}: <b>{{point.z}}</b><br>`
+        }
+      }]
+    };
+  }
+
 
   getInvertedSplineChartOptionsFromJson123(
     data: any[],
@@ -369,7 +485,6 @@ export class LoadChart {
           type: zomming
         }
       },
-
       title: {
         text: chartTitle
       },
@@ -833,57 +948,7 @@ export class LoadChart {
   }
 
 
-  getVariwideChartOptions(
-    rawData: any[],
-    selectedArgumentField: string,
-    selectedValueField: string,
-    selectedThirdArgument: string,
-    chartTitle: string = '',
-    chartSubtitle: string = '',
-    tooltipUnit: string = '€/h'
-  ): any {
-    const data: (string | number)[][] = rawData.map(item => [
-      item[selectedValueField],   // e.g., 'Norway'
-      item[selectedArgumentField],      // e.g., 51.9
-      item[selectedThirdArgument]      // e.g., 448716
-    ]);
-    console.log('data', data);
-    return {
-      chart: {
-        type: 'variwide'
-      },
-      title: {
-        text: chartTitle || 'Variwide Chart'
-      },
-      subtitle: {
-        text: chartSubtitle
-      },
-      xAxis: {
-        type: 'category'
-      },
-      caption: {
-        text: 'Column widths are proportional to ' + selectedThirdArgument
-      },
-      legend: {
-        enabled: false
-      },
-      series: [{
-        type: 'variwide',
-        name: selectedValueField,
-        data,
-        colorByPoint: true,
-        borderRadius: 3,
-        dataLabels: {
-          enabled: true,
-          format: `${tooltipUnit}{{point.y:.0f}}`
-        },
-        tooltip: {
-          pointFormat: `${selectedValueField}: <b>${tooltipUnit} {{point.y}}</b><br>` +
-            `${selectedThirdArgument}: <b>{{point.z}}</b><br>`
-        }
-      }]
-    };
-  }
+
 
   getPieChartOption(
     type: string = '',

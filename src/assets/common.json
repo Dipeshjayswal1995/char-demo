@@ -38,18 +38,6 @@
                 "name": "Spline Chart"
             },
             {
-                "type": "columnrange",
-                "name": "Column Range Chart"
-            },
-            {
-                "type": "arearange",
-                "name": "Area Range Chart"
-            },
-            {
-                "type": "scatter",
-                "name": "Scatter Chart"
-            },
-            {
                 "type": "pie",
                 "name": "Pie Chart"
             },
@@ -61,7 +49,7 @@
     },
     {
         "name": "Two Level Charts",
-        "id": 1,
+        "id": 2,
         "isVisableMapOption": false,
         "xAxis": true,
         "yAxis": true,
@@ -71,27 +59,11 @@
         "enableMouseTracking": true,
         "zooming": true,
         "tooltip": true,
-        "showLegend": true,
+        "showLegend": false,
         "chartOption": [
             {
                 "type": "line",
                 "name": "Line Chart"
-            },
-            {
-                "type": "spline",
-                "name": "Spline Chart"
-            },
-            {
-                "type": "bar",
-                "name": "Bar Chart"
-            },
-            {
-                "type": "column",
-                "name": "Column Chart"
-            },
-            {
-                "type": "area",
-                "name": "Area Chart"
             },
             {
                 "type": "spline",
@@ -108,20 +80,39 @@
             {
                 "type": "scatter",
                 "name": "Scatter Chart"
-            },
+            }
+        ]
+    },
+    {
+        "name": "Three Level Charts",
+        "id": 3,
+        "isVisableMapOption": false,
+        "xAxis": true,
+        "yAxis": true,
+        "isVisiableSeriesField": false,
+        "dataLabel": true,
+        "enableMouseTracking": true,
+        "zooming": true,
+        "tooltip": false,
+        "showLegend": false,
+        "chartOption": [
             {
-                "type": "pie",
-                "name": "Pie Chart"
+                "type": "variwide",
+                "name": "Variwide Chart",
+                "thirdArgument": true,
+                "fouthArgument": false
             },
             {
                 "type": "bubble",
-                "name": "Bubble Chart"
+                "name": "Bubble Chart",
+                "thirdArgument": true,
+                "fouthArgument": true
             }
         ]
     },
     {
         "name": "Multi Dimminational Charts",
-        "id": 3,
+        "id": 4,
         "isVisableMapOption": false,
         "isVisableMatchFeild": false,
         "isVisialbeValueFeild": true,
@@ -136,7 +127,7 @@
     },
     {
         "name": "Map Charts",
-        "id": 4,
+        "id": 5,
         "isVisableMapOption": true,
         "isVisableMatchFeild": false,
         "isVisialbeValueFeild": true,
@@ -151,7 +142,7 @@
     },
     {
         "name": "Multi-Series Charts",
-        "id": 5,
+        "id": 6,
         "isVisableMapOption": false,
         "isVisableMatchFeild": false,
         "isVisialbeValueFeild": true,

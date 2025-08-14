@@ -411,7 +411,7 @@ export class Mapchart9 {
       );
       console.log(chartOptions)
     } else if (this.barColunmchartOption === 'variwide') {
-      chartOptions = this.chartBuilderService.getVariwideChartOptions(
+      chartOptions = this.chartBuilderService.getVariwideChartOptions123(
         this.rawData,
         this.selectedArgumentField,
         this.selectedValueField,

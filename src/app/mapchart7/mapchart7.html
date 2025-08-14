@@ -45,7 +45,7 @@
 
             <div class="sidebar-section">
                 <label>Chart Caterory</label>
-                <select [(ngModel)]="selectedChartCate" (change)="changeChart()">
+                <select [(ngModel)]="selectedChartCate" (change)="changeCategory()">
                     <option *ngFor="let f of chartCategories" [ngValue]="f">{{ f.name }}</option>
                 </select>
             </div>
@@ -128,15 +128,53 @@
 
                 <div class="sidebar-section" *ngIf="selectedChartCate?.xAxis">
                     <label>X-Axis</label>
-                    <select [(ngModel)]="selectedXAxis" (change)="renderChart()">
+                    <select [(ngModel)]="selectedXAxis">
                         <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
                     </select>
                 </div>
 
                 <div class="sidebar-section" *ngIf="selectedChartCate?.yAxis">
                     <label>Y-Axis</label>
-                    <select [(ngModel)]="selectedYAxis" (change)="renderChart()">
+                    <select [(ngModel)]="selectedYAxis">
                         <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMatchFeild">
+                    <label>Match Field</label>
+                    <select [(ngModel)]="selectedMatchValue" (change)="renderChart()">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.thirdArgument">
+                    <label>Width-Value</label>
+                    <select [(ngModel)]="selectedThirdArgument">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.fouthArgument">
+                    <label>Inside Name</label>
+                    <select [(ngModel)]="selectedForthArgument">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableSeriesField">
+                    <label>Series Fields</label>
+                    <div class="checkbox-list">
+                        <div *ngFor="let key of allFields">
+                            <input type="checkbox" [value]="key" (change)="onSeriesFieldToggle(key, $event)" />
+                            {{ key }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
+                    <label>Load Map</label>
+                    <select [(ngModel)]="selectedMapOption">
+                        <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
                     </select>
                 </div>
 
@@ -197,46 +235,8 @@
                     </select>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMatchFeild">
-                    <label>Match Field</label>
-                    <select [(ngModel)]="selectedMatchValue" (change)="renderChart()">
-                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
-                    </select>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
-                    <label>Load Map</label>
-                    <select [(ngModel)]="selectedMapOption">
-                        <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
-                    </select>
-                </div>
 
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.yAxis">
-                    <label>Third-Argument</label>
-                    <select [(ngModel)]="selectedThirdArgument" (change)="renderChart()">
-                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
-                    </select>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.name === 'bubble'">
-                    <label>Buble Inside Name</label>
-                    <select [(ngModel)]="passedInSideDisplayName" (change)="renderChart()">
-                        <option *ngFor="let f of argumentFields" [value]="f">{{ f }}</option>
-                    </select>
-                </div>
-
-
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableSeriesField">
-                    <label>Series Fields</label>
-                    <div class="checkbox-list">
-                        <div *ngFor="let key of allFields">
-                            <input type="checkbox" [value]="key" (change)="onSeriesFieldToggle(key, $event)" />
-                            {{ key }}
-                        </div>
-                    </div>
-                </div>
 
                 <div class="sidebar-section">
                     <label>
