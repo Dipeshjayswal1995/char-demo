@@ -339,9 +339,6 @@ export class Mapchart9 {
       case 'bubble':
         this.renderBubleChart(chartType);
         break;
-      case 'scatter':
-        this.renderScatterChart(chartType);
-        break;
       case 'line-time':
       case 'spline-with-inverted-axes':
         this.renderTimeSeriesLineChart(chartType); // new method
@@ -490,23 +487,6 @@ export class Mapchart9 {
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
-  renderScatterChart(chartType: string): void {
-    if (!this.selectedArgumentField) {
-      console.warn('Select at least one series field and argument field');
-      return;
-    }
-    let chartOptions: any = null;
-    console.log('Load the line-time charts');
-    chartOptions = this.chartBuilderService.getScatterChartOptions(
-      this.rawData,
-      this.title,
-      this.subTitle,
-      this.selectedValueField,
-      this.selectedSeriesFields,
-    );
-    console.log(chartOptions);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
 
 
   areayChartRender() {

@@ -126,18 +126,28 @@
                 </div> -->
 
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.xAxis">
+                <div class="sidebar-section" *ngIf="selectedChartType?.xAxis">
                     <label>X-Axis</label>
                     <select [(ngModel)]="selectedXAxis">
                         <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
                     </select>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.yAxis">
+                <div class="sidebar-section" *ngIf="selectedChartType?.yAxis">
                     <label>Y-Axis</label>
                     <select [(ngModel)]="selectedYAxis">
                         <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
                     </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.type === 'pie'">
+                    <input type="text" [(ngModel)]="pieInnerSize" placeholder="Please enter 1 to 100 between" />
+                </div>
+                <div class="sidebar-section" *ngIf="selectedChartType?.type === 'pie'">
+                    <input type="number" [(ngModel)]="pieStartAngal" placeholder="Please enter StartAngale" />
+                </div>
+                <div class="sidebar-section" *ngIf="selectedChartType?.type === 'pie'">
+                    <input type="number" [(ngModel)]="pieENDAngal" placeholder="Please enter StartAngal" />
                 </div>
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMatchFeild">
@@ -179,7 +189,7 @@
                 </div>
 
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.zooming">
+                <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
                     <label>Zooming</label>
                     <select [(ngModel)]="zooming" (change)="renderChart()">
                         <option value="">none</option>
@@ -190,38 +200,17 @@
                 </div>
 
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.showLegend">
+                <div class="sidebar-section" *ngIf="selectedChartType?.showLegend">
                     <label><input type="checkbox" [(ngModel)]="showLengend" /> Show Lengend</label>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.dataLabel">
+                <div class="sidebar-section" *ngIf="selectedChartType?.dataLabel">
                     <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartCate?.enableMouseTracking">
-                    <label><input type="checkbox" [(ngModel)]="enableMouseTracking" (change)="renderChart()" /> Enable
+                <div class="sidebar-section" *ngIf="selectedChartType?.enableMouseTracking">
+                    <label><input type="checkbox" [(ngModel)]="enableMouseTracking" /> Enable
                         Mouse Tracking</label>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.barColunmchartOption">
-                    <label>Colunm and bar chart Option</label>
-                    <select [(ngModel)]="barColunmchartOption">
-                        <option value="">none</option>
-                        <option value="column">Column</option>
-                        <option value="bar">Bar</option>
-                        <option value="columnrange">Column Range</option>
-                        <option value="variwide">variwide</option>
-                    </select>
-                </div>
-
-                <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
-                    <input type="text" [(ngModel)]="pieInnerSize" placeholder="Please enter 1 to 100 between" />
-                </div>
-                <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
-                    <input type="number" [(ngModel)]="pieStartAngal" placeholder="Please enter StartAngale" />
-                </div>
-                <div class="sidebar-section" *ngIf="selectedChartType?.name === 'pie'">
-                    <input type="number" [(ngModel)]="pieENDAngal" placeholder="Please enter StartAngal" />
                 </div>
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
@@ -235,30 +224,18 @@
                     </select>
                 </div>
 
-
-
-
                 <div class="sidebar-section">
-                    <label>
-                        <input type="checkbox" [checked]="enableCustomAnimation"
-                            (change)="toggleCustomAnimation($event)">
-                        Enable Custom Animation
-                    </label>
-                </div>
-
-
-                <div class="sidebar-section">
-                    <label>Top N</label>
-                    <select [(ngModel)]="selectedTopN" (change)="renderChart()">
-                        <option value="">None</option>
-                        <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
+                    <label>Show Records</label>
+                    <select [(ngModel)]="rankingType">
+                        <option value="all">All</option>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
                     </select>
                 </div>
 
                 <div class="sidebar-section">
-                    <label>Bottom N</label>
-                    <select [(ngModel)]="selectedBottomN" (change)="renderChart()">
-                        <option value="">None</option>
+                    <label>Limit:</label>
+                    <select [(ngModel)]="limit" (change)="renderChart()">
                         <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
                     </select>
                 </div>

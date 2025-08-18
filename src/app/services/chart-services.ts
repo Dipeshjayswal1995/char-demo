@@ -741,4 +741,5 @@ export class ChartServices {
         return rawData.map(r => r[argumentField]);
     }
   }
+  
 }

@@ -250,7 +250,11 @@ export class LoadChart {
     zooming: string,
     showLegend: boolean = false,
     dataLabel: boolean = false,
-    enableMouseTracking: boolean = true
+    enableMouseTracking: boolean = true,
+    thirdArgument?: string, 
+    innerSize: string = '',  
+    startAngle: number = 0,  
+    endAngle: number = 0  
   ): any {
     let categories: any[] = [];
     let series: any[] = [];
@@ -259,26 +263,58 @@ export class LoadChart {
     let yAxisConfig: any = {};
     let tooltip: any = {};
     console.log(selectedChartCate);
+    console.log(selectedChartType);
     // CATEGORY CHARTS: line, column, bar
-    if ([1].includes(selectedChartCate.id)) {
-      categories = rawData.map(r => r[xAxis]);
-      const fieldsArray = Array.isArray(selectedSeriesFields)
-        ? selectedSeriesFields
-        : [selectedSeriesFields];
+    if ([1,6].includes(selectedChartCate.id)) {
+      if (selectedChartType.type === 'pie') {
+        series = [{
+          type: selectedChartType.type,
+          innerSize: innerSize === '' ? 0 : innerSize + '%',
+          name: Array.isArray(selectedSeriesFields)
+            ? selectedSeriesFields[0]
+            : selectedSeriesFields,
+          colorByPoint: true,
+          allowPointSelect: true,
+          cursor: 'pointer',
+          enableMouseTracking,
+          dataLabels: {
+            enabled: dataLabel,
+            format: '<b>{point.name}</b>: {point.percentage:.1f}%'
+          },
+          startAngle,
+          endAngle,
+          showInLegend: showLegend,
+          data: rawData.map(item => ({
+            name: item[xAxis],
+            y: Number(item[selectedSeriesFields as string])
+          }))
+        }];
+        tooltip = {
+          pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})'
+        };
+      } else {
+        console.log(selectedSeriesFields)
+        categories = rawData.map(r => r[xAxis]);
+        const fieldsArray = Array.isArray(selectedSeriesFields)
+          ? selectedSeriesFields
+          : [selectedSeriesFields];
 
-      series = fieldsArray.map(field => ({
-        name: field,
-        data: rawData.map(r => r[field] ?? null)
-      }));
+        series = fieldsArray.map(field => ({
+          type: selectedChartType.type,
+          name: field,
+          dataLabels: { enabled: dataLabel },
+          enableMouseTracking,
+          data: rawData.map(r => r[field] ?? null)
+        }));
 
-      xAxisConfig = {
-        categories,
-        accessibility: {
-          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
-        }
-      };
-      yAxisConfig = undefined; // default yAxis
-
+        xAxisConfig = {
+          categories,
+          accessibility: {
+            rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
+          }
+        };
+        yAxisConfig = undefined; // default yAxis
+      }
       // XY CHARTS: spline, scatter
     } else if ([2].includes(selectedChartCate.id)) {
       const field = Array.isArray(selectedSeriesFields)
@@ -290,8 +326,14 @@ export class LoadChart {
         .filter(([x, y]) => !isNaN(x) && !isNaN(y));
 
       series = [{
+        type: selectedChartType.type,
         name: field,
-        label: { enabled: false },
+        dataLabels: {
+          enabled: dataLabel,
+          format: `{point.y}` // format for data labels
+        },
+        enableMouseTracking,
+        label: { enabled: true },
         data: dataPoints
       }];
 
@@ -309,12 +351,35 @@ export class LoadChart {
         headerFormat: `<b>${xAxis} : ${Array.isArray(selectedSeriesFields) ? selectedSeriesFields.join(', ') : selectedSeriesFields}</b><br/>`,
         pointFormat: '{point.x} : {point.y}'
       }
+    } else if ([3].includes(selectedChartCate.id)) {
+      const data: (string | number)[][] = rawData.map(item => [
+        item[xAxis],
+        item[selectedSeriesFields as string],
+        item[thirdArgument as string]
+      ]);
+
+      series = [{
+        type: selectedChartType.type,
+        name: xAxis,
+        data,
+        colorByPoint: true,
+        borderRadius: 3,
+        enableMouseTracking,
+        dataLabels: {
+          enabled: dataLabel,
+          format: `{point.y:.0f}`
+        },
+        tooltip: {
+          pointFormat: `${selectedSeriesFields}: <b>{point.y}</b><br>` +
+            `${thirdArgument}: <b>{point.z}</b><br>`
+        }
+      }];
+      xAxisConfig = { type: 'category' };
     }
 
     // FINAL RETURN OBJECT
     return {
       chart: {
-        type: selectedChartType.type,
         inverted,
         backgroundColor: 'transparent',
         zooming: { type: zooming }
@@ -326,82 +391,14 @@ export class LoadChart {
       tooltip,
       legend: {
         enabled: showLegend,
-        layout: 'vertical',
-        align: 'right',
-        verticalAlign: 'middle'
-      },
-      plotOptions: {
-        [selectedChartType.type]: {
-          dataLabels: { enabled: dataLabel },
-          enableMouseTracking
-        }
+        // layout: 'vertical',
+        // align: 'right',
+        // verticalAlign: 'middle'
       },
       series
     };
   }
 
-  getVariwideChartOptions(
-    selectedChartCate: any,
-    selectedChartType: any,
-    rawData: any[],
-    title: string,
-    subTitle: string,
-    xAxis: string,
-    yAxis: string,
-    thirdArgument: string,
-    zooming: string,
-    showLegend: boolean = false,
-    dataLabel: boolean = false,
-    enableMouseTracking: boolean = true
-  ): any {
-    const data: (string | number)[][] = rawData.map(item => [
-      item[xAxis],
-      item[yAxis],
-      item[thirdArgument]
-    ]);
-    console.log('data', data);
-    return {
-      chart: {
-        type: selectedChartType.type,
-        backgroundColor: 'transparent',
-        zooming: {
-          type: zooming
-        }
-      },
-      title: {
-        text: title,
-        align: 'left'
-      },
-      xAxis: {
-        type: 'category'
-      },
-      subtitle: {
-        text: subTitle,
-        align: 'left'
-      },
-      caption: {
-        text: 'Column widths are proportional to ' + thirdArgument
-      },
-      legend: {
-        enabled: showLegend
-      },
-      series: [{
-        type: selectedChartType.type,
-        name: xAxis,
-        data,
-        colorByPoint: true,
-        borderRadius: 3,
-        dataLabels: {
-          enabled: dataLabel,
-          format: `{point.y:.0f}`
-        },
-        tooltip: {
-          pointFormat: `${yAxis}: <b>{point.y}</b><br>` +
-            `${thirdArgument}: <b>{point.z}</b><br>`
-        }
-      }]
-    };
-  }
 
   getVariwideChartOptions123(
     rawData: any[],
@@ -947,9 +944,6 @@ export class LoadChart {
     };
   }
 
-
-
-
   getPieChartOption(
     type: string = '',
     title: string = '',
@@ -969,19 +963,6 @@ export class LoadChart {
       chart: {
         type: type,
         backgroundColor: 'transparent',
-        events: {
-          // load() {
-          //   self.pieChartSliceAnimation(this);
-          // }
-        }
-        // zooming: {
-        //   type: 'xy'
-        // },
-        // panning: {
-        //   enabled: true,
-        //   type: 'xy'
-        // },
-        // panKey: 'shift'
       },
       title: {
         text: title,
@@ -999,44 +980,19 @@ export class LoadChart {
           valueSuffix: '%'
         }
       },
-      plotOptions: {
-        pie: {
-          allowPointSelect: true,
-          cursor: 'pointer',
-          dataLabels: {
-            enabled: true,
-            format: '<b>{point.name}</b>: {point.percentage:.1f}%'
-          },
-          startAngle: startAngle,
-          endAngle: endAngle,
-          showInLegend: showLengend
-          // We are using in ferature
-          //     allowPointSelect: true,
-          //     cursor: 'pointer',
-          //     dataLabels: [{
-          //         enabled: true,
-          //         distance: 20
-          //     }, {
-          //         enabled: true,
-          //         distance: -40,
-          //         format: '<b>{point.name}</b>: {point.y}',
-          //         style: {
-          //             fontSize: '1.2em',
-          //             textOutline: 'none',
-          //             opacity: 0.7
-          //         },
-          //         filter: {
-          //             operator: '>',
-          //             property: 'percentage',
-          //             value: 10
-          //         }
-          //     }]
-        }
-      },
       series: [{
         innerSize: innerSize === '' ? 0 : innerSize + '%',
         name: selectedValueField,
         colorByPoint: true,
+        allowPointSelect: true,
+        cursor: 'pointer',
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: {point.percentage:.1f}%'
+        },
+        startAngle: startAngle,
+        endAngle: endAngle,
+        showInLegend: showLengend,
         data: rawData.map(item => ({
           name: item[selectedArgumentField],
           y: Number(item[selectedValueField])
@@ -1221,101 +1177,7 @@ export class LoadChart {
     }
   }
 
-  getScatterChartOptions(
-    rawData: any[],
-    title: string = '',
-    subTitle: string = '',
-    selectedArgumentField: string,
-    selectedSeriesFields: string[],
-    markerSymbol: string = '',
-  ): any {
-    const categories = rawData.map(r => r[selectedArgumentField]);
 
-    const series = selectedSeriesFields.map(field => ({
-      name: field,
-      data: rawData.map(r => r[field] ?? null),
-    }));
-    console.log('makerSym', markerSymbol);
-    return {
-      chart: {
-        type: 'scatter',
-        backgroundColor: 'transparent',
-        zooming: {
-          type: 'xy'
-        }
-      },
-      title: {
-        text: title,
-        align: 'left'
-      },
-      subtitle: {
-        text: subTitle,
-        align: 'left'
-      },
-      // yAxis: {
-      //   title: {
-      //     text: selectedValueField
-      //   }
-      // },
-      xAxis: {
-        categories,
-        labels: {
-          format: '{value}'
-        },
-        accessibility: {
-          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
-        }
-      },
-      yAxis: {
-        labels: {
-          format: '{value}'
-        }
-      },
-      legend: {
-        enabled: false,
-        layout: 'vertical',
-        align: 'right',
-        verticalAlign: 'middle'
-      },
-      plotOptions: {
-        scatter: {
-          marker: {
-            radius: 2.5,
-            symbol: 'circle',
-            states: {
-              hover: {
-                enabled: true,
-                lineColor: 'rgb(100,100,100)'
-              }
-            }
-          },
-          states: {
-            hover: {
-              marker: {
-                enabled: false
-              }
-            }
-          },
-          jitter: {
-            x: 0.005
-          }
-        }
-      },
-      series,
-      responsive: [{
-        condition: {
-          maxWidth: 500
-        },
-        chartOptions: {
-          legend: {
-            layout: 'horizontal',
-            align: 'center',
-            verticalAlign: 'bottom'
-          }
-        }
-      }]
-    };
-  }
 
   getCategoriesFromRaw(rawData: any[], argumentField: string, xAxisType: string): any[] {
     if (xAxisType === 'datetime') {

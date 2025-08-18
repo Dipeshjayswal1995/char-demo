@@ -2,111 +2,214 @@
     {
         "name": "Singal Level Charts",
         "id": 1,
-        "isVisableMapOption": false,
-        "xAxis": true,
-        "yAxis": true,
-        "isVisialbeValueFeild": false,
-        "isVisiableSeriesField": false,
-        "dataLabel": true,
-        "enableMouseTracking": true,
-        "zooming": true,
-        "tooltip": true,
-        "showLegend": true,
         "chartOption": [
             {
                 "type": "line",
-                "name": "Line Chart"
+                "name": "Line Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             },
             {
                 "type": "spline",
-                "name": "Spline Chart"
+                "name": "Spline Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             },
             {
                 "type": "bar",
-                "name": "Bar Chart"
+                "name": "Bar Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             },
             {
                 "type": "column",
-                "name": "Column Chart"
+                "name": "Column Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             },
             {
                 "type": "area",
-                "name": "Area Chart"
-            },
-            {
-                "type": "spline",
-                "name": "Spline Chart"
+                "name": "Area Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             },
             {
                 "type": "pie",
-                "name": "Pie Chart"
+                "name": "Pie Chart or Donut Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             },
             {
                 "type": "bubble",
-                "name": "Bubble Chart"
+                "name": "Bubble Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
             }
         ]
     },
     {
         "name": "Two Level Charts",
         "id": 2,
-        "isVisableMapOption": false,
-        "xAxis": true,
-        "yAxis": true,
-        "isVisialbeValueFeild": false,
-        "isVisiableSeriesField": false,
-        "dataLabel": true,
-        "enableMouseTracking": true,
-        "zooming": true,
-        "tooltip": true,
-        "showLegend": false,
         "chartOption": [
             {
                 "type": "line",
-                "name": "Line Chart"
+                "name": "Line Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": false
             },
             {
                 "type": "spline",
-                "name": "Spline Chart"
+                "name": "Spline Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": false
             },
             {
                 "type": "columnrange",
-                "name": "Column Range Chart"
+                "name": "Column Range Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": false
             },
             {
                 "type": "arearange",
-                "name": "Area Range Chart"
+                "name": "Area Range Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": false
             },
             {
                 "type": "scatter",
-                "name": "Scatter Chart"
+                "name": "Scatter Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": false
             }
         ]
     },
     {
         "name": "Three Level Charts",
         "id": 3,
-        "isVisableMapOption": false,
-        "xAxis": true,
-        "yAxis": true,
-        "isVisiableSeriesField": false,
-        "dataLabel": true,
-        "enableMouseTracking": true,
-        "zooming": true,
-        "tooltip": false,
-        "showLegend": false,
         "chartOption": [
             {
                 "type": "variwide",
                 "name": "Variwide Chart",
                 "thirdArgument": true,
-                "fouthArgument": false
+                "fouthArgument": false,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": false,
+                "showLegend": false
             },
             {
                 "type": "bubble",
                 "name": "Bubble Chart",
                 "thirdArgument": true,
-                "fouthArgument": true
+                "fouthArgument": true,
+                "xAxis": true,
+                "yAxis": true,
+                "isVisiableSeriesField": false,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": false,
+                "showLegend": false
             }
         ]
     },
@@ -143,16 +246,78 @@
     {
         "name": "Multi-Series Charts",
         "id": 6,
-        "isVisableMapOption": false,
-        "isVisableMatchFeild": false,
-        "isVisialbeValueFeild": true,
-        "isVisiableArgumentField": true,
-        "isVisiableSeriesField": true,
-        "dataLabel": true,
-        "enableMouseTracking": true,
-        "markerSymbols": false,
-        "zooming": false,
-        "typeofareaChart": false,
-        "barColunmchartOption": false
+         "chartOption": [
+            {
+                "type": "line",
+                "name": "Line Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": false,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": true,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
+            },
+            {
+                "type": "spline",
+                "name": "Spline Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": false,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": true,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
+            },
+            {
+                "type": "bar",
+                "name": "Bar Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": false,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": true,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
+            },
+            {
+                "type": "column",
+                "name": "Column Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": false,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": true,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
+            },
+            {
+                "type": "area",
+                "name": "Area Chart",
+                "isVisableMapOption": false,
+                "xAxis": true,
+                "yAxis": false,
+                "isVisialbeValueFeild": false,
+                "isVisiableSeriesField": true,
+                "dataLabel": true,
+                "enableMouseTracking": true,
+                "zooming": true,
+                "tooltip": true,
+                "showLegend": true
+            }
+           
+        ]
     }
 ]

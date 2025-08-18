@@ -65,9 +65,7 @@ export class Mapchart7 {
 
   yAxes: { title: string; field: string, chartType: string, unit: string, opposite: boolean, color: string }[] = [];
 
-  topBottomOptions = [3, 5, 10];
-  selectedTopN: number | '' = '';
-  selectedBottomN: number | '' = '';
+
   selectedSeriesFields: string[] = [];    // Multiple dynamic series fields
 
   enableCustomAnimation = true;
@@ -94,12 +92,12 @@ export class Mapchart7 {
   enableMouseTracking: boolean = false;
   selectedThirdArgument: string = '';
   selectedForthArgument: string = '';
+  topBottomOptions = [3, 5, 10];
+  rankingType: string = 'all';
+  limit: number | null = null;
 
-  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation) {
 
-  }
-
-
+  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation) { }
 
   ngOnInit() {
     this.loadChartCategories();
@@ -116,8 +114,6 @@ export class Mapchart7 {
       }
     );
   }
-
-
 
   ngAfterViewInit(): void {
   }
@@ -185,41 +181,6 @@ export class Mapchart7 {
     };
 
     reader.readAsBinaryString(file);
-  }
-
-
-
-  changeChart() {
-    console.log('Selected chart type:', this.selectedChartType);
-
-  }
-
-  async fetchAndConvertCSVtoJSON123(csvUrl: string): Promise<any[]> {
-    const response = await fetch(csvUrl);
-    let csvText = await response.text();
-
-    // Clean up the CSV
-    csvText = csvText.replace(/\n\n/g, '\n');
-
-    const [headerLine, ...lines] = csvText.trim().split('\n');
-    const headers = headerLine.split(',');
-
-    const json = lines.map(line => {
-      const values = line.split(',');
-
-      // Declare entry as an object with string keys and any values
-      const entry: { [key: string]: any } = {};
-
-      headers.forEach((header, i) => {
-        const value = values[i];
-        // Parse numeric values, keep strings as-is
-        entry[header] = isNaN(Number(value)) ? value : Number(value);
-      });
-
-      return entry;
-    });
-
-    return json;
   }
 
   async fetchAndConvertCSVtoJSON(csvUrl: string): Promise<any[]> {
@@ -301,37 +262,6 @@ export class Mapchart7 {
     this.allFields = Object.keys(data[0]);
   }
 
-
-
-
-  toggleCustomAnimation(ev: any) {
-    this.enableCustomAnimation = ev.target.checked;
-    (window as any).enableCustomAnimation = ev.target.checked;
-
-    this.renderChart(); // re-render chart with/without animation
-  }
-
-  private applyTopBottomFilter(data: any[]): any[] {
-    if (!this.selectedValueField) return data;
-
-    const sortedData = [...data].sort((a, b) => {
-      const aVal = Number(a[this.selectedValueField]) || 0;
-      const bVal = Number(b[this.selectedValueField]) || 0;
-      return bVal - aVal;
-    });
-
-    if (this.selectedTopN) {
-      return sortedData.slice(0, Number(this.selectedTopN));
-    }
-
-    if (this.selectedBottomN) {
-      return sortedData.reverse().slice(0, Number(this.selectedBottomN));
-    }
-
-    return data;
-  }
-
-
   renderChart(): void {
     console.log('selectedChartType', this.selectedChartType);
     // if (!this.selectedChartType || !this.selectedValueField || !this.selectedArgumentField) return;
@@ -339,8 +269,9 @@ export class Mapchart7 {
     if (this.currentChart) {
       this.currentChart.destroy();
     }
-
-    console.log('Rendering chart of type:', this.selectedChartCate?.id);
+    // console.log(this.rankingType)
+    // this.rawData = this.applyTopBottomFilter(this.rawData);
+    // console.log('Rendering chart of type:', this.selectedChartCate?.id);
     switch (this.selectedChartCate?.id) {
       case 1:
       case 2:
@@ -349,46 +280,34 @@ export class Mapchart7 {
       case 3:
         this.renderthreeAndFourLevelChart();
         break;
+      case 6:
+        this.rendertSeriesChart();
+        break;
+      default:
+        this.renderSingleAndTwoLevelChart();
     }
-    // switch (chartType) {
-    //   case 'map':
-    //     this.renderMapChart();
-    //     break;
-    //   case 'area-chart':
-    //     this.areayChartRender();
-    //     break;
-    //   case 'column':
-    //     this.renderTimeSeriesLineChart(chartType);
-    //     break;
-    //   case 'pie':
-    //     this.renderPieOrDonutChart(chartType);
-    //     break;
-    //   case 'bubble':
-    //     this.renderBubleChart(chartType);
-    //     break;
-    //   case 'scatter':
-    //     this.renderScatterChart(chartType);
-    //     break;
-    //   // case 'line-time':
-    //   // case 'spline-with-inverted-axes':
-    //   //   this.renderTimeSeriesLineChart(chartType); // new method
-    //   //   break;
-    //   case 'line':
-    //     this.renderTimeSeriesLineChart(chartType); // new method
-    //     break;
-    //   case 'spline':
-    //     this.renderTimeSeriesLineChart(chartType); // new method
-    //     break;
-    //   case 'area':
-    //     this.renderTimeSeriesLineChart(chartType); // new method
-    //     break;
-    //   case 'multiDiminssional':
-    //     this.multiDiminonalChart(); // new method
-    //     break;
-    //   default:
-    //     this.renderStandardChart(chartType);
-    // }
   }
+
+  applyTopBottomFilter(rawData: any[]): any[] {
+    let filteredData = [...rawData];
+
+    if (this.rankingType !== 'all' && (this.limit && this.limit > 0)) {
+      const field = Array.isArray(this.selectedSeriesFields)
+        ? this.selectedSeriesFields[0]
+        : this.selectedSeriesFields;
+
+      filteredData = [...rawData]
+        .sort((a, b) => {
+          const aVal = Number(a[field]) || 0;
+          const bVal = Number(b[field]) || 0;
+          return this.rankingType === 'top' ? bVal - aVal : aVal - bVal;
+        })
+        .slice(0, this.limit);
+    }
+
+    return filteredData;
+  }
+
 
   renderSingleAndTwoLevelChart(): void {
     if (!this.selectedXAxis && this.selectedYAxis) {
@@ -408,6 +327,10 @@ export class Mapchart7 {
       this.showLengend,
       this.dataLabel,
       this.enableMouseTracking,
+      this.selectedThirdArgument,
+      this.pieInnerSize,
+      this.pieStartAngal,
+      this.pieENDAngal,
     );
     console.log(chartOptions);
     console.log('this.chat', this.currentChart);
@@ -420,7 +343,7 @@ export class Mapchart7 {
       return;
     }
     let chartOptions: any = null;
-    chartOptions = this.chartBuilderService.getVariwideChartOptions(
+    chartOptions = this.chartBuilderService.getChartOptions(
       this.selectedChartCate,
       this.selectedChartType,
       this.rawData,
@@ -428,11 +351,37 @@ export class Mapchart7 {
       this.subTitle,
       this.selectedXAxis,
       this.selectedYAxis,
-      this.selectedThirdArgument,
       this.zooming,
       this.showLengend,
       this.dataLabel,
       this.enableMouseTracking,
+      this.selectedThirdArgument,
+    );
+    console.log(chartOptions);
+    console.log('this.chat', this.currentChart);
+    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+  }
+
+  rendertSeriesChart() {
+    console.log('render series charts');
+    if (!this.selectedXAxis && this.selectedYAxis) {
+      console.warn('Select at least one series field and argument field');
+      return;
+    }
+    let chartOptions: any = null;
+    chartOptions = this.chartBuilderService.getChartOptions(
+      this.selectedChartCate,
+      this.selectedChartType,
+      this.rawData,
+      this.title,
+      this.subTitle,
+      this.selectedXAxis,
+      this.selectedSeriesFields,
+      this.zooming,
+      this.showLengend,
+      this.dataLabel,
+      this.enableMouseTracking,
+      this.selectedThirdArgument,
     );
     console.log(chartOptions);
     console.log('this.chat', this.currentChart);
@@ -456,76 +405,6 @@ export class Mapchart7 {
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
-  renderBubleChart(chartType: string) {
-    if (!this.selectedArgumentField) {
-      console.warn('Select at least one series field and argument field');
-      return;
-    }
-    let chartOptions: any;
-    chartOptions = this.chartBuilderService.bubbleChartSetup(
-      chartType,
-      this.title,
-      this.subTitle,
-      this.rawData,
-      this.selectedValueField,
-      this.selectedArgumentField,
-      this.selectedThirdArgument,
-      this.selectedForthArgument
-    );
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
-
-  coloumChartrender() {
-    if (!this.selectedArgumentField) {
-      console.warn('Select at least one series field and argument field');
-      return;
-    }
-    let chartOptions: any;
-    if (this.barColunmchartOption === 'columnrange') {
-      chartOptions = this.chartBuilderService.getColumnRangeChartOptions(
-        this.rawData,
-        this.selectedValueField,
-        this.selectedArgumentField,
-        this.selectedValueField,
-        this.dataLabel,
-        '',
-        '',
-        '',
-        true,
-        this.zooming,
-        this.barColunmchartOption
-      );
-      console.log(chartOptions)
-    } else if (this.barColunmchartOption === 'variwide') {
-      // chartOptions = this.chartBuilderService.getVariwideChartOptions(
-      //   this.rawData,
-      //   this.selectedArgumentField,
-      //   this.selectedValueField,
-      //   this.selectedThirdArgument,
-      //   '',
-      //   '',
-      //   ''
-      // );
-    } else {
-      chartOptions = this.chartBuilderService.getBarChartOptions(
-        this.barColunmchartOption,
-        this.rawData,
-        this.selectedValueField,
-        this.selectedArgumentField,
-        this.selectedSeriesFields,
-        this.dataLabel,
-        '',
-        'Column chart',
-        'Column chart',
-        true,
-        this.selectSymbol,
-        this.zooming,
-        this.typeofareaChart
-      );
-    }
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
-
   onSeriesFieldToggle(field: string, e: any): void {
     if (e.target?.checked) {
       this.selectedSeriesFields.push(field);
@@ -535,260 +414,7 @@ export class Mapchart7 {
     this.renderChart();
   }
 
-
-  renderScatterChart(chartType: string): void {
-    if (!this.selectedArgumentField) {
-      console.warn('Select at least one series field and argument field');
-      return;
-    }
-    let chartOptions: any = null;
-    console.log('Load the line-time charts');
-    chartOptions = this.chartBuilderService.getScatterChartOptions(
-      this.rawData,
-      this.title,
-      this.subTitle,
-      this.selectedValueField,
-      this.selectedSeriesFields,
-    );
-    console.log(chartOptions);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
-
-
-  areayChartRender() {
-    let chartOptions: any;
-    if (this.typeofareaChart === 'arearange') {
-      chartOptions = this.chartBuilderService.getAreaRangeChartOptions(
-        this.rawData,
-        this.selectedValueField,   // xField
-        this.selectedArgumentField,
-        this.selectedThirdArgument,     // yField
-        '',
-        '',    // yTitle
-        '',  // chartTitle
-        true,
-        this.xAxisData
-      );
-    } else {
-      chartOptions = this.chartBuilderService.getAreaChartOptions(
-        this.rawData,
-        this.title,
-        this.subTitle,
-        this.selectedValueField,
-        this.selectedSeriesFields,
-        this.dataLabel,
-        this.enableMouseTracking,
-        this.selectSymbol,
-        this.zooming,
-        this.typeofareaChart
-      );
-    }
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-
-  }
-
-
-  // For pie or donut
-  renderPieOrDonutChart(type: string): void {
-    const chartOptions = this.chartBuilderService.getPieChartOption(
-      type,
-      this.title,
-      this.subTitle,
-      this.rawData,
-      this.selectedValueField,
-      this.selectedArgumentField,
-      this.pieInnerSize,
-      this.showLengend,
-      this.pieStartAngal,
-      this.pieENDAngal
-    );
-    console.log(chartOptions);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
-
-  // For bar/column/line
-  renderStandardChart(type: string): void {
-    const filteredData = this.applyTopBottomFilter(this.rawData);
-    const grouped = this.groupData(filteredData);
-    const categories = Object.keys(grouped);
-    const seriesNames = new Set<string>();
-
-    Object.values(grouped).forEach((entry: any) => {
-      Object.keys(entry).forEach(key => seriesNames.add(key));
-    });
-
-    const seriesData = Array.from(seriesNames).map(seriesName => ({
-      name: seriesName,
-      data: categories.map(cat => grouped[cat][seriesName] || 0)
-    }));
-
-    const chartOptions = this.getBaseChartOptions(
-      `Chart of ${this.selectedValueField} by ${this.selectedArgumentField}`, type
-    );
-
-    chartOptions.xAxis = { categories };
-    chartOptions.yAxis = {
-      title: { text: this.selectedValueField }
-    };
-    chartOptions.series = seriesData;
-
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  }
-
-  // For map charts
-  renderMapChart(): void {
-    const mapUrl: any = this.selectedMapOption?.json_file;
-    if (!mapUrl) return;
-
-    fetch(mapUrl)
-      .then(res => res.json())
-      .then(topology => {
-        const filtered = this.applyTopBottomFilter(this.rawData);
-
-        const mapData = filtered.map(row => ({
-          code: (row[this.selectedMatchValue] || '').toUpperCase(),
-          value: row[this.selectedValueField]
-        }));
-
-        if (!mapData.length) {
-          console.error('Map data is empty.');
-          return;
-        }
-
-        this.currentChart = Highcharts.mapChart('chart-container', {
-          chart: {
-            map: topology,
-            backgroundColor: 'transparent'
-          },
-          title: {
-            text: `Map of ${this.selectedValueField} by ${this.selectedArgumentField}`
-          },
-          mapNavigation: {
-            enabled: true
-          },
-          colorAxis: {
-            min: 1,
-            type: 'logarithmic',
-            minColor: '#EEEEFF',
-            maxColor: '#000022',
-            stops: [
-              [0, '#EFEFFF'],
-              [0.67, '#4444FF'],
-              [1, '#000022']
-            ]
-          },
-          series: [{
-            data: mapData,
-            joinBy: [this.selectedMapOption?.uniqueValueMatch, 'code'],
-            name: this.selectedValueField,
-            dataLabels: {
-              enabled: true,
-              formatter: function (this: any) {
-                return `${this.point.value ? this.point.value : ''}`;
-              }
-            },
-            tooltip: {
-              pointFormat: '{point.code}: {point.value}'
-            }
-          }]
-        });
-      })
-      .catch(err => {
-        console.error('Map load error:', err);
-      });
-  }
-
-  // Shared config base
-  getBaseChartOptions(title: string, type: string): any {
-    return {
-      chart: {
-        type,
-        backgroundColor: 'transparent'
-      },
-      title: {
-        text: title
-      },
-      plotOptions: {},
-      series: []
-    };
-  }
-
-  // addCustomAnimationPlugin() {
-  //   (function (H) {
-  //     const animateSVGPath = (
-  //       svgElem: any,
-  //       animation: any,
-  //       callback?: () => void // ✅ Make the callback explicitly optional
-  //     ) => {
-  //       const length = svgElem.element.getTotalLength();
-  //       svgElem.attr({
-  //         'stroke-dasharray': length,
-  //         'stroke-dashoffset': length,
-  //         opacity: 1
-  //       });
-  //       svgElem.animate(
-  //         {
-  //           'stroke-dashoffset': 0
-  //         },
-  //         animation,
-  //         callback // ✅ Now valid
-  //       );
-  //     };
-
-  //     // Animate lines (like series.graph) using stroke-dash
-  //     H.seriesTypes.line.prototype.animate = function (init: any) {
-  //       const series = this,
-  //         animation = H.animObject(series.options.animation);
-
-  //       if (!init && (window as any).enableCustomAnimation !== false) {
-  //         animateSVGPath(series.graph, animation);
-  //       }
-  //     };
-
-  //     // Axis and plot line animation
-  //     H.addEvent(H.Axis, 'afterRender', function (this: any) {
-  //       const axis = this,
-  //         chart = axis.chart,
-  //         animation = H.animObject(chart.renderer.globalAnimation);
-
-  //       if ((window as any).enableCustomAnimation === false) return;
-
-  //       // Animate axis group
-  //       axis.axisGroup
-  //         .attr({ opacity: 0, rotation: -3, scaleY: 0.9 })
-  //         .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
-
-  //       // Animate label group
-  //       if (axis.horiz) {
-  //         axis.labelGroup
-  //           .attr({ opacity: 0, rotation: 3, scaleY: 0.5 })
-  //           .animate({ opacity: 1, rotation: 0, scaleY: 1 }, animation);
-  //       } else {
-  //         axis.labelGroup
-  //           .attr({ opacity: 0, rotation: 3, scaleX: -0.5 })
-  //           .animate({ opacity: 1, rotation: 0, scaleX: 1 }, animation);
-  //       }
-
-  //       // Animate plot lines/bands with SVG path effect
-  //       if (axis.plotLinesAndBands) {
-  //         axis.plotLinesAndBands.forEach((plotLine: any) => {
-  //           const anim = H.animObject(plotLine.options.animation);
-
-  //           plotLine.label?.attr({ opacity: 0 });
-
-  //           animateSVGPath(plotLine.svgElem, anim, () => {
-  //             plotLine.label?.animate({ opacity: 1 });
-  //           });
-  //         });
-  //       }
-  //     });
-  //   })(Highcharts);
-  // }
-
-
   loadChart() {
-    // (window as any).enableCustomAnimation = this.enableCustomAnimation;
-    // // this.addCustomAnimationPlugin();
     this.renderChart();
   }
 
@@ -815,16 +441,22 @@ export class Mapchart7 {
   }
 
   changeCategory() {
-    // this.selectedChartType = null;
-    // this.allFields = [];
-    console.log('Selected chart category:', this.selectedChartCate);
     this.selectedChartType = null;
+    this.changeChart();
+  }
+
+  changeChart() {
     this.selectedXAxis = '';
     this.selectedYAxis = '';
     this.showLengend = false;
     this.dataLabel = false;
     this.enableMouseTracking = false;
     this.zooming = '';
+    this.selectedThirdArgument = '';
+    this.selectedForthArgument = '';
+    this.pieENDAngal = 0;
+    this.pieStartAngal = 0;
+    this.pieInnerSize = '';
   }
 
   resetOptions() {
