@@ -246,15 +246,17 @@ export class LoadChart {
     title: string,
     subTitle: string,
     xAxis: string,
-    selectedSeriesFields: string[] | string,
+    yAxis: string,
     zooming: string,
     showLegend: boolean = false,
     dataLabel: boolean = false,
     enableMouseTracking: boolean = true,
-    thirdArgument?: string, 
-    innerSize: string = '',  
-    startAngle: number = 0,  
-    endAngle: number = 0  
+    thirdArgument?: string,
+    innerSize: string = '',
+    startAngle: number = 0,
+    endAngle: number = 0,
+    stacking?: string,
+    selectedSeriesFields?: { field: string; color: string }[]
   ): any {
     let categories: any[] = [];
     let series: any[] = [];
@@ -265,14 +267,12 @@ export class LoadChart {
     console.log(selectedChartCate);
     console.log(selectedChartType);
     // CATEGORY CHARTS: line, column, bar
-    if ([1,6].includes(selectedChartCate.id)) {
+    if ([1].includes(selectedChartCate.id)) {
       if (selectedChartType.type === 'pie') {
         series = [{
           type: selectedChartType.type,
           innerSize: innerSize === '' ? 0 : innerSize + '%',
-          name: Array.isArray(selectedSeriesFields)
-            ? selectedSeriesFields[0]
-            : selectedSeriesFields,
+          name: yAxis,
           colorByPoint: true,
           allowPointSelect: true,
           cursor: 'pointer',
@@ -286,26 +286,27 @@ export class LoadChart {
           showInLegend: showLegend,
           data: rawData.map(item => ({
             name: item[xAxis],
-            y: Number(item[selectedSeriesFields as string])
+            y: Number(item[yAxis])
           }))
         }];
         tooltip = {
           pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})'
         };
       } else {
-        console.log(selectedSeriesFields)
+        console.log(yAxis)
         categories = rawData.map(r => r[xAxis]);
-        const fieldsArray = Array.isArray(selectedSeriesFields)
-          ? selectedSeriesFields
-          : [selectedSeriesFields];
+        // const fieldsArray = Array.isArray(yAxis)
+        //   ? yAxis
+        //   : [yAxis];
 
-        series = fieldsArray.map(field => ({
+        series = [{
           type: selectedChartType.type,
-          name: field,
+          stacking: stacking || undefined,
+          name: yAxis,
           dataLabels: { enabled: dataLabel },
           enableMouseTracking,
-          data: rawData.map(r => r[field] ?? null)
-        }));
+          data: rawData.map(r => r[yAxis] ?? null)
+        }];
 
         xAxisConfig = {
           categories,
@@ -315,11 +316,36 @@ export class LoadChart {
         };
         yAxisConfig = undefined; // default yAxis
       }
+
       // XY CHARTS: spline, scatter
+    } else if ([6].includes(selectedChartCate.id)) {
+      console.log(selectedSeriesFields)
+      categories = rawData.map(r => r[xAxis]);
+      if (!selectedSeriesFields) {
+        return { series: [] }; // or return early
+      }
+
+      series = selectedSeriesFields.map(field => ({
+        type: selectedChartType.type,
+        stacking: stacking || undefined,
+        name: field?.field,
+        dataLabels: { enabled: dataLabel },
+        enableMouseTracking,
+        color: field?.color,
+        data: rawData.map(r => r[field.field] ?? null),
+      }));
+
+      xAxisConfig = {
+        categories,
+        accessibility: {
+          rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
+        }
+      };
+      yAxisConfig = undefined; // default yAxis
     } else if ([2].includes(selectedChartCate.id)) {
-      const field = Array.isArray(selectedSeriesFields)
-        ? selectedSeriesFields[0]
-        : selectedSeriesFields;
+      const field = Array.isArray(yAxis)
+        ? yAxis[0]
+        : yAxis;
 
       const dataPoints: [number, number][] = rawData
         .map(d => [Number(d[xAxis]), Number(d[field])] as [number, number])
@@ -330,7 +356,7 @@ export class LoadChart {
         name: field,
         dataLabels: {
           enabled: dataLabel,
-          format: `{point.y}` // format for data labels
+          format: `{point.y}`
         },
         enableMouseTracking,
         label: { enabled: true },
@@ -348,13 +374,13 @@ export class LoadChart {
       };
 
       tooltip = {
-        headerFormat: `<b>${xAxis} : ${Array.isArray(selectedSeriesFields) ? selectedSeriesFields.join(', ') : selectedSeriesFields}</b><br/>`,
+        headerFormat: `<b>${xAxis} : ${Array.isArray(yAxis) ? yAxis.join(', ') : yAxis}</b><br/>`,
         pointFormat: '{point.x} : {point.y}'
       }
     } else if ([3].includes(selectedChartCate.id)) {
       const data: (string | number)[][] = rawData.map(item => [
         item[xAxis],
-        item[selectedSeriesFields as string],
+        item[yAxis],
         item[thirdArgument as string]
       ]);
 
@@ -370,7 +396,7 @@ export class LoadChart {
           format: `{point.y:.0f}`
         },
         tooltip: {
-          pointFormat: `${selectedSeriesFields}: <b>{point.y}</b><br>` +
+          pointFormat: `${yAxis}: <b>{point.y}</b><br>` +
             `${thirdArgument}: <b>{point.z}</b><br>`
         }
       }];
@@ -391,12 +417,83 @@ export class LoadChart {
       tooltip,
       legend: {
         enabled: showLegend,
-        // layout: 'vertical',
-        // align: 'right',
-        // verticalAlign: 'middle'
       },
       series
     };
+  }
+
+  multiDiminonalChart(
+    chatTitle: string,
+    subTitle: string,
+    rawData: any[],
+    selectedArgumentField: string,
+    yAxis: any[]
+  ) {
+    const categories = rawData.map(item => item[selectedArgumentField]);
+    const series = yAxis.map((field, index) => ({
+      name: field.title,
+      type: field.chartType,
+      dataLabels: { enabled: true },
+      yAxis: index,
+      tooltip: {
+        valueSuffix: ' ' + field.unit,
+      },
+      color: field.color,
+      data: rawData.map(r => r[field.field] ?? null),
+    }));
+    const yAxisData = yAxis.map((series, index) => ({
+      title: {
+        text: series.title,
+        style: {
+          color: series.color
+        }
+      },
+      labels: {
+        format: '{value}' + series.unit,
+        style: {
+          color: series.color
+        }
+      },
+      opposite: series.opposite
+    }));
+    console.log("yAxisData ===> ", yAxisData);
+
+
+    console.log(categories);
+    console.log(series);
+    return {
+      chart: {
+        zooming: {
+          type: 'xy'
+        }
+      },
+      title: {
+        text: chatTitle
+      },
+      subtitle: {
+        text: subTitle
+      },
+      xAxis: [{
+        categories: categories,
+        crosshair: true
+      }],
+      yAxis: yAxisData,
+      tooltip: {
+        shared: true
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'left',
+        x: 80,
+        verticalAlign: 'top',
+        y: 55,
+        floating: true,
+        backgroundColor:
+          Highcharts.defaultOptions.legend.backgroundColor ||
+          'rgba(201, 123, 123, 0.25)'
+      },
+      series: series
+    }
   }
 
 
@@ -1104,78 +1201,7 @@ export class LoadChart {
     };
   }
 
-  multiDiminonalChart(
-    chatTitle: string,
-    subTitle: string,
-    rawData: any[],
-    selectedArgumentField: string,
-    yAxis: any[]
-  ) {
-    const categories = rawData.map(item => item[selectedArgumentField]);
-    const series = yAxis.map((field, index) => ({
-      name: field.title,
-      type: field.chartType,
 
-      yAxis: index,
-      tooltip: {
-        valueSuffix: ' ' + field.unit,
-      },
-      color: field.color,
-      data: rawData.map(r => r[field.field] ?? null),
-    }));
-    const yAxisData = yAxis.map((series, index) => ({
-      title: {
-        text: series.title,
-        style: {
-          color: series.color
-        }
-      },
-      labels: {
-        format: '{value}' + series.unit, // You can add unit if needed based on name
-        style: {
-          color: series.color
-        }
-      },
-      opposite: series.opposite
-    }));
-    console.log("yAxisData ===> ", yAxisData)
-
-    console.log(categories);
-    console.log(series);
-    return {
-      chart: {
-        zooming: {
-          type: 'xy'
-        }
-      },
-      title: {
-        text: chatTitle
-      },
-      subtitle: {
-        text: subTitle
-      },
-      xAxis: [{
-        categories: categories,
-        crosshair: true
-      }],
-      yAxis: yAxisData,
-      tooltip: {
-        shared: true
-      },
-      legend: {
-        layout: 'vertical',
-        align: 'left',
-        x: 80,
-        verticalAlign: 'top',
-        y: 55,
-        floating: true,
-        backgroundColor:
-          Highcharts.defaultOptions.legend.backgroundColor ||
-          'rgba(201, 123, 123, 0.25)'
-      },
-      series: series
-    }
-  }
 
 
 

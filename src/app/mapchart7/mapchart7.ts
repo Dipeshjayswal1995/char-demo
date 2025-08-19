@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { LoadChart } from '../services/load-chart';
 import * as XLSX from 'xlsx';
 import { Aggregation } from '../services/aggregation';
+import { NotificationMassageService } from '../../@core/services/notification-massage-service';
 
 
 declare const Highcharts: any;
@@ -20,15 +21,8 @@ export class Mapchart7 {
   apiUrl: string = 'assets/test1.json';
   isLoading = false;
   rawData: any[] = [];
-
   allFields: string[] = [];
-  valueFields: string[] = [];
-  argumentFields: string[] = [];
-  seriesFields: string[] = [];
 
-  selectedValueField = '';
-  selectedArgumentField = '';
-  selectedSeriesField = '';
   selectedMatchValue = '';
   selectedMapOption: {
     name: string;
@@ -39,40 +33,16 @@ export class Mapchart7 {
   title: string = '';
   subTitle: string = '';
 
-  chartOption = [
-    { name: 'line', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'spline-with-inverted-axes', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: true, zooming: true, barColunmchartOption: false },
-    { name: 'area-chart', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: false },
-    { name: 'column', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: true, zooming: true, typeofareaChart: true, barColunmchartOption: true },
-    { name: 'pie', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'bubble', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: false, dataLabel: true, enableMouseTracking: false, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'scatter', isVisableMapOption: false, isVisableMatchFeild: false, isVisialbeValueFeild: true, isVisiableArgumentField: true, isVisiableSeriesField: true, dataLabel: true, enableMouseTracking: true, markerSymbols: false, zooming: true, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'map', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
-    { name: 'multiDiminssional', isVisableMapOption: true, isVisableMatchFeild: true, isVisialbeValueFeild: true, isVisiableArgumentField: false, isVisiableSeriesField: false, dataLabel: false, enableMouseTracking: false, markerSymbols: false, zooming: false, typeofareaChart: false, barColunmchartOption: false },
-  ]
-
 
   mapOption = [
     { name: 'USA-ALL', json_file: 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', uniqueValueMatch: 'postal-code' },
     { name: 'ASIA', json_file: 'https://code.highcharts.com/mapdata/custom/asia.geo.json', uniqueValueMatch: 'iso-a2' },
     { name: 'EUROPE', json_file: 'https://code.highcharts.com/mapdata/custom/europe.topo.json', uniqueValueMatch: 'iso-a2' },
   ]
-  markerSymbols = ['circle', 'square', 'diamond', 'triangle', 'triangle-down', 'url(https://www.highcharts.com/samples/graphics/sun.png)'];
-  selectSymbol: string = '';
-
-
-  xAxisData: string = '';
 
   yAxes: { title: string; field: string, chartType: string, unit: string, opposite: boolean, color: string }[] = [];
-
-
-  selectedSeriesFields: string[] = [];    // Multiple dynamic series fields
-
+  selectedSeriesFields: { field: string, color: string }[] = [];
   enableCustomAnimation = true;
-  zooming: string = '';
-
-  typeofareaChart: string = '';
-  barColunmchartOption: string = '';
 
   pieInnerSize: string = '';
   pieStartAngal: number = 0;
@@ -95,9 +65,9 @@ export class Mapchart7 {
   topBottomOptions = [3, 5, 10];
   rankingType: string = 'all';
   limit: number | null = null;
-
-
-  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation) { }
+  zooming: string = '';
+  stacking: string = '';
+  constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private readonly notifyService: NotificationMassageService) { }
 
   ngOnInit() {
     this.loadChartCategories();
@@ -133,8 +103,17 @@ export class Mapchart7 {
     console.log(this.yAxes);
   }
 
+  addSeries(): void {
+    this.selectedSeriesFields.push({ field: '', color: '' });
+    console.log(this.yAxes);
+  }
+
   removeYAxis(index: number): void {
     this.yAxes.splice(index, 1);
+  }
+
+  removeSeries(index: number): void {
+    this.selectedSeriesFields.splice(index, 1);
   }
 
   onFileChange(event: any): void {
@@ -151,21 +130,11 @@ export class Mapchart7 {
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-
-      // Assuming data is in the first worksheet
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-
-      // Read sheet as raw 2D array (header + rows)
       const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-
-      // Remove completely empty rows
       const filteredRows = data.filter(row => row.some(cell => cell !== ''));
-
-      // Separate headers from rows
       const [headerRow, ...rows] = filteredRows;
-
-      // Build clean JSON
       const cleanJson = rows.map(row => {
         const obj: any = {};
         headerRow.forEach((header, i) => {
@@ -173,13 +142,8 @@ export class Mapchart7 {
         });
         return obj;
       });
-
-      // console.log('✅ Clean Excel JSON:', cleanJson);
       this.uploadedExcelData = cleanJson;
-      // this.handleLoadedData(cleanJson);
-      // Now you can use `cleanJson` to display, upload, etc.
     };
-
     reader.readAsBinaryString(file);
   }
 
@@ -260,6 +224,7 @@ export class Mapchart7 {
       return;
     }
     this.allFields = Object.keys(data[0]);
+    this.notifyService.success('Copied....!');
   }
 
   renderChart(): void {
@@ -269,9 +234,7 @@ export class Mapchart7 {
     if (this.currentChart) {
       this.currentChart.destroy();
     }
-    // console.log(this.rankingType)
-    // this.rawData = this.applyTopBottomFilter(this.rawData);
-    // console.log('Rendering chart of type:', this.selectedChartCate?.id);
+
     switch (this.selectedChartCate?.id) {
       case 1:
       case 2:
@@ -280,32 +243,15 @@ export class Mapchart7 {
       case 3:
         this.renderthreeAndFourLevelChart();
         break;
+      case 4:
+        this.multiDiminonalChart();
+        break;
       case 6:
         this.rendertSeriesChart();
         break;
       default:
         this.renderSingleAndTwoLevelChart();
     }
-  }
-
-  applyTopBottomFilter(rawData: any[]): any[] {
-    let filteredData = [...rawData];
-
-    if (this.rankingType !== 'all' && (this.limit && this.limit > 0)) {
-      const field = Array.isArray(this.selectedSeriesFields)
-        ? this.selectedSeriesFields[0]
-        : this.selectedSeriesFields;
-
-      filteredData = [...rawData]
-        .sort((a, b) => {
-          const aVal = Number(a[field]) || 0;
-          const bVal = Number(b[field]) || 0;
-          return this.rankingType === 'top' ? bVal - aVal : aVal - bVal;
-        })
-        .slice(0, this.limit);
-    }
-
-    return filteredData;
   }
 
 
@@ -331,6 +277,7 @@ export class Mapchart7 {
       this.pieInnerSize,
       this.pieStartAngal,
       this.pieENDAngal,
+      this.stacking,
     );
     console.log(chartOptions);
     console.log('this.chat', this.currentChart);
@@ -356,6 +303,10 @@ export class Mapchart7 {
       this.dataLabel,
       this.enableMouseTracking,
       this.selectedThirdArgument,
+      this.pieInnerSize,
+      this.pieStartAngal,
+      this.pieENDAngal,
+      this.stacking,
     );
     console.log(chartOptions);
     console.log('this.chat', this.currentChart);
@@ -376,12 +327,17 @@ export class Mapchart7 {
       this.title,
       this.subTitle,
       this.selectedXAxis,
-      this.selectedSeriesFields,
+      this.selectedYAxis,
       this.zooming,
       this.showLengend,
       this.dataLabel,
       this.enableMouseTracking,
       this.selectedThirdArgument,
+      this.pieInnerSize,
+      this.pieStartAngal,
+      this.pieENDAngal,
+      this.stacking,
+      this.selectedSeriesFields
     );
     console.log(chartOptions);
     console.log('this.chat', this.currentChart);
@@ -390,7 +346,7 @@ export class Mapchart7 {
 
 
   multiDiminonalChart() {
-    if (!this.selectedValueField) {
+    if (!this.selectedXAxis) {
       console.warn('Select at least one series field and argument field');
       return;
     }
@@ -399,38 +355,23 @@ export class Mapchart7 {
       this.title,
       this.subTitle,
       this.rawData,
-      this.selectedValueField,
+      this.selectedXAxis,
       this.yAxes
     );
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
-  onSeriesFieldToggle(field: string, e: any): void {
-    if (e.target?.checked) {
-      this.selectedSeriesFields.push(field);
-    } else {
-      this.selectedSeriesFields = this.selectedSeriesFields.filter(f => f !== field);
-    }
-    this.renderChart();
-  }
+  // onSeriesFieldToggle(field: string, e: any): void {
+  //   if (e.target?.checked) {
+  //     this.selectedSeriesFields.push(field);
+  //   } else {
+  //     this.selectedSeriesFields = this.selectedSeriesFields.filter(f => f !== field);
+  //   }
+  //   this.renderChart();
+  // }
 
   loadChart() {
     this.renderChart();
-  }
-
-  private groupData(filteredData: any[] = this.rawData): any {
-    const grouped: any = {};
-    filteredData.forEach(item => {
-      const category = item[this.selectedArgumentField];
-      const series = this.selectedSeriesField ? item[this.selectedSeriesField] : 'Default';
-
-      if (!grouped[category]) grouped[category] = {};
-      if (!grouped[category][series]) grouped[category][series] = 0;
-
-      const value = item[this.selectedValueField];
-      grouped[category][series] += typeof value === 'number' ? value : 1;
-    });
-    return grouped;
   }
 
   resetAllValue() {
@@ -441,6 +382,7 @@ export class Mapchart7 {
   }
 
   changeCategory() {
+    console.log(this.selectedChartCate);
     this.selectedChartType = null;
     this.changeChart();
   }
@@ -457,6 +399,8 @@ export class Mapchart7 {
     this.pieENDAngal = 0;
     this.pieStartAngal = 0;
     this.pieInnerSize = '';
+    this.stacking = '';
+    this.selectedSeriesFields = []
   }
 
   resetOptions() {

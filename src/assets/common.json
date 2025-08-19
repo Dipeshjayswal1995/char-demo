@@ -9,6 +9,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": true,
+                "stacking": false,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": false,
                 "dataLabel": true,
@@ -23,6 +24,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": true,
+                "stacking": false,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": false,
                 "dataLabel": true,
@@ -37,6 +39,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": true,
+                "stacking": false,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": false,
                 "dataLabel": true,
@@ -51,6 +54,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": true,
+                "stacking": false,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": false,
                 "dataLabel": true,
@@ -65,6 +69,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": true,
+                "stacking": false,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": false,
                 "dataLabel": true,
@@ -83,7 +88,7 @@
                 "isVisiableSeriesField": false,
                 "dataLabel": true,
                 "enableMouseTracking": true,
-                "zooming": true,
+                "zooming": false,
                 "tooltip": true,
                 "showLegend": true
             },
@@ -241,12 +246,29 @@
         "markerSymbols": false,
         "zooming": true,
         "typeofareaChart": false,
-        "barColunmchartOption": false
+        "barColunmchartOption": false,
+        "mapType": [
+            {
+                "name": "USA-ALL",
+                "json_file": "https://code.highcharts.com/mapdata/countries/us/us-all.topo.json",
+                "uniqueValueMatch": "postal-code"
+            },
+            {
+                "name": "ASIA",
+                "json_file": "https://code.highcharts.com/mapdata/custom/asia.geo.json",
+                "uniqueValueMatch": "iso-a2"
+            },
+            {
+                "name": "EUROPE",
+                "json_file": "https://code.highcharts.com/mapdata/custom/europe.topo.json",
+                "uniqueValueMatch": "iso-a2"
+            }
+        ]
     },
     {
         "name": "Multi-Series Charts",
         "id": 6,
-         "chartOption": [
+        "chartOption": [
             {
                 "type": "line",
                 "name": "Line Chart",
@@ -281,6 +303,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": false,
+                "stacking": true,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": true,
                 "dataLabel": true,
@@ -295,6 +318,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": false,
+                "stacking": true,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": true,
                 "dataLabel": true,
@@ -309,6 +333,7 @@
                 "isVisableMapOption": false,
                 "xAxis": true,
                 "yAxis": false,
+                "stacking": true,
                 "isVisialbeValueFeild": false,
                 "isVisiableSeriesField": true,
                 "dataLabel": true,
@@ -317,7 +342,6 @@
                 "tooltip": true,
                 "showLegend": true
             }
-           
         ]
     }
 ]

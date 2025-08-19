@@ -34,8 +34,6 @@
         <button class="load-chart-btn" (click)="loadChart()">📊 Load Chart</button>
     </div>
 
-
-
     <div class="layout fade-in" *ngIf="rawData.length && !showOptions">
         <aside class="sidebar slide-in">
             <div class="sidebar-section">
@@ -50,19 +48,11 @@
                 </select>
             </div>
 
-            <div class="sidebar-section">
-                <label>Chart Type</label>
-                <select [(ngModel)]="selectedChartType" (change)="changeChart()">
-                    <option *ngFor="let f of selectedChartCate?.chartOption" [ngValue]="f">{{ f.name }}</option>
-                </select>
-            </div>
-
-
-            <ng-container *ngIf="selectedChartType?.name == 'multiDiminssional'">
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisialbeValueFeild">
+            <ng-container *ngIf="selectedChartCate?.id == 4">
+                <div class="sidebar-section" *ngIf="selectedChartCate?.isVisialbeValueFeild">
                     <label>X-Axis</label>
-                    <select [(ngModel)]="selectedValueField">
-                        <option *ngFor="let f of valueFields" [value]="f">{{ f }}</option>
+                    <select [(ngModel)]="selectedXAxis">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
                     </select>
                 </div>
                 <div *ngFor="let axis of yAxes; let i = index" class="sidebar-section">
@@ -97,17 +87,14 @@
                             <option value="spline">Spline</option>
                             <option value="line">line</option>
                             <option value="area">area</option>
-                            <option value="bar">bar</option>
                             <option value="scatter">Scatter</option>
-                            <option value="bubble">bubble</option>
                         </select>
                     </div>
 
                     <label>Select Series Field:</label>
                     <select [(ngModel)]="axis.field">
-                        <option *ngFor="let key of valueFields" [value]="key">{{ key }}</option>
+                        <option *ngFor="let key of allFields" [value]="key">{{ key }}</option>
                     </select>
-
 
                     <button (click)="removeYAxis(i)">❌ Remove</button>
                 </div>
@@ -116,15 +103,16 @@
             </ng-container>
 
 
-            <ng-container *ngIf="selectedChartType?.name !== 'multiDiminssional'">
+            <ng-container
+                *ngIf="selectedChartCate?.id == 1 || selectedChartCate?.id == 2 || selectedChartCate?.id == 3 || selectedChartCate?.id == 6">
 
-                <!-- <div class="sidebar-section" *ngIf="selectedChartType?.markerSymbols">
-                    <label>Symbol</label>
-                    <select [(ngModel)]="selectSymbol">
-                        <option *ngFor="let f of markerSymbols" [ngValue]="f">{{ f }}</option>
+
+                <div class="sidebar-section">
+                    <label>Chart Type</label>
+                    <select [(ngModel)]="selectedChartType" (change)="changeChart()">
+                        <option *ngFor="let f of selectedChartCate?.chartOption" [ngValue]="f">{{ f.name }}</option>
                     </select>
-                </div> -->
-
+                </div>
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.xAxis">
                     <label>X-Axis</label>
@@ -171,15 +159,40 @@
                     </select>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.isVisiableSeriesField">
-                    <label>Series Fields</label>
-                    <div class="checkbox-list">
-                        <div *ngFor="let key of allFields">
-                            <input type="checkbox" [value]="key" (change)="onSeriesFieldToggle(key, $event)" />
-                            {{ key }}
-                        </div>
-                    </div>
+                <div class="sidebar-section" *ngIf="selectedChartType?.stacking">
+                    <label>Stacked</label>
+                    <select [(ngModel)]="stacking" (change)="renderChart()">
+                        <option value="">none</option>
+                        <option value="normal">Normal</option>
+                        <option value="percent">Percentage</option>
+                    </select>
                 </div>
+
+                <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
+                    <div *ngFor="let axis of selectedSeriesFields; let i = index" class="sidebar-section">
+
+                        <div class="theme-color-field">
+                            <label for="themeColorInput">
+                                Theme color <span class="required">(i.e. #ffffff)<sup>*</sup></span>
+                            </label>
+
+                            <div class="theme-color-input-group">
+                                <input type="text" id="themeColorInput" [(ngModel)]="axis.color" placeholder="#ffffff"
+                                    class="theme-color-text" />
+                                <input type="color" [(ngModel)]="axis.color" class="theme-color-picker" />
+                            </div>
+                        </div>
+
+                        <label>Select Series Field:</label>
+                        <select [(ngModel)]="axis.field">
+                            <option *ngFor="let key of allFields" [value]="key">{{ key }}</option>
+                        </select>
+
+                        <button (click)="removeSeries(i)">❌ Remove</button>
+                    </div>
+
+                    <button (click)="addSeries()">➕ Add Y-Axis</button>
+                </ng-container>
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
                     <label>Load Map</label>
@@ -213,18 +226,8 @@
                         Mouse Tracking</label>
                 </div>
 
-                <div class="sidebar-section" *ngIf="selectedChartType?.typeofareaChart">
-                    <label>Type of area</label>
-                    <select [(ngModel)]="typeofareaChart" (change)="renderChart()">
-                        <option value="">none</option>
-                        <option value="normal">Stacked area</option>
-                        <option value="percent">Percentage area</option>
-                        <option value="arearange" *ngIf="selectedChartType?.name === 'area-chart'">Range</option>
-                        <!-- <option value="areaspline" *ngIf="selectedChartType?.name === 'area-chart'">areaspline</option> -->
-                    </select>
-                </div>
 
-                <div class="sidebar-section">
+                <!-- <div class="sidebar-section">
                     <label>Show Records</label>
                     <select [(ngModel)]="rankingType">
                         <option value="all">All</option>
@@ -238,7 +241,11 @@
                     <select [(ngModel)]="limit" (change)="renderChart()">
                         <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
                     </select>
-                </div>
+                </div> -->
+            </ng-container>
+
+            <ng-container *ngIf="selectedChartCate?.id == 5">
+                
             </ng-container>
 
         </aside>
