@@ -1,0 +1,316 @@
+<div class="chart-dashboard">
+    <h2>📡 Data Loader</h2>
+
+    <!-- Success Banner -->
+    <div *ngIf="rawData.length && !showOptions" class="data-loaded-banner fade-in">
+        ✅ Data loaded successfully.
+        <button (click)="resetOptions()">🔁 Change Source</button>
+        
+    </div>
+
+    <!-- Load Options -->
+    <div *ngIf="!rawData.length || showOptions" class="form-container slide-in">
+        <div class="form-group">
+            <label><span class="icon">🔗</span> Load from API:</label>
+            <input type="text" [(ngModel)]="apiUrl" placeholder="Enter API URL or path" />
+        </div>
+
+        <div class="or-separator">— OR —</div>
+
+        <div class="form-group">
+            <label><span class="icon">📁</span> Load from Excel:</label>
+            <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+        </div>
+
+        <div class="button-group">
+            <button (click)="fetchData()" [disabled]="isLoading">
+                <span *ngIf="!isLoading">🔄 Fetch Data</span>
+                <span *ngIf="isLoading">⏳ Loading...</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Always show chart button -->
+    <div class="button-group fade-in">
+        <button class="load-chart-btn" (click)="loadChart()">📊 Load Chart</button>
+        <button class="load-chart-btn" (click)="saveData()">🔁 Save</button>
+    </div>
+
+    <div class="layout fade-in" *ngIf="rawData.length && !showOptions">
+        <aside class="sidebar slide-in">
+            <div class="sidebar-section">
+                <input type="text" [(ngModel)]="title" placeholder="Enter Chart Title" />
+                <input type="text" [(ngModel)]="subTitle" placeholder="Enter Chart Subtitle" />
+            </div>
+
+            <div class="sidebar-section">
+                <label>Chart Caterory</label>
+                <select [(ngModel)]="selectedChartCate" (change)="changeCategory()" [compareWith]="compareObjectsByKey('id')">
+                    <option *ngFor="let f of chartCategories" [ngValue]="f">{{ f.name }}</option>
+                </select>
+            </div>
+
+            <ng-container *ngIf="selectedChartCate?.id == 4">
+                <div class="sidebar-section" *ngIf="selectedChartCate?.xAxis">
+                    <label>X-Axis</label>
+                    <select [(ngModel)]="selectedXAxis">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.zooming">
+                    <label>Zooming</label>
+                    <select [(ngModel)]="zooming" (change)="renderChart()">
+                        <option value="">none</option>
+                        <option value="x">x-axis</option>
+                        <option value="y">y-axis</option>
+                        <option value="xy">xy-axis</option>
+                    </select>
+                </div>
+
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.showLegend">
+                    <label><input type="checkbox" [(ngModel)]="showLengend" /> Show Lengend</label>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.dataLabel">
+                    <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.enableMouseTracking">
+                    <label><input type="checkbox" [(ngModel)]="enableMouseTracking" /> Enable
+                        Mouse Tracking</label>
+                </div>
+
+                <div *ngFor="let axis of yAxes; let i = index" class="sidebar-section">
+                    <label>Y-Axis Title:</label>
+                    <input type="text" [(ngModel)]="axis.title" placeholder="Enter Y-Axis Title" />
+
+                    <label>Unit:</label>
+                    <input type="text" [(ngModel)]="axis.unit" placeholder="Enter Unit" />
+
+
+                    <div class="theme-color-field">
+                        <label for="themeColorInput">
+                            Theme color <span class="required">(i.e. #ffffff)<sup>*</sup></span>
+                        </label>
+
+                        <div class="theme-color-input-group">
+                            <input type="text" id="themeColorInput" [(ngModel)]="axis.color" placeholder="#ffffff"
+                                class="theme-color-text" />
+                            <input type="color" [(ngModel)]="axis.color" class="theme-color-picker" />
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <label><input type="checkbox" [(ngModel)]="axis.opposite" /> opposite </label>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <label>Chart Option</label>
+                        <select [(ngModel)]="axis.chartType">
+                            <option value="">none</option>
+                            <option value="column">Column</option>
+                            <option value="spline">Spline</option>
+                            <option value="line">line</option>
+                            <option value="area">area</option>
+                            <option value="scatter">Scatter</option>
+                        </select>
+                    </div>
+
+                    <label>Select Series Field:</label>
+                    <select [(ngModel)]="axis.field">
+                        <option *ngFor="let key of allFields" [value]="key">{{ key }}</option>
+                    </select>
+
+                    <button (click)="removeYAxis(i)">❌ Remove</button>
+                </div>
+                <button (click)="addYAxis()">➕ Add Y-Axis</button>
+
+            </ng-container>
+
+
+            <ng-container
+                *ngIf="selectedChartCate?.id == 1 || selectedChartCate?.id == 2 || selectedChartCate?.id == 3 || selectedChartCate?.id == 6">
+
+
+                <div class="sidebar-section">
+                    <label>Chart Type</label>
+                    <select [(ngModel)]="selectedChartType" (change)="changeChart()" [compareWith]="compareObjectsByKey('type')">
+                        <option *ngFor="let f of selectedChartCate?.chartOption" [ngValue]="f">{{ f.name }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.xAxis">
+                    <label>X-Axis</label>
+                    <select [(ngModel)]="selectedXAxis">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.yAxis">
+                    <label>Y-Axis</label>
+                    <select [(ngModel)]="selectedYAxis">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.type === 'pie'">
+                    <label>Pie Inner Size</label>
+                    <input type="text" [(ngModel)]="pieInnerSize" placeholder="Please enter 1 to 100 between" />
+                </div>
+                <div class="sidebar-section" *ngIf="selectedChartType?.type === 'pie'">
+                    <label>Pie Start Angal</label>
+                    <input type="number" [(ngModel)]="pieStartAngal" placeholder="Please enter StartAngale" />
+                </div>
+                <div class="sidebar-section" *ngIf="selectedChartType?.type === 'pie'">
+                    <label>Pie End Angal</label>
+                    <input type="number" [(ngModel)]="pieENDAngal" placeholder="Please enter StartAngal" />
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMatchFeild">
+                    <label>Match Field</label>
+                    <select [(ngModel)]="selectedMatchValue" (change)="renderChart()">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.thirdArgument">
+                    <label>Width-Value</label>
+                    <select [(ngModel)]="selectedThirdArgument">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.fouthArgument">
+                    <label>Inside Name</label>
+                    <select [(ngModel)]="selectedForthArgument">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.stacking">
+                    <label>Stacked</label>
+                    <select [(ngModel)]="stacking" (change)="renderChart()">
+                        <option value="">none</option>
+                        <option value="normal">Normal</option>
+                        <option value="percent">Percentage</option>
+                    </select>
+                </div>
+
+                <ng-container *ngIf="selectedChartType?.isVisiableSeriesField">
+                    <div *ngFor="let axis of selectedSeriesFields; let i = index" class="sidebar-section">
+
+                        <div class="theme-color-field">
+                            <label for="themeColorInput">
+                                Theme color <span class="required">(i.e. #ffffff)<sup>*</sup></span>
+                            </label>
+
+                            <div class="theme-color-input-group">
+                                <input type="text" id="themeColorInput" [(ngModel)]="axis.color" placeholder="#ffffff"
+                                    class="theme-color-text" />
+                                <input type="color" [(ngModel)]="axis.color" class="theme-color-picker" />
+                            </div>
+                        </div>
+
+                        <label>Select Series Field:</label>
+                        <select [(ngModel)]="axis.field">
+                            <option *ngFor="let key of allFields" [value]="key">{{ key }}</option>
+                        </select>
+
+                        <button (click)="removeSeries(i)">❌ Remove</button>
+                    </div>
+
+                    <button (click)="addSeries()">➕ Add Y-Axis</button>
+                </ng-container>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
+                    <label>Load Map</label>
+                    <select [(ngModel)]="selectedMapOption">
+                        <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
+                    </select>
+                </div>
+
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.zooming">
+                    <label>Zooming</label>
+                    <select [(ngModel)]="zooming" (change)="renderChart()">
+                        <option value="">none</option>
+                        <option value="x">x-axis</option>
+                        <option value="y">y-axis</option>
+                        <option value="xy">xy-axis</option>
+                    </select>
+                </div>
+
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.showLegend">
+                    <label><input type="checkbox" [(ngModel)]="showLengend" /> Show Lengend</label>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.dataLabel">
+                    <label><input type="checkbox" [(ngModel)]="dataLabel" /> Show Data Labels</label>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartType?.enableMouseTracking">
+                    <label><input type="checkbox" [(ngModel)]="enableMouseTracking" /> Enable
+                        Mouse Tracking</label>
+                </div>
+
+
+                <!-- <div class="sidebar-section">
+                    <label>Show Records</label>
+                    <select [(ngModel)]="rankingType">
+                        <option value="all">All</option>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <label>Limit:</label>
+                    <select [(ngModel)]="limit" (change)="renderChart()">
+                        <option *ngFor="let n of topBottomOptions" [value]="n">{{ n }}</option>
+                    </select>
+                </div> -->
+            </ng-container>
+
+            <ng-container *ngIf="selectedChartCate?.id == 5">
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.isVisableMapOption">
+                    <label>Load Map</label>
+                    <select [(ngModel)]="selectedMapOption">
+                        <option *ngFor="let f of selectedChartCate.mapOption" [ngValue]="f">{{ f.name }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.isVisableMatchFeild">
+                    <label>Match Field</label>
+                    <select [(ngModel)]="selectedMatchValue">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.xAxis">
+                    <label>X-Axis</label>
+                    <select [(ngModel)]="selectedXAxis">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section" *ngIf="selectedChartCate?.yAxis">
+                    <label>Y-Axis</label>
+                    <select [(ngModel)]="selectedYAxis">
+                        <option *ngFor="let f of allFields" [value]="f">{{ f }}</option>
+                    </select>
+                </div>
+
+            </ng-container>
+
+        </aside>    
+
+        <main class="chart-area fade-in">
+            <div id="chart-container" style="width: 100%; height: 600px;"></div>
+        </main>
+
+    </div>
+</div>

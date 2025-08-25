@@ -1,0 +1,10 @@
+<div class="layout-wrapper">
+  <app-sidebar *ngIf="sidebarVisible"></app-sidebar>
+
+  <div class="layout-content">
+    <app-header (sidebarToggle)="toggleSidebar()"></app-header>
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
