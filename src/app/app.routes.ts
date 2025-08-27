@@ -71,9 +71,11 @@ export const routes: Routes = [
     path: '',
     component: Layout,
     children: [
-      { path: 'chart/:filename', component: Mapchart7 },
-      { path: '', redirectTo: 'chart/example', pathMatch: 'full' } // set a default filename
-    ]
+      { path: 'chart/create-new-chart', component: Mapchart7 },           // no filename
+      { path: 'chart/:filename', component: Mapchart7 }, // with filename
+      { path: '', redirectTo: 'chart', pathMatch: 'full' }
+    ] 
   },
   { path: '**', redirectTo: '' }
 ];
+

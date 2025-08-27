@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { LoadChart } from '../../../../@core/services/load-chart';
+import { LoadChart } from '../../../@core/services/load-chart';
 import * as XLSX from 'xlsx';
-import { ChartServices } from '../../../../@core/services/chart-services';
+import { ChartServices } from '../../../@core/services/chart-services';
 
 
 declare const Highcharts: any;

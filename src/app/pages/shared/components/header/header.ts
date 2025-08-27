@@ -1,49 +1,28 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ConfirmationDialog } from '../confirmation-dialog/confirmation-dialog';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { StorageService } from '../../../../@core/services/storage-service';
+import { LOCAL_STORAGE_KEYS } from './../../../../@core/utils/local-storage-key.utility';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, MatButtonModule, MatDialogModule],
+  imports: [MatIconModule, MatButtonModule, MatDialogModule, CommonModule],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   standalone: true,
 })
 export class Header {
   @Output() sidebarToggle = new EventEmitter<void>();
-  constructor(private readonly dialog: MatDialog, private readonly router:Router) {
-
+  filesList = [];
+  constructor(private readonly dialog: MatDialog, private readonly router: Router, private readonly storage: StorageService) {
+    this.filesList = JSON.parse(storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
   }
 
   toggleSidebar() {
     this.sidebarToggle.emit();
   }
 
-
-  onLogout() {
-    // const dialogRef = this.dialog.open(ConfirmationDialog, {
-    //   width: '420px',
-    //   disableClose: true,
-    //   data: {
-    //     title: `Confirm Deletion`,
-    //     message: `Are Sure wan't to logout ?`,
-    //     confirmButtonText: 'Logout',
-    //     confirmButtonColor: 'warn',
-    //     cancelButtonText: 'Cancel',
-    //     cancelButtonColor: '',
-    //     icon: 'logout'
-    //   }
-    // });
-
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result) {
-    //     localStorage.clear();
-    //     this.router.navigate(['/login']);
-    //     this.notifyService.success("Logout Sucessfully...!!")
-    //   }
-    // });
-  }
 }

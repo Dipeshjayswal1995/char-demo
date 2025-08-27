@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "chart-dashboard": {
+    "ahc": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -31,7 +31,8 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/ngx-toastr/toastr.css"
             ]
           },
           "configurations": {
@@ -62,10 +63,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "chart-dashboard:build:production"
+              "buildTarget": "ahc:build:production"
             },
             "development": {
-              "buildTarget": "chart-dashboard:build:development"
+              "buildTarget": "ahc:build:development"
             }
           },
           "defaultConfiguration": "development"
