@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { StorageService } from '../../../@core/services/storage-service';
 import { LOCAL_STORAGE_KEYS } from './../../../@core/utils/local-storage-key.utility';
+import { ChartEventService } from '../../../@core/services/chart-event-service';
 
 declare const Highcharts: any;
 
@@ -75,19 +76,37 @@ export class Mapchart7 {
   showErrors = false;
   newFileName: string = '';
   isViewCharts = false;
-  files: { name: string; createdAt?: string }[] = [];
+  selectedChartFiles: any = null;
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private ngZone: NgZone,
     private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
-    private readonly route: ActivatedRoute, private readonly router: Router) {
-    const filename = this.route.snapshot.paramMap.get('filename');
-    this.files = JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
-    console.log(filename);
+    private readonly route: ActivatedRoute, private readonly router: Router, private readonly chartEventService: ChartEventService) {
+    // const filename = this.route.snapshot.paramMap.get('filename');
+    // this.files = JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
+    // console.log(filename);
     // if (!filename && this.files.length > 0) {
     //   this.router.navigate(['/chart', this.files[0].name]);
     // }
+
+    this.chartEventService.changeTabEvent.subscribe((data) => {
+      console.log('🔥 New chart mode activated!', data);
+      if (data) {
+        this.selectedChartFiles = data;
+        this.loadChartCategories();
+      } else {
+        this.selectedChartFiles = null;
+        this.loadChartCategories();
+        // this.rawData = [];
+      }
+      // here you can open a dialog, update sidebar, reset forms, etc.
+    });
   }
 
   ngOnInit() {
+    if (!this.selectedChartFiles) {
+      // this.isViewCharts = true;
+    } else {
+      this.isViewCharts = false;
+    }
 
   }
 
@@ -104,17 +123,27 @@ export class Mapchart7 {
       data => {
         this.chartCategories = data;
         console.log('Loaded chart categories:', this.chartCategories);
-        this.route.params.subscribe((params: any) => {
-          this.fileNameFromUrl = params['filename'];
-          const mode = params['mode'] || 'viewer';
-          this.isViewCharts = (mode === 'viewer');
-          if (this.fileNameFromUrl) {
-            console.log(this.fileNameFromUrl);
-            this.getFilesData();
-          } else {
-            this.fileNameFromUrl = '';
-          }
-        });
+        console.log('Loaded chart categories:', this.selectedChartFiles);
+        if (this.selectedChartFiles) {
+          this.newFileName = this.selectedChartFiles?.name;
+          this.getFilesData();
+        } else {
+          this.newFileName = '';
+          this.selectedChartFiles = null;
+          this.rawData = [];
+          console.log('charts loaded');
+        }
+        // this.route.params.subscribe((params: any) => {
+        //   this.fileNameFromUrl = params['filename'];
+        //   const mode = params['mode'] || 'viewer';
+        //   this.isViewCharts = (mode === 'viewer');
+        //   if (this.fileNameFromUrl) {
+        //     console.log(this.fileNameFromUrl);
+        //     this.getFilesData();
+        //   } else {
+        //     this.fileNameFromUrl = '';
+        //   }
+        // });
       },
       error => {
         console.error('Error loading common.json:', error);
@@ -131,10 +160,9 @@ export class Mapchart7 {
   // }
 
   getFilesData() {
-    this.apiServices.getFile(this.fileNameFromUrl).subscribe({
+    this.apiServices.getFile(this.selectedChartFiles.name).subscribe({
       next: (res: any) => {
         if (res.status) {
-          // this.files = res.data;
           console.log('Files:', res.data);
           this.selectedChartCate = res.data.selectedChartCate;
           console.log(this.selectedChartCate);
@@ -165,7 +193,6 @@ export class Mapchart7 {
             this.renderChart();
           }, 300);
         } else {
-          // this.files = [];
           console.error('API Error:', res.message);
         }
       },
@@ -280,7 +307,7 @@ export class Mapchart7 {
     this.showErrors = true;
     this.isLoading = true;
 
-    if ((!this.newFileName || this.newFileName.trim() === '') && !this.fileNameFromUrl) {
+    if ((!this.newFileName || this.newFileName.trim() === '')) {
       this.isLoading = false;
       return;
     }
@@ -568,6 +595,7 @@ export class Mapchart7 {
     }).subscribe({
       next: (res: any) => {
         if (res.status) {
+          this.chartEventService.emitCreateChart(true);
           // this.router.navigate(['/chart', this.newFileName]);
         } else {
         }
@@ -582,7 +610,7 @@ export class Mapchart7 {
   }
 
   updateFiles() {
-    this.apiServices.updateFile(this.fileNameFromUrl, {
+    this.apiServices.updateFile(this.selectedChartFiles.name, {
       selectedChartCate: this.selectedChartCate,
       selectedChartType: this.selectedChartType,
       rawData: this.rawData,
@@ -618,7 +646,7 @@ export class Mapchart7 {
 
 
   saveData() {
-    if (this.fileNameFromUrl) {
+    if (this.selectedChartFiles) {
       this.updateFiles();
     } else {
       this.createFiles();

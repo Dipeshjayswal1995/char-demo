@@ -66,15 +66,27 @@ import { Layout } from './pages/shared/layout/layout';
 // ];
 
 
+// export const routes: Routes = [
+//   {
+//     path: '',
+//     component: Layout,
+//     children: [
+//       { path: 'chart/create-new-chart', component: Mapchart7 },           // no filename
+//       { path: 'chart/:filename', component: Mapchart7 }, // with filename
+//       { path: '', redirectTo: 'chart', pathMatch: 'full' }
+//     ] 
+//   },
+//   { path: '**', redirectTo: '' }
+// ];
+
 export const routes: Routes = [
   {
     path: '',
     component: Layout,
     children: [
-      { path: 'chart/create-new-chart', component: Mapchart7 },           // no filename
-      { path: 'chart/:filename', component: Mapchart7 }, // with filename
+      { path: 'chart', component: Mapchart7 }, // with filename
       { path: '', redirectTo: 'chart', pathMatch: 'full' }
-    ] 
+    ]
   },
   { path: '**', redirectTo: '' }
 ];
