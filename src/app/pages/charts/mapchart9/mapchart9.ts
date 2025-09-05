@@ -103,6 +103,12 @@ export class Mapchart9 {
 
   ngOnInit() {
 
+    this.selectedMapOption = {
+    "name": "USA-ALL",
+    "json_file": "https://code.highcharts.com/mapdata/countries/us/us-all.topo.json",
+    "uniqueValueMatch": "postal-code"
+};
+
   }
 
   ngAfterViewInit(): void {
@@ -116,6 +122,12 @@ export class Mapchart9 {
 
   removeYAxis(index: number): void {
     this.yAxes.splice(index, 1);
+  }
+
+    compareObjectsByKey(key: string) {
+    return (o1: any, o2: any) => {
+      return o1 && o2 ? o1[key] === o2[key] : o1 === o2;
+    };
   }
 
   onFileChange(event: any): void {

@@ -6,25 +6,42 @@ import { LoadChart } from '../../../@core/services/load-chart';
 import * as XLSX from 'xlsx';
 import { Aggregation } from '../../../@core/services/aggregation';
 import { NotificationMassageService } from '../../../@core/services/notification-massage-service';
-import * as convert from 'xml-js';
 import { ApiServices } from '../../../@core/services/api-services';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { StorageService } from '../../../@core/services/storage-service';
-import { LOCAL_STORAGE_KEYS } from './../../../@core/utils/local-storage-key.utility';
 import { ChartEventService } from '../../../@core/services/chart-event-service';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 
 declare const Highcharts: any;
 
 @Component({
   selector: 'app-mapchart7',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, MatIconModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatCardModule,
+    MatProgressSpinnerModule
+  ],
+
   templateUrl: './mapchart7.html',
   styleUrl: './mapchart7.scss'
 })
 export class Mapchart7 {
-  apiUrl: string = 'assets/test1.json';
+  // apiUrl: string = 'assets/test1.json';
+  apiUrl: string = '';
   isLoading = false;
   rawData: any[] = [];
   allFields: string[] = [];
@@ -47,15 +64,12 @@ export class Mapchart7 {
 
   yAxes: { title: string; field: string, chartType: string, unit: string, opposite: boolean, color: string }[] = [];
   selectedSeriesFields: { field: string, color: string }[] = [];
-  enableCustomAnimation = true;
 
   pieInnerSize: string = '';
   pieStartAngal: number = 0;
   pieENDAngal: number = 0;
   uploadedExcelData: any[] | null = null;
   showOptions = false;
-
-  lineOption: string = 'line';
 
   chartCategories: any[] = [];
   selectedChartCate: any = null;
@@ -67,48 +81,63 @@ export class Mapchart7 {
   enableMouseTracking: boolean = false;
   selectedThirdArgument: string = '';
   selectedForthArgument: string = '';
-  topBottomOptions = [3, 5, 10];
-  rankingType: string = 'all';
-  limit: number | null = null;
   zooming: string = '';
   stacking: string = '';
-  fileNameFromUrl: string = '';
   showErrors = false;
   newFileName: string = '';
-  isViewCharts = false;
+  isViewCharts = true;
   selectedChartFiles: any = null;
+  aggFunctions = ["sum", "avg", "min", "max", "count"];
+  selectedAgg = '';
+  uploadedFileName: string = '';
+  sourceType = 1; // 1: API, 2: Excel
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private ngZone: NgZone,
     private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
-    private readonly route: ActivatedRoute, private readonly router: Router, private readonly chartEventService: ChartEventService) {
-    // const filename = this.route.snapshot.paramMap.get('filename');
-    // this.files = JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
-    // console.log(filename);
-    // if (!filename && this.files.length > 0) {
-    //   this.router.navigate(['/chart', this.files[0].name]);
-    // }
+    private readonly chartEventService: ChartEventService) {
 
     this.chartEventService.changeTabEvent.subscribe((data) => {
       console.log('🔥 New chart mode activated!', data);
       if (data) {
         this.selectedChartFiles = data;
         this.loadChartCategories();
-      } else {
-        this.selectedChartFiles = null;
-        this.loadChartCategories();
-        // this.rawData = [];
       }
-      // here you can open a dialog, update sidebar, reset forms, etc.
     });
+    this.chartEventService.createNewChatEvent.subscribe((data) => {
+      if (data) {
+        this.selectedChartFiles = null;
+        this.apiUrl = '';
+        this.uploadedExcelData = null;
+        this.showOptions = true;
+        this.selectedMatchValue = '';
+        this.selectedMapOption = null;
+        this.title = '';
+        this.subTitle = '';
+        this.newFileName = '';
+        this.selectedChartFiles = null;
+        this.isViewCharts = false;
+        this.allFields = [];
+        this.rawData = [];
+        this.showErrors = false;
+        this.selectedThirdArgument = '';
+        this.chartCategories = [];
+        this.selectedChartCate = null;
+        this.selectedChartType = null;
+        this.selectedXAxis = '';
+        this.selectedYAxis = '';
+        this.selectedThirdArgument = '';
+        this.selectedForthArgument = '';
+        this.showLengend = false;
+        this.dataLabel = false;
+        this.enableMouseTracking = false;
+        this.zooming = '';
+        this.stacking = '';
+        this.uploadedFileName = '';
+        this.loadChartCategories();
+      }
+    })
   }
 
-  ngOnInit() {
-    if (!this.selectedChartFiles) {
-      // this.isViewCharts = true;
-    } else {
-      this.isViewCharts = false;
-    }
-
-  }
+  ngOnInit() { }
 
   changeView() {
     this.isViewCharts = !this.isViewCharts;
@@ -127,23 +156,7 @@ export class Mapchart7 {
         if (this.selectedChartFiles) {
           this.newFileName = this.selectedChartFiles?.name;
           this.getFilesData();
-        } else {
-          this.newFileName = '';
-          this.selectedChartFiles = null;
-          this.rawData = [];
-          console.log('charts loaded');
         }
-        // this.route.params.subscribe((params: any) => {
-        //   this.fileNameFromUrl = params['filename'];
-        //   const mode = params['mode'] || 'viewer';
-        //   this.isViewCharts = (mode === 'viewer');
-        //   if (this.fileNameFromUrl) {
-        //     console.log(this.fileNameFromUrl);
-        //     this.getFilesData();
-        //   } else {
-        //     this.fileNameFromUrl = '';
-        //   }
-        // });
       },
       error => {
         console.error('Error loading common.json:', error);
@@ -151,56 +164,62 @@ export class Mapchart7 {
     );
   }
 
-  // switchMode(newMode: string) {
-  //   this.router.navigate([], {
-  //     relativeTo: this.route,
-  //     queryParams: { mode: newMode },
-  //     queryParamsHandling: 'merge' // keep other params if any
-  //   });
-  // }
-
-  getFilesData() {
+  getFilesData(): void {
     this.apiServices.getFile(this.selectedChartFiles.name).subscribe({
       next: (res: any) => {
-        if (res.status) {
-          console.log('Files:', res.data);
-          this.selectedChartCate = res.data.selectedChartCate;
-          console.log(this.selectedChartCate);
-          this.selectedChartType = res.data.selectedChartType;
-          this.rawData = res.data.rawData;
-          this.title = res.data.title;
-          this.subTitle = res.data.subTitle;
-          this.selectedXAxis = res.data.selectedXAxis;
-          this.selectedYAxis = res.data.selectedYAxis;
-          this.zooming = res.data.zooming;
-          this.showLengend = res.data.showLengend;
-          this.dataLabel = res.data.dataLabel;
-          this.enableMouseTracking = res.data.enableMouseTracking;
-          this.selectedThirdArgument = res.data.selectedThirdArgument;
-          this.pieInnerSize = res.data.pieInnerSize;
-          this.pieStartAngal = res.data.pieStartAngal;
-          this.pieENDAngal = res.data.pieENDAngal;
-          this.stacking = res.data.stacking;
-          this.selectedSeriesFields = res.data.selectedSeriesFields;
-          this.yAxes = res.data.yAxes;
-          if (!this.rawData || this.rawData.length === 0) {
-            console.error('No data found');
-            return;
-          }
-          this.showOptions = false;
-          this.allFields = Object.keys(this.rawData[0]);
-          setTimeout(() => {
-            this.renderChart();
-          }, 300);
-        } else {
-          console.error('API Error:', res.message);
+        if (!res?.status) {
+          console.error("API Error:", res?.message || "Unknown error");
+          return;
         }
+
+        const data = res.data;
+        console.log("Fetched file data:", data);
+        this.sourceType = data?.sourceType || 1;
+        if (data?.sourceType == 1) {
+          this.apiUrl = data?.sourceFile || '';
+          this.uploadedFileName = '';
+          this.uploadedExcelData = null;
+        } else if (data?.sourceType == 2) {
+          this.uploadedFileName = data?.sourceFile || '';
+          this.uploadedExcelData = data?.rawData || [];
+          this.apiUrl = '';
+        }
+        console.log("data?.sourceType =>", data?.sourceType);
+        console.log("data?.sourceType =>", data?.sourceFile);
+        console.log("this.sourceType =>", this.uploadedExcelData);
+        this.selectedChartCate = data?.selectedChartCate || null;
+        this.selectedChartType = data?.selectedChartType || null;
+        this.selectedMatchValue = data?.selectedMatchValue || '';
+        this.selectedMapOption = data?.selectedMapOption || null;
+        this.rawData = data?.rawData || [];
+        this.title = data?.title || '';
+        this.subTitle = data?.subTitle || '';
+        this.selectedXAxis = data?.selectedXAxis || '';
+        this.selectedYAxis = data?.selectedYAxis || '';
+        this.zooming = data?.zooming || '';
+        this.showLengend = !!data?.showLengend;
+        this.dataLabel = !!data?.dataLabel;
+        this.enableMouseTracking = !!data?.enableMouseTracking;
+        this.selectedThirdArgument = data?.selectedThirdArgument || '';
+        this.pieInnerSize = data?.pieInnerSize || 0;
+        this.pieStartAngal = data?.pieStartAngal || 0;
+        this.pieENDAngal = data?.pieENDAngal || 0;
+        this.stacking = data?.stacking || '';
+        this.selectedSeriesFields = data?.selectedSeriesFields || [];
+        this.yAxes = data?.yAxes || [];
+        if (!this.rawData.length) {
+          console.error("No data found");
+          return;
+        }
+        this.showOptions = false;
+        this.allFields = Object.keys(this.rawData[0]);
+        setTimeout(() => this.renderChart(), 300);
       },
       error: (err) => {
-        console.error('HTTP Error:', err);
+        console.error("HTTP Error:", err);
       },
       complete: () => {
-        console.log('Request completed.');
+        console.log("Request completed.");
       }
     });
   }
@@ -219,7 +238,6 @@ export class Mapchart7 {
     }
     return result;
   }
-
 
   addYAxis(): void {
     this.yAxes.push({ title: '', field: '', chartType: '', unit: '', opposite: false, color: '' });
@@ -249,7 +267,7 @@ export class Mapchart7 {
 
     const file: File = target.files[0];
     const reader: FileReader = new FileReader();
-
+    this.uploadedFileName = file.name;
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
@@ -268,6 +286,12 @@ export class Mapchart7 {
       this.uploadedExcelData = cleanJson;
     };
     reader.readAsBinaryString(file);
+  }
+
+  removeFile(): void {
+    this.uploadedFileName = '';
+    // Reset the input to allow the same file to be selected again
+    // this.fileInput.nativeElement.value = '';
   }
 
   async fetchAndConvertCSVtoJSON(csvUrl: string): Promise<any[]> {
@@ -312,6 +336,11 @@ export class Mapchart7 {
       return;
     }
 
+    if (!this.newFileName || this.newFileName.trim() === '' || this.newFileName.trim().length > 30) {
+      this.isLoading = false;
+      return;
+    }
+
     if ((!this.apiUrl || this.apiUrl.trim() === '') && !this.uploadedExcelData) {
       this.isLoading = false;
       return;
@@ -332,38 +361,54 @@ export class Mapchart7 {
         this.handleLoadedData(data);
       }).catch(error => {
         this.isLoading = false;
+        this.notifyService.error('Failed to load or parse CSV file.', 'Error');
         console.error('CSV Load Error:', error);
       });
-    } else if (isJSON) {
+    } else {
       this.http.get<any[]>(this.apiUrl).subscribe(data => {
         this.handleLoadedData(data);
       }, error => {
         this.isLoading = false;
+        this.notifyService.error('Failed to load data.', 'Error');
         console.error('JSON Load Error:', error);
       });
-    } else {
-      // fallback if unknown file type
-      this.isLoading = false;
-      console.error('Unsupported file type. Only .csv or .json allowed.');
     }
   }
 
-  handleLoadedData(data: any[]) {
+
+  handleLoadedData(data: any[]): void {
     this.isLoading = false;
     this.showOptions = false;
-    this.rawData = data;
-    console.log(this.rawData);
-    if (!data || data.length === 0) {
-      console.error('No data found');
+    if (!this.validateRowData(data)) {
+      this.notifyService.error('Row data not valid', 'Validation Failed', { timeOut: 5000 });
       return;
     }
+    this.rawData = data;
     this.allFields = Object.keys(data[0]);
-    // this.xmlToJson();
+    console.log(this.rawData);
+  }
+
+  validateRowData(rows: any[]): boolean {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return false;
+    }
+
+    for (const row of rows) {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) {
+        return false;
+      }
+
+      for (const value of Object.values(row)) {
+        if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   renderChart(): void {
     console.log('selectedChartType', this.selectedChartType);
-    // if (!this.selectedChartType || !this.selectedValueField || !this.selectedArgumentField) return;
 
     if (this.currentChart) {
       this.currentChart.destroy();
@@ -416,13 +461,17 @@ export class Mapchart7 {
       this.pieENDAngal,
       this.stacking,
     );
-    console.log(this.rawData);
-    console.log(chartOptions);
-    // setTimeout(() => {
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
-    console.log('this.currentCharts', this.currentChart);
-    // }, 3000);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      this.currentChart = null;
+      console.error('Highcharts error:', error);
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
+    console.log("this.currentChart =>", this.currentChart);
+    console.log("this.currentChart =>", chartOptions);
   }
+
 
   renderthreeAndFourLevelChart() {
     if (!this.selectedXAxis && this.selectedYAxis) {
@@ -448,9 +497,14 @@ export class Mapchart7 {
       this.pieENDAngal,
       this.stacking,
     );
-    console.log(chartOptions);
-    console.log('this.chat', this.currentChart);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      console.error('Highcharts error:', error);
+      this.currentChart = null;
+      // Show user-friendly message
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
   }
 
   rendertSeriesChart() {
@@ -479,9 +533,14 @@ export class Mapchart7 {
       this.stacking,
       this.selectedSeriesFields
     );
-    console.log(chartOptions);
-    console.log('this.chat', this.currentChart);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      console.error('Highcharts error:', error);
+      this.currentChart = null;
+      // Show user-friendly message
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
   }
 
 
@@ -502,9 +561,14 @@ export class Mapchart7 {
       this.dataLabel,
       this.enableMouseTracking,
     );
-    console.log(this.rawData);
-    console.log(chartOptions);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      console.error('Highcharts error:', error);
+      this.currentChart = null;
+      // Show user-friendly message
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
   }
 
   async rendertMapChart(): Promise<void> {
@@ -521,14 +585,14 @@ export class Mapchart7 {
         this.title,
         this.subTitle,
         this.selectedXAxis,
-        this.zooming,
         this.showLengend,
         this.dataLabel,
         this.enableMouseTracking,
       );
       this.currentChart = Highcharts.mapChart('chart-container', chartOptions);
     } catch (err) {
-      console.error('Map load error:', err);
+      this.currentChart = null;
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
     }
   }
 
@@ -568,12 +632,16 @@ export class Mapchart7 {
   resetOptions() {
     this.showOptions = true;
     this.rawData = [];
-    this.resetAllValue();
+    // this.resetAllValue();
     // this.apiUrl = '';
   }
 
   createFiles() {
     this.apiServices.saveJson(this.newFileName, {
+      sourceType: this.sourceType,
+      sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
+      selectedMatchValue: this.selectedMatchValue,
+      selectedMapOption: this.selectedMapOption,
       selectedChartCate: this.selectedChartCate,
       selectedChartType: this.selectedChartType,
       rawData: this.rawData,
@@ -595,12 +663,12 @@ export class Mapchart7 {
     }).subscribe({
       next: (res: any) => {
         if (res.status) {
-          this.chartEventService.emitCreateChart(true);
-          // this.router.navigate(['/chart', this.newFileName]);
-        } else {
+          this.chartEventService.emitCreateChart(this.newFileName);
+          this.notifyService.success(res.message, 'success');
         }
       },
       error: (err) => {
+        this.notifyService.success(err.message, 'success');
         console.error('HTTP Error:', err);
       },
       complete: () => {
@@ -610,9 +678,16 @@ export class Mapchart7 {
   }
 
   updateFiles() {
+    console.log('apiUrl', this.apiUrl);
+    console.log('uploadedFileName', this.uploadedFileName);
+    console.log('sourceType', this.sourceType);
     this.apiServices.updateFile(this.selectedChartFiles.name, {
+      sourceType: this.sourceType,
+      sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
       selectedChartCate: this.selectedChartCate,
       selectedChartType: this.selectedChartType,
+      selectedMatchValue: this.selectedMatchValue,
+      selectedMapOption: this.selectedMapOption,
       rawData: this.rawData,
       title: this.title,
       subTitle: this.subTitle,
@@ -632,11 +707,13 @@ export class Mapchart7 {
     }).subscribe({
       next: (res: any) => {
         if (res.status) {
-        } else {
+          this.chartEventService.emitCreateChart(this.newFileName);
+          this.notifyService.success(res.message, 'success');
         }
       },
       error: (err) => {
         console.error('HTTP Error:', err);
+        this.notifyService.success(err.message, 'error');
       },
       complete: () => {
         console.log('Request completed.');
@@ -651,8 +728,15 @@ export class Mapchart7 {
     } else {
       this.createFiles();
     }
-
   }
 
+  changeSourceType() {
+    if (this.sourceType == 1) {
+      this.uploadedExcelData = null;
+      this.uploadedFileName = '';
+    } else {
+      this.apiUrl = '';
+    }
+  }
 
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-  
+
 
 @Injectable({
   providedIn: 'root'
@@ -52,7 +52,13 @@ export class LoadChart {
     try {
       // CATEGORY CHARTS: line, column, bar
       if ([1].includes(selectedChartCate.id)) {
+        if (!xAxis || !yAxis) {
+          console.warn("⚠️ Missing xAxis or yAxis for chart!");
+          return this.getNoDataChart("xAxis or yAxis not provided");
+        }
+
         if (selectedChartType.type === 'pie') {
+
           series = [{
             type: selectedChartType.type,
             innerSize: innerSize === '' ? 0 : innerSize + '%',
@@ -76,6 +82,7 @@ export class LoadChart {
           tooltip = {
             pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})'
           };
+          console.log("series==>", series);
         } else {
           categories = rawData.map(r => r[xAxis]);
           series = [{
@@ -93,12 +100,16 @@ export class LoadChart {
             }
           };
           yAxisConfig = undefined;
+
         }
 
         // XY CHARTS: spline, scatter
       } else if ([6].includes(selectedChartCate.id)) {
         categories = rawData.map(r => r[xAxis]);
-        if (!selectedSeriesFields || selectedSeriesFields.length === 0) {
+        if (!xAxis) {
+          console.warn("⚠️ Missing xAxis  for  chart!");
+          return this.getNoDataChart("xAxis not provided");
+        } else if (!selectedSeriesFields || selectedSeriesFields.length === 0) {
           console.warn("⚠️ No series fields selected for XY Chart!");
           return this.getNoDataChart("No series fields selected");
         }
@@ -119,15 +130,14 @@ export class LoadChart {
         };
         yAxisConfig = undefined;
 
-        // SCATTER
       } else if ([2].includes(selectedChartCate.id)) {
         const field = Array.isArray(yAxis) ? yAxis[0] : yAxis;
         const dataPoints: [number, number][] = rawData
           .map(d => [Number(d[xAxis]), Number(d[field])] as [number, number])
           .filter(([x, y]) => !isNaN(x) && !isNaN(y));
         if (dataPoints.length === 0) {
-          console.warn("⚠️ Invalid or missing numeric values for scatter chart");
-          return this.getNoDataChart("Invalid numeric values for scatter chart");
+          console.warn("⚠️ Invalid or missing numeric values for chart");
+          return this.getNoDataChart("Invalid numeric values for chart");
         }
         series = [{
           type: selectedChartType.type,
@@ -153,16 +163,16 @@ export class LoadChart {
           pointFormat: '{point.x} : {point.y}'
         };
 
-        // BUBBLE
       } else if ([3].includes(selectedChartCate.id)) {
-        if (!thirdArgument) {
-          console.warn("⚠️ Third argument required for bubble chart!");
-          return this.getNoDataChart("Third argument missing for bubble chart");
+
+        if (!thirdArgument || !yAxis || !xAxis) {
+          console.warn("⚠️ X, Y or Third argument missing for  chart");
+          return this.getNoDataChart("⚠️ X, Y or Third argument missing for  chart");
         }
         const data: (string | number)[][] = rawData.map(item => [
           item[xAxis],
           item[yAxis],
-          item[thirdArgument as string]
+          item[thirdArgument]
         ]);
         series = [{
           type: selectedChartType.type,
@@ -240,6 +250,10 @@ export class LoadChart {
     dataLabel: boolean = false,
     enableMouseTracking: boolean = true,
   ) {
+    if (!selectedArgumentField || !yAxis || yAxis.length === 0) {
+      console.warn("⚠️ Missing argument or yAxis fields for multi-dimensional chart!");
+      return this.getNoDataChart("⚠️ Missing argument or yAxis fields for multi-dimensional chart!");
+    }
     const categories = rawData.map(item => item[selectedArgumentField]);
     const series = yAxis.map((field, index) => ({
       name: field.title,
@@ -304,7 +318,6 @@ export class LoadChart {
     title: string,
     subTitle: string,
     xAxis: string,
-    zooming: string,
     showLegend: boolean = false,
     dataLabel: boolean = false,
     enableMouseTracking: boolean = true,
@@ -343,6 +356,7 @@ export class LoadChart {
       },
       series: [{
         data: rawData,
+        colorByPoint: true,
         joinBy: [selectedMapOption?.uniqueValueMatch, selectedMatchValue],
         name: xAxis,
         dataLabels: {

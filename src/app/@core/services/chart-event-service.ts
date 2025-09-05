@@ -4,14 +4,19 @@ import { EventEmitter, Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class ChartEventService {
-  createChartEvent = new EventEmitter();
+  createChartEventApi = new EventEmitter();
   changeTabEvent = new EventEmitter();
+  createNewChatEvent = new EventEmitter();
 
-  emitCreateChart(createChart: boolean) {
-    this.createChartEvent.emit(createChart);
+  emitCreateChart(fileName: string) {
+    this.createChartEventApi.emit(fileName);
   }
 
   changeTab(changeTab: any) {
     this.changeTabEvent.emit(changeTab);
+  }
+
+  createChart(createNew:any){
+    this.createNewChatEvent.emit(createNew);
   }
 }

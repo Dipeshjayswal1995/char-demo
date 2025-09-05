@@ -144,7 +144,7 @@
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
                     <label>Load Map</label>
-                    <select [(ngModel)]="selectedMapOption">
+                    <select [(ngModel)]="selectedMapOption"  [compareWith]="compareObjectsByKey('name')">
                         <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
                     </select>
                 </div>

@@ -2,13 +2,11 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiServices } from '../../../../@core/services/api-services';
 import { CommonModule } from '@angular/common';
-
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { StorageService } from '../../../../@core/services/storage-service';
-import { LOCAL_STORAGE_KEYS } from './../../../../@core/utils/local-storage-key.utility';
 import { ChartEventService } from '../../../../@core/services/chart-event-service';
 
 @Component({
@@ -29,12 +27,11 @@ export class Sidebar {
     //   console.log(params.get('filename'));
     // });
 
-    this.chartEventService.createChartEvent.subscribe((data) => {
-      console.log('🔥 New chart mode activated!');
+    this.chartEventService.createChartEventApi.subscribe((data) => {
       if (data) {
-        this.loadFileList();
+        console.log('🔥 New chart mode activated!', data);
+        this.loadFileList(data);
       }
-      // here you can open a dialog, update sidebar, reset forms, etc.
     });
   }
 
@@ -46,11 +43,19 @@ export class Sidebar {
     return name.replace(/[^a-zA-Z0-9-]/g, '-');
   }
 
-  loadFileList() {
+  loadFileList(fileName: string = '') {
     this.apiServices.getFiles().subscribe({
       next: (res: any) => {
         if (res.status) {
           this.files = res.data;
+          if (fileName) {
+            const index = this.files.findIndex(file => file.name === fileName);
+            if (this.files[index]) {
+              this.viewChart(this.files[index]);
+            }
+          } else {
+            this.viewChart(this.files[0]);
+          }
         } else {
           this.files = [];
           console.error('API Error:', res.message);
@@ -70,11 +75,13 @@ export class Sidebar {
   }
 
   createNewChart() {
+    this.selectedTab = '';
     this.router.navigate(['/chart']);
-    this.chartEventService.changeTab(false);
+    this.chartEventService.createChart(true);
   }
 
   viewChart(item: any) {
+    console.log('item', item);
     this.selectedTab = item.name;
     this.chartEventService.changeTab(item);
   }
