@@ -3,6 +3,8 @@ import { Header } from '../components/header/header';
 import { Sidebar } from '../components/sidebar/sidebar';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { StorageService } from '../../../@core/services/storage-service';
+import { LOCAL_STORAGE_KEYS } from './../../../@core/utils/local-storage-key.utility';
 
 @Component({
   selector: 'app-layout',
@@ -12,15 +14,16 @@ import { CommonModule } from '@angular/common';
 })
 export class Layout {
   sidebarVisible = true;
-
-  constructor(public router: Router) {
+  filesList = [];
+  constructor(public router: Router, private readonly storage: StorageService) {
+    this.filesList = JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
   }
 
   toggleSidebar() {
     this.sidebarVisible = !this.sidebarVisible;
   }
 
- 
+
 
 
 }

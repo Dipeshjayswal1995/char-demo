@@ -138,13 +138,12 @@
                         <option value="normal">Stacked area</option>
                         <option value="percent">Percentage area</option>
                         <option value="arearange" *ngIf="selectedChartType?.name === 'area-chart'">Range</option>
-                        <!-- <option value="areaspline" *ngIf="selectedChartType?.name === 'area-chart'">areaspline</option> -->
                     </select>
                 </div>
 
                 <div class="sidebar-section" *ngIf="selectedChartType?.isVisableMapOption">
                     <label>Load Map</label>
-                    <select [(ngModel)]="selectedMapOption">
+                    <select [(ngModel)]="selectedMapOption"  [compareWith]="compareObjectsByKey('name')">
                         <option *ngFor="let f of mapOption" [ngValue]="f">{{ f.name }}</option>
                     </select>
                 </div>

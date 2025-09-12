@@ -1,16 +1,13 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav mode="side" opened class="sidenav">
     <div class="sidebar-header">
-      <button mat-raised-button color="primary" class="sidebar-btn">
+      <button mat-raised-button color="primary" class="sidebar-btn" (click)="createNewChart()">
         <mat-icon>add</mat-icon>
         Create New Chart
       </button>
     </div>
     <mat-nav-list>
-      <a  [ngClass]="{'active-link': 'fileName' === file.name}" mat-list-item *ngFor="let file of files"
-        [routerLink]="['/chart',file.name]"
-         routerLinkActive="active-link"
-         [routerLinkActiveOptions]="{ exact: true }">
+      <a  [ngClass]="{'active-link': selectedTab === file.name}" mat-list-item *ngFor="let file of files" (click)="viewChart(file)">
         <span class="file-name">{{ file.name }}</span>
       </a>
     </mat-nav-list>

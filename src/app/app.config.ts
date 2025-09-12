@@ -6,6 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHighcharts } from 'highcharts-angular';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
+import { provideMarkdown } from 'ngx-markdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimations(),
+    provideMarkdown(),
     provideToastr({
       timeOut: 3000,
       positionClass: 'toast-top-right',

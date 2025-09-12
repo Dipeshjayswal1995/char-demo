@@ -1,5 +1,5 @@
 <div class="layout-wrapper">
-  <app-sidebar *ngIf="sidebarVisible"></app-sidebar>
+  <app-sidebar *ngIf="sidebarVisible && filesList.length"></app-sidebar>
 
   <div class="layout-content">
     <app-header (sidebarToggle)="toggleSidebar()"></app-header>

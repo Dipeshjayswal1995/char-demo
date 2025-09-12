@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { LoadChart } from '../../../../@core/services/load-chart';
+import { LoadChart } from '../../../@core/services/load-chart';
 import * as XLSX from 'xlsx';
-import { ChartServices } from '../../../../@core/services/chart-services';
+import { ChartServices } from '../../../@core/services/chart-services';
 
 
 declare const Highcharts: any;
@@ -103,6 +103,12 @@ export class Mapchart9 {
 
   ngOnInit() {
 
+    this.selectedMapOption = {
+    "name": "USA-ALL",
+    "json_file": "https://code.highcharts.com/mapdata/countries/us/us-all.topo.json",
+    "uniqueValueMatch": "postal-code"
+};
+
   }
 
   ngAfterViewInit(): void {
@@ -116,6 +122,12 @@ export class Mapchart9 {
 
   removeYAxis(index: number): void {
     this.yAxes.splice(index, 1);
+  }
+
+    compareObjectsByKey(key: string) {
+    return (o1: any, o2: any) => {
+      return o1 && o2 ? o1[key] === o2[key] : o1 === o2;
+    };
   }
 
   onFileChange(event: any): void {

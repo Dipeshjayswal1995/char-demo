@@ -260,7 +260,7 @@
         "enableMouseTracking": true,
         "zooming": true,
         "tooltip": false,
-        "showLegend": false
+        "showLegend": true
     },
     {
         "name": "Map Charts",

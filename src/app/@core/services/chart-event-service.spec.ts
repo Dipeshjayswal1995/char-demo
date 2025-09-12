@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { JsonXml } from './json-xml';
+import { ChartEventService } from './chart-event-service';
 
-describe('JsonXml', () => {
-  let service: JsonXml;
+describe('ChartEventService', () => {
+  let service: ChartEventService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(JsonXml);
+    service = TestBed.inject(ChartEventService);
   });
 
   it('should be created', () => {

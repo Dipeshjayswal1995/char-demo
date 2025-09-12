@@ -2,26 +2,46 @@ import { Component, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { LoadChart } from '../../../../@core/services/load-chart';
+import { LoadChart } from '../../../@core/services/load-chart';
 import * as XLSX from 'xlsx';
-import { Aggregation } from '../../../../@core/services/aggregation';
-import { NotificationMassageService } from '../../.././../@core/services/notification-massage-service';
-import * as convert from 'xml-js';
-import { JsonXml } from '../../../../@core/services/json-xml';
-import { ApiServices } from '../../../../@core/services/api-services';
-import { ActivatedRoute } from '@angular/router';
+import { Aggregation } from '../../../@core/services/aggregation';
+import { NotificationMassageService } from '../../../@core/services/notification-massage-service';
+import { ApiServices } from '../../../@core/services/api-services';
+import { MatIconModule } from '@angular/material/icon';
+import { StorageService } from '../../../@core/services/storage-service';
+import { ChartEventService } from '../../../@core/services/chart-event-service';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 
 declare const Highcharts: any;
 
 @Component({
   selector: 'app-mapchart7',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatCardModule,
+    MatProgressSpinnerModule
+  ],
+
   templateUrl: './mapchart7.html',
   styleUrl: './mapchart7.scss'
 })
 export class Mapchart7 {
-  apiUrl: string = 'assets/test1.json';
+  // apiUrl: string = 'assets/test1.json';
+  apiUrl: string = '';
   isLoading = false;
   rawData: any[] = [];
   allFields: string[] = [];
@@ -36,7 +56,6 @@ export class Mapchart7 {
   title: string = '';
   subTitle: string = '';
 
-
   mapOption = [
     { name: 'USA-ALL', json_file: 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', uniqueValueMatch: 'postal-code' },
     { name: 'ASIA', json_file: 'https://code.highcharts.com/mapdata/custom/asia.geo.json', uniqueValueMatch: 'iso-a2' },
@@ -45,15 +64,12 @@ export class Mapchart7 {
 
   yAxes: { title: string; field: string, chartType: string, unit: string, opposite: boolean, color: string }[] = [];
   selectedSeriesFields: { field: string, color: string }[] = [];
-  enableCustomAnimation = true;
 
   pieInnerSize: string = '';
   pieStartAngal: number = 0;
   pieENDAngal: number = 0;
   uploadedExcelData: any[] | null = null;
   showOptions = false;
-
-  lineOption: string = 'line';
 
   chartCategories: any[] = [];
   selectedChartCate: any = null;
@@ -65,28 +81,70 @@ export class Mapchart7 {
   enableMouseTracking: boolean = false;
   selectedThirdArgument: string = '';
   selectedForthArgument: string = '';
-  topBottomOptions = [3, 5, 10];
-  rankingType: string = 'all';
-  limit: number | null = null;
   zooming: string = '';
   stacking: string = '';
+  showErrors = false;
+  newFileName: string = '';
+  isViewCharts = true;
+  selectedChartFiles: any = null;
+  aggFunctions = ["sum", "avg", "min", "max", "count"];
+  selectedAgg = '';
+  uploadedFileName: string = '';
+  sourceType = 1; // 1: API, 2: Excel
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private ngZone: NgZone,
-    private readonly notifyService: NotificationMassageService, private readonly converter: JsonXml, private readonly apiServices: ApiServices,
-    private readonly route: ActivatedRoute) {
-    this.route.params.subscribe((params: any) => {
-      console.log(params);
-      console.log(params['filename']);
-      // this.filename = params['filename'];
-      // Now you can use this.filename to load the appropriate chart/data
+    private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
+    private readonly chartEventService: ChartEventService) {
+
+    this.chartEventService.changeTabEvent.subscribe((data) => {
+      console.log('🔥 New chart mode activated!', data);
+      if (data) {
+        this.selectedChartFiles = data;
+        this.loadChartCategories();
+      }
     });
+    this.chartEventService.createNewChatEvent.subscribe((data) => {
+      if (data) {
+        this.selectedChartFiles = null;
+        this.apiUrl = '';
+        this.uploadedExcelData = null;
+        this.showOptions = true;
+        this.selectedMatchValue = '';
+        this.selectedMapOption = null;
+        this.title = '';
+        this.subTitle = '';
+        this.newFileName = '';
+        this.selectedChartFiles = null;
+        this.isViewCharts = false;
+        this.allFields = [];
+        this.rawData = [];
+        this.showErrors = false;
+        this.selectedThirdArgument = '';
+        this.chartCategories = [];
+        this.selectedChartCate = null;
+        this.selectedChartType = null;
+        this.selectedXAxis = '';
+        this.selectedYAxis = '';
+        this.selectedThirdArgument = '';
+        this.selectedForthArgument = '';
+        this.showLengend = false;
+        this.dataLabel = false;
+        this.enableMouseTracking = false;
+        this.zooming = '';
+        this.stacking = '';
+        this.uploadedFileName = '';
+        this.loadChartCategories();
+      }
+    })
   }
 
-  ngOnInit() {
-    this.loadChartCategories();
+  ngOnInit() { }
+
+  changeView() {
+    this.isViewCharts = !this.isViewCharts;
   }
 
   ngAfterViewInit(): void {
-
+    this.loadChartCategories();
   }
 
   loadChartCategories(): void {
@@ -94,7 +152,11 @@ export class Mapchart7 {
       data => {
         this.chartCategories = data;
         console.log('Loaded chart categories:', this.chartCategories);
-        this.getFilesData();
+        console.log('Loaded chart categories:', this.selectedChartFiles);
+        if (this.selectedChartFiles) {
+          this.newFileName = this.selectedChartFiles?.name;
+          this.getFilesData();
+        }
       },
       error => {
         console.error('Error loading common.json:', error);
@@ -102,50 +164,62 @@ export class Mapchart7 {
     );
   }
 
-  getFilesData() {
-    this.apiServices.getFile('fileName').subscribe({
+  getFilesData(): void {
+    this.apiServices.getFile(this.selectedChartFiles.name).subscribe({
       next: (res: any) => {
-        if (res.status) {
-          // this.files = res.data;
-          console.log('Files:', res.data);
-          this.selectedChartCate = res.data.selectedChartCate;
-          console.log(this.selectedChartCate);
-          this.selectedChartType = res.data.selectedChartType;
-          this.rawData = res.data.rawData;
-          this.title = res.data.title;
-          this.subTitle = res.data.subTitle;
-          this.selectedXAxis = res.data.selectedXAxis;
-          this.selectedYAxis = res.data.selectedYAxis;
-          this.zooming = res.data.zooming;
-          this.showLengend = res.data.showLengend;
-          this.dataLabel = res.data.dataLabel;
-          this.enableMouseTracking = res.data.enableMouseTracking;
-          this.selectedThirdArgument = res.data.selectedThirdArgument;
-          this.pieInnerSize = res.data.pieInnerSize;
-          this.pieStartAngal = res.data.pieStartAngal;
-          this.pieENDAngal = res.data.pieENDAngal;
-          this.stacking = res.data.stacking;
-          this.selectedSeriesFields = res.data.selectedSeriesFields;
-          this.yAxes = res.data.yAxes;
-          if (!this.rawData || this.rawData.length === 0) {
-            console.error('No data found');
-            return;
-          }
-          this.showOptions = false;
-          this.allFields = Object.keys(this.rawData[0]);
-          setTimeout(() => {
-            this.renderChart();
-          }, 300);
-        } else {
-          // this.files = [];
-          console.error('API Error:', res.message);
+        if (!res?.status) {
+          console.error("API Error:", res?.message || "Unknown error");
+          return;
         }
+
+        const data = res.data;
+        console.log("Fetched file data:", data);
+        this.sourceType = data?.sourceType || 1;
+        if (data?.sourceType == 1) {
+          this.apiUrl = data?.sourceFile || '';
+          this.uploadedFileName = '';
+          this.uploadedExcelData = null;
+        } else if (data?.sourceType == 2) {
+          this.uploadedFileName = data?.sourceFile || '';
+          this.uploadedExcelData = data?.rawData || [];
+          this.apiUrl = '';
+        }
+        console.log("data?.sourceType =>", data?.sourceType);
+        console.log("data?.sourceType =>", data?.sourceFile);
+        console.log("this.sourceType =>", this.uploadedExcelData);
+        this.selectedChartCate = data?.selectedChartCate || null;
+        this.selectedChartType = data?.selectedChartType || null;
+        this.selectedMatchValue = data?.selectedMatchValue || '';
+        this.selectedMapOption = data?.selectedMapOption || null;
+        this.rawData = data?.rawData || [];
+        this.title = data?.title || '';
+        this.subTitle = data?.subTitle || '';
+        this.selectedXAxis = data?.selectedXAxis || '';
+        this.selectedYAxis = data?.selectedYAxis || '';
+        this.zooming = data?.zooming || '';
+        this.showLengend = !!data?.showLengend;
+        this.dataLabel = !!data?.dataLabel;
+        this.enableMouseTracking = !!data?.enableMouseTracking;
+        this.selectedThirdArgument = data?.selectedThirdArgument || '';
+        this.pieInnerSize = data?.pieInnerSize || 0;
+        this.pieStartAngal = data?.pieStartAngal || 0;
+        this.pieENDAngal = data?.pieENDAngal || 0;
+        this.stacking = data?.stacking || '';
+        this.selectedSeriesFields = data?.selectedSeriesFields || [];
+        this.yAxes = data?.yAxes || [];
+        if (!this.rawData.length) {
+          console.error("No data found");
+          return;
+        }
+        this.showOptions = false;
+        this.allFields = Object.keys(this.rawData[0]);
+        setTimeout(() => this.renderChart(), 300);
       },
       error: (err) => {
-        console.error('HTTP Error:', err);
+        console.error("HTTP Error:", err);
       },
       complete: () => {
-        console.log('Request completed.');
+        console.log("Request completed.");
       }
     });
   }
@@ -156,9 +230,6 @@ export class Mapchart7 {
     };
   }
 
-
-
-
   generateBigData(count: number): number[] {
     const result: number[] = [];
     for (let i = 0; i < count; i++) {
@@ -167,7 +238,6 @@ export class Mapchart7 {
     }
     return result;
   }
-
 
   addYAxis(): void {
     this.yAxes.push({ title: '', field: '', chartType: '', unit: '', opposite: false, color: '' });
@@ -197,7 +267,7 @@ export class Mapchart7 {
 
     const file: File = target.files[0];
     const reader: FileReader = new FileReader();
-
+    this.uploadedFileName = file.name;
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
@@ -216,6 +286,12 @@ export class Mapchart7 {
       this.uploadedExcelData = cleanJson;
     };
     reader.readAsBinaryString(file);
+  }
+
+  removeFile(): void {
+    this.uploadedFileName = '';
+    // Reset the input to allow the same file to be selected again
+    // this.fileInput.nativeElement.value = '';
   }
 
   async fetchAndConvertCSVtoJSON(csvUrl: string): Promise<any[]> {
@@ -252,7 +328,23 @@ export class Mapchart7 {
   }
 
   fetchData() {
+    this.showErrors = true;
     this.isLoading = true;
+
+    if ((!this.newFileName || this.newFileName.trim() === '')) {
+      this.isLoading = false;
+      return;
+    }
+
+    if (!this.newFileName || this.newFileName.trim() === '' || this.newFileName.trim().length > 30) {
+      this.isLoading = false;
+      return;
+    }
+
+    if ((!this.apiUrl || this.apiUrl.trim() === '') && !this.uploadedExcelData) {
+      this.isLoading = false;
+      return;
+    }
 
     if (this.uploadedExcelData) {
       this.handleLoadedData(this.uploadedExcelData);
@@ -269,45 +361,54 @@ export class Mapchart7 {
         this.handleLoadedData(data);
       }).catch(error => {
         this.isLoading = false;
+        this.notifyService.error('Failed to load or parse CSV file.', 'Error');
         console.error('CSV Load Error:', error);
       });
-    } else if (isJSON) {
+    } else {
       this.http.get<any[]>(this.apiUrl).subscribe(data => {
         this.handleLoadedData(data);
       }, error => {
         this.isLoading = false;
+        this.notifyService.error('Failed to load data.', 'Error');
         console.error('JSON Load Error:', error);
       });
-    } else {
-      // fallback if unknown file type
-      this.isLoading = false;
-      console.error('Unsupported file type. Only .csv or .json allowed.');
     }
   }
 
-  handleLoadedData(data: any[]) {
+
+  handleLoadedData(data: any[]): void {
     this.isLoading = false;
     this.showOptions = false;
-    this.rawData = data;
-    console.log(this.rawData);
-    if (!data || data.length === 0) {
-      console.error('No data found');
+    if (!this.validateRowData(data)) {
+      this.notifyService.error('Row data not valid', 'Validation Failed', { timeOut: 5000 });
       return;
     }
+    this.rawData = data;
     this.allFields = Object.keys(data[0]);
-    // this.xmlToJson();
+    console.log(this.rawData);
   }
 
-  async xmlToJson() {
-    const xml = this.converter.jsonToXml(this.rawData);
-    const jsonObj = this.converter.xmlToJson(xml);
-    console.log(jsonObj);
+  validateRowData(rows: any[]): boolean {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return false;
+    }
 
+    for (const row of rows) {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) {
+        return false;
+      }
+
+      for (const value of Object.values(row)) {
+        if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   renderChart(): void {
     console.log('selectedChartType', this.selectedChartType);
-    // if (!this.selectedChartType || !this.selectedValueField || !this.selectedArgumentField) return;
 
     if (this.currentChart) {
       this.currentChart.destroy();
@@ -360,153 +461,17 @@ export class Mapchart7 {
       this.pieENDAngal,
       this.stacking,
     );
-    console.log(this.rawData);
-    console.log(chartOptions);
-    // setTimeout(() => {
-    this.ngZone.run(() => {
-      this.currentChart = Highcharts.chart('chart-container', {
-        "chart": {
-          "backgroundColor": "transparent",
-          "zooming": {
-            "type": ""
-          }
-        },
-        "title": {
-          "text": "",
-          "align": "left"
-        },
-        "subtitle": {
-          "text": "",
-          "align": "left"
-        },
-        "xAxis": {
-          "categories": [
-            "Alabama",
-            "Alaska",
-            "Arizona",
-            "Arkansas",
-            "California",
-            "Colorado",
-            "Connecticut",
-            "Delaware",
-            "Florida",
-            "Georgia",
-            "Hawaii",
-            "Idaho",
-            "Illinois",
-            "Indiana",
-            "Iowa",
-            "Kansas",
-            "Kentucky",
-            "Louisiana",
-            "Maine",
-            "Maryland",
-            "Massachusetts",
-            "Michigan",
-            "Minnesota",
-            "Mississippi",
-            "Missouri",
-            "Montana",
-            "Nebraska",
-            "Nevada",
-            "New Hampshire",
-            "New Jersey",
-            "New Mexico",
-            "New York",
-            "North Carolina",
-            "North Dakota",
-            "Ohio",
-            "Oklahoma",
-            "Oregon",
-            "Pennsylvania",
-            "Rhode Island",
-            "South Carolina",
-            "South Dakota",
-            "Tennessee",
-            "Texas",
-            "Utah",
-            "Vermont",
-            "Virginia",
-            "Washington",
-            "West Virginia",
-            "Wisconsin",
-            "Wyoming"
-          ],
-          "accessibility": {
-            "rangeDescription": "Range: Alabama to Wyoming"
-          }
-        },
-        "tooltip": {},
-        "legend": {
-          "enabled": false
-        },
-        "series": [
-          {
-            "type": "spline",
-            "name": "income",
-            "dataLabels": {
-              "enabled": false
-            },
-            "enableMouseTracking": false,
-            "data": [
-              60660,
-              113934,
-              77315,
-              63250,
-              123988,
-              97301,
-              114156,
-              87173,
-              73311,
-              74632,
-              141832,
-              74942,
-              80306,
-              76910,
-              71433,
-              70333,
-              61980,
-              57650,
-              73733,
-              124693,
-              127760,
-              76960,
-              86364,
-              55060,
-              78290,
-              70804,
-              74590,
-              80366,
-              110205,
-              117847,
-              60980,
-              91366,
-              70804,
-              76525,
-              73770,
-              67330,
-              91100,
-              73824,
-              104252,
-              69100,
-              71810,
-              72700,
-              75780,
-              89786,
-              89695,
-              89393,
-              103748,
-              60410,
-              74631,
-              72415
-            ]
-          }
-        ]
-      });
-    });
-    console.log('this.currentCharts', this.currentChart);
-    // }, 3000);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      this.currentChart = null;
+      console.error('Highcharts error:', error);
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
+    console.log("this.currentChart =>", this.currentChart);
+    console.log("this.currentChart =>", chartOptions);
   }
+
 
   renderthreeAndFourLevelChart() {
     if (!this.selectedXAxis && this.selectedYAxis) {
@@ -532,9 +497,14 @@ export class Mapchart7 {
       this.pieENDAngal,
       this.stacking,
     );
-    console.log(chartOptions);
-    console.log('this.chat', this.currentChart);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      console.error('Highcharts error:', error);
+      this.currentChart = null;
+      // Show user-friendly message
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
   }
 
   rendertSeriesChart() {
@@ -563,9 +533,14 @@ export class Mapchart7 {
       this.stacking,
       this.selectedSeriesFields
     );
-    console.log(chartOptions);
-    console.log('this.chat', this.currentChart);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    } catch (error: any) {
+      console.error('Highcharts error:', error);
+      this.currentChart = null;
+      // Show user-friendly message
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
   }
 
 
@@ -586,9 +561,15 @@ export class Mapchart7 {
       this.dataLabel,
       this.enableMouseTracking,
     );
-    console.log(this.rawData);
-    console.log(chartOptions);
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
+    try {
+      this.currentChart = Highcharts.chart('chart-container', chartOptions);
+      console.log('chartOptions =>', chartOptions);
+    } catch (error: any) {
+      console.error('Highcharts error:', error);
+      this.currentChart = null;
+      // Show user-friendly message
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
+    }
   }
 
   async rendertMapChart(): Promise<void> {
@@ -605,14 +586,14 @@ export class Mapchart7 {
         this.title,
         this.subTitle,
         this.selectedXAxis,
-        this.zooming,
         this.showLengend,
         this.dataLabel,
         this.enableMouseTracking,
       );
       this.currentChart = Highcharts.mapChart('chart-container', chartOptions);
     } catch (err) {
-      console.error('Map load error:', err);
+      this.currentChart = null;
+      this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
     }
   }
 
@@ -652,13 +633,16 @@ export class Mapchart7 {
   resetOptions() {
     this.showOptions = true;
     this.rawData = [];
-    this.resetAllValue();
+    // this.resetAllValue();
     // this.apiUrl = '';
   }
 
-
-  saveData() {
-    this.apiServices.saveJson('fileName', {
+  createFiles() {
+    this.apiServices.saveJson(this.newFileName, {
+      sourceType: this.sourceType,
+      sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
+      selectedMatchValue: this.selectedMatchValue,
+      selectedMapOption: this.selectedMapOption,
       selectedChartCate: this.selectedChartCate,
       selectedChartType: this.selectedChartType,
       rawData: this.rawData,
@@ -680,10 +664,12 @@ export class Mapchart7 {
     }).subscribe({
       next: (res: any) => {
         if (res.status) {
-        } else {
+          this.chartEventService.emitCreateChart(this.newFileName);
+          this.notifyService.success(res.message, 'success');
         }
       },
       error: (err) => {
+        this.notifyService.success(err.message, 'success');
         console.error('HTTP Error:', err);
       },
       complete: () => {
@@ -692,5 +678,66 @@ export class Mapchart7 {
     });
   }
 
+  updateFiles() {
+    console.log('apiUrl', this.apiUrl);
+    console.log('uploadedFileName', this.uploadedFileName);
+    console.log('sourceType', this.sourceType);
+    this.apiServices.updateFile(this.selectedChartFiles.name, {
+      sourceType: this.sourceType,
+      sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
+      selectedChartCate: this.selectedChartCate,
+      selectedChartType: this.selectedChartType,
+      selectedMatchValue: this.selectedMatchValue,
+      selectedMapOption: this.selectedMapOption,
+      rawData: this.rawData,
+      title: this.title,
+      subTitle: this.subTitle,
+      selectedXAxis: this.selectedXAxis,
+      selectedYAxis: this.selectedYAxis,
+      zooming: this.zooming,
+      showLengend: this.showLengend,
+      dataLabel: this.dataLabel,
+      enableMouseTracking: this.enableMouseTracking,
+      selectedThirdArgument: this.selectedThirdArgument,
+      pieInnerSize: this.pieInnerSize,
+      pieStartAngal: this.pieStartAngal,
+      pieENDAngal: this.pieENDAngal,
+      stacking: this.stacking,
+      selectedSeriesFields: this.selectedSeriesFields,
+      yAxes: this.yAxes
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status) {
+          this.chartEventService.emitCreateChart(this.newFileName);
+          this.notifyService.success(res.message, 'success');
+        }
+      },
+      error: (err) => {
+        console.error('HTTP Error:', err);
+        this.notifyService.success(err.message, 'error');
+      },
+      complete: () => {
+        console.log('Request completed.');
+      }
+    });
+  }
+
+
+  saveData() {
+    if (this.selectedChartFiles) {
+      this.updateFiles();
+    } else {
+      this.createFiles();
+    }
+  }
+
+  changeSourceType() {
+    if (this.sourceType == 1) {
+      this.uploadedExcelData = null;
+      this.uploadedFileName = '';
+    } else {
+      this.apiUrl = '';
+    }
+  }
 
 }

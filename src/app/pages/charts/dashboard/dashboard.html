@@ -1,0 +1,18 @@
+<div class="toolbar">
+    <button (click)="addWidget()">➕ Add Widget</button>
+</div>
+
+<gridster [options]="options">
+    <gridster-item *ngFor="let item of dashboard;let index=index" [item]="item">
+        <div class="widget-card">
+            <div class="widget-header">
+                <span>{{ item.label }}</span>
+                <button class="remove-btn" (click)="removeWidget(item)">✖</button>
+            </div>
+            <div class="widget-body">
+                <p>Content for {{ item.label }}</p>
+            </div>
+            <div [id]="'chart-container' + index" style="width: 100%; height: 600px;"></div>
+        </div>
+    </gridster-item>
+</gridster>
