@@ -1,22 +1,43 @@
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: center; // Center all content
+  justify-content: space-between;
   height: 64px;
   padding: 0 24px;
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  position: relative;
 
   .app-title {
     font-size: 20px;
     font-weight: 600;
-    margin-left: 0; // Remove left margin for perfect centering
   }
 
-  .menu-btn {
-    position: absolute;
-    left: 24px; // Position menu button on the left
-    margin-right: 0;
+  .mode-toggle {
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 4px;
+
+    mat-button-toggle {
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      padding: 0 12px;
+
+      mat-icon {
+        font-size: 18px;
+      }
+    }
+
+    mat-button-toggle.mat-button-toggle-checked {
+      background-color: #1976d2;
+      color: white;
+
+      mat-icon {
+        color: white;
+      }
+    }
   }
 }

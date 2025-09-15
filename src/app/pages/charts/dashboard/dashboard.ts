@@ -15,11 +15,16 @@ interface DashboardItem extends GridsterItem {
   label?: string;
 }
 
+interface Widget {
+  id: string;
+  content: string;
+}
+
 declare const Highcharts: any;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [AngularSplitModule, CommonModule, GridsterModule, FormsModule, ReactiveFormsModule],
+  imports: [AngularSplitModule, CommonModule, GridsterModule, FormsModule, ReactiveFormsModule, AngularSplitModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -27,6 +32,15 @@ export class Dashboard {
   options: GridsterConfig;
   dashboard: Array<DashboardItem>;
   currentChart: any;
+  direction: 'horizontal' | 'vertical' = 'horizontal';
+
+  widgets: Widget[] = [
+    { id: 'w1', content: 'Widget 1' },
+    { id: 'w2', content: 'Widget 2' }
+  ];
+
+   private counter = 3;
+
 
   constructor() {
     this.options = {
@@ -44,12 +58,27 @@ export class Dashboard {
       maxRows: 12
     };
 
+
     this.dashboard = [
       { cols: 6, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
-      // { cols: 3, rows: 4, y: 0, x: 3, label: 'Revenue' },
-      // { cols: 6, rows: 2, y: 2, x: 0, label: 'Customer Map' }
     ];
 
+  }
+
+    addWidget() {
+    this.widgets.push({
+      id: `w${this.counter}`,
+      content: `Widget ${this.counter}`
+    });
+    this.counter++;
+  }
+
+  removeWidget(widget: Widget) {
+    this.widgets = this.widgets.filter(w => w.id !== widget.id);
+  }
+
+  toggleDirection() {
+    this.direction = this.direction === 'horizontal' ? 'vertical' : 'horizontal';
   }
 
 
@@ -229,11 +258,11 @@ export class Dashboard {
     this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
-  addWidget() {
-    this.dashboard.push({ cols: 2, rows: 2, y: 0, x: 0, label: 'New Widget' });
-  }
+  // addWidget() {
+  //   this.dashboard.push({ cols: 2, rows: 2, y: 0, x: 0, label: 'New Widget' });
+  // }
 
-  removeWidget(item: DashboardItem) {
-    this.dashboard.splice(this.dashboard.indexOf(item), 1);
-  }
+  // removeWidget(item: DashboardItem) {
+  //   this.dashboard.splice(this.dashboard.indexOf(item), 1);
+  // }
 }

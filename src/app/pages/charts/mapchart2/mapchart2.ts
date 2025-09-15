@@ -6,7 +6,8 @@ import {
   NgZone,
   OnInit,
   AfterViewInit,
-  ViewEncapsulation
+  ViewEncapsulation,
+  HostListener
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -48,27 +49,54 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   charts: any[] = [];
   remove = false;
 
-  constructor(private cdr: ChangeDetectorRef, private zone: NgZone) { }
+  //  @HostListener('window:beforeunload', ['$event'])
+  // unloadHandler(event: BeforeUnloadEvent) {
+  //   // if (this.isFormDirty) {
+  //     event.preventDefault();
+  //     event.returnValue = ''; // Required for Chrome/Edge to show confirmation
+  //   // }
+  // }
+
+  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone) { }
 
   ngOnInit(): void {
+    // this.options = {
+    //   gridType: GridType.Fit,
+    //   compactType: 'compactUp',
+    //   displayGrid: DisplayGrid.None,
+    //   initCallback: Mapchart2.gridInit,
+    //   margin: 5,
+    //   outerMargin: true,
+    //   destroyCallback: Mapchart2.gridDestroy,
+    //   gridSizeChangedCallback: Mapchart2.gridSizeChanged,
+    //   itemChangeCallback: Mapchart2.itemChange,
+    //   itemResizeCallback: Mapchart2.itemResize,
+    //   itemInitCallback: Mapchart2.itemInit,
+    //   itemRemovedCallback: Mapchart2.itemRemoved,
+    //   itemValidateCallback: Mapchart2.itemValidate,
+    //   pushItems: true,
+    //   draggable: { enabled: false },
+    //   resizable: { enabled: true },
+    // };
+
     this.options = {
-      gridType: GridType.Fit,
-      compactType: 'compactUp&Left',
+      draggable: { enabled: true },
+      resizable: { enabled: true },
+      // displayGrid: 'always',
       displayGrid: DisplayGrid.None,
-      initCallback: Mapchart2.gridInit,
-      margin: 10,
-      outerMargin: true,
-      destroyCallback: Mapchart2.gridDestroy,
-      gridSizeChangedCallback: Mapchart2.gridSizeChanged,
-      itemChangeCallback: Mapchart2.itemChange,
-      itemResizeCallback: Mapchart2.itemResize,
-      itemInitCallback: Mapchart2.itemInit,
-      itemRemovedCallback: Mapchart2.itemRemoved,
-      itemValidateCallback: Mapchart2.itemValidate,
       pushItems: true,
-      draggable: { enabled: false },
-      resizable: { enabled: true }
+      gridType: GridType.Fit,
+      compactType: 'compactUp',
+      // minCols: 6, // Define a minimum number of columns for the grid
+      // minRows: 6, // Define a minimum number of rows for the grid
     };
+
+
+    this.dashboard = [
+      { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
+      { cols: 4, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
+      { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' }
+    ];
   }
 
   ngAfterViewInit(): void {
@@ -125,9 +153,9 @@ export class Mapchart2 implements OnInit, AfterViewInit {
 
   /** Handle reflow on grid resize */
   onResize(): void {
-    this.zone.runOutsideAngular(() => {
-      this.charts.forEach(chart => chart?.reflow());
-    });
+    // this.zone.runOutsideAngular(() => {
+    //   this.charts.forEach(chart => chart?.reflow());
+    // });
   }
 
   removeItem($event: MouseEvent | TouchEvent, item: any): void {
@@ -152,6 +180,10 @@ export class Mapchart2 implements OnInit, AfterViewInit {
     }, 100);
   }
 
+  loadWidgetData(): void {
+    console.log("loadWidgetData called", this.dashboard);
+  }
+
   destroy(): void {
     this.remove = !this.remove;
   }
@@ -174,7 +206,7 @@ export class Mapchart2 implements OnInit, AfterViewInit {
       tooltip: { shared: true },
       legend: { enabled: true },
       series: [
-        { name: 'Rainfall', type: 'column', data: [49.9, 71.5, 106.4, 129.2, 144, 176, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4], yAxis: 0, color: '#5856d2' },
+        { name: 'Rainfall', type: 'column', data: [49.9, 71.5, null, 129.2, 144, 176, 135.6, null, 216.4, 194.1, 95.6, 54.4], yAxis: 0, color: '#5856d2' },
         { name: 'Temperature', type: 'spline', data: [7, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6], yAxis: 1, color: '#29d13d' },
         { name: 'Sea Level Pressure', type: 'spline', data: [1016, 1016, 1015.9, 1015.5, 1012.3, 1009.5, 1009.6, 1010.2, 1013.1, 1016.9, 1018.2, 1016.7], yAxis: 2, color: '#49b4b6' }
       ],

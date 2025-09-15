@@ -22,3 +22,12 @@
   height: 100%;
   min-height: 250px;
 }
+
+.chart-area {
+  flex: 1;
+  min-width: 600px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fff;
+  padding: 1rem;
+}

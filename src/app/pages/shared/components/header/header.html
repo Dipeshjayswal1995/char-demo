@@ -1,7 +1,20 @@
 <header class="app-header">
-  <button mat-icon-button (click)="toggleSidebar()" class="menu-btn" *ngIf="filesList.length">
-    <mat-icon>menu</mat-icon>
-  </button>
-  
   <span class="app-title">Ace High Charts</span>
+
+  <mat-button-toggle-group
+    class="mode-toggle"
+    [value]="isDesignerMode ? 'designer' : 'viewer'"
+    (change)="toggleMode($event)"
+    exclusive
+  >
+    <mat-button-toggle value="viewer">
+      <mat-icon>visibility</mat-icon>
+      <span>Switch to Viewer</span>
+    </mat-button-toggle>
+
+    <mat-button-toggle value="designer">
+      <mat-icon>edit</mat-icon>
+      <span>Edit the Designer</span>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
 </header>
