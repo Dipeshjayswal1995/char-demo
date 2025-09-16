@@ -18,6 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute } from '@angular/router';
 
 
 declare const Highcharts: any;
@@ -93,7 +94,12 @@ export class Mapchart7 {
   sourceType = 1; // 1: API, 2: Excel
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private ngZone: NgZone,
     private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
-    private readonly chartEventService: ChartEventService) {
+    private readonly chartEventService: ChartEventService, private readonly route: ActivatedRoute) {
+
+    this.route.queryParams.subscribe(params => {
+      const mode = params['mode'];
+      this.isViewCharts = mode !== 'designer';
+    });
 
     this.chartEventService.changeTabEvent.subscribe((data) => {
       console.log('🔥 New chart mode activated!', data);

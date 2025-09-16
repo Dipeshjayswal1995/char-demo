@@ -12,6 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   DisplayGrid,
   GridsterComponent,
@@ -48,6 +49,15 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   dashboard: Array<GridsterItem> = [];
   charts: any[] = [];
   remove = false;
+  isViewCharts = true;
+
+
+  // @HostListener('window:resize')
+  // onWindowResize() {
+  //   // if (this.options?.api?.resize) {
+  //   //   this.options.api.resize();
+  //   // }
+  // }
 
   //  @HostListener('window:beforeunload', ['$event'])
   // unloadHandler(event: BeforeUnloadEvent) {
@@ -57,7 +67,12 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   //   // }
   // }
 
-  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone) { }
+  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router) {
+    this.route.queryParams.subscribe(params => {
+      const mode = params['mode'];
+      this.isViewCharts = mode !== 'designer';
+    });
+  }
 
   ngOnInit(): void {
     // this.options = {

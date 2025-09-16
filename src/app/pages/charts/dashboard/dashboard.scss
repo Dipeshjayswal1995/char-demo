@@ -1,92 +1,28 @@
-// .toolbar {
-//   margin-bottom: 10px;
-// }
-
-// button {
-//   padding: 6px 12px;
-//   border: none;
-//   border-radius: 6px;
-//   background: #1976d2;
-//   color: #fff;
-//   cursor: pointer;
-// }
-
-// button:hover {
-//   background: #1565c0;
-// }
-
-// .widget-card {
-//   background: #fff;
-//   border-radius: 12px;
-//   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-//   height: 100%;
-//   display: flex;
-//   flex-direction: column;
-// }
-
-// .widget-header {
-//   padding: 6px 10px;
-//   background: #f5f5f5;
-//   border-bottom: 1px solid #ddd;
-//   display: flex;
-//   justify-content: space-between;
-//   font-weight: 600;
-// }
-
-// .remove-btn {
-//   border: none;
-//   background: transparent;
-//   cursor: pointer;
-//   color: red;
-//   font-size: 16px;
-// }
-
-// .widget-body {
-//   flex: 1;
-//   padding: 12px;
-//   font-size: 14px;
-// }
-
-
-.toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.split-container {
-  height: 70vh;
-  border: 1px solid #ccc;
-}
-
-.widget {
-  display: flex;
-  flex-direction: column;
-  background: #f5f5f5;
+:host {
+  display: block;
+  width: 100%;
   height: 100%;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.bloc {
+  height: 100%;
+}
+.explanations {
+  padding: 15px;
+}
+.panel {
+  font-size: 100px;
+  font-weight: bold;
+  color: #cccccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
   overflow: hidden;
 }
-
-.widget-header {
-  background: #007bff;
-  color: white;
-  padding: 5px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.panel > p {
+  margin: 0;
 }
-
-.widget-header button {
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.widget-body {
-  flex: 1;
-  padding: 10px;
+button {
+  margin-bottom: 10px;
+  margin-right: 10px;
 }

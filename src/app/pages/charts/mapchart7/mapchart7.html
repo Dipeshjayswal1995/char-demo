@@ -93,8 +93,8 @@
     <div class="button-group fade-in" *ngIf="rawData.length && !showOptions">
         <button class="load-chart-btn" (click)="loadChart()" *ngIf="!isViewCharts">📊 Load Chart</button>
         <button class="load-chart-btn" (click)="saveData()" *ngIf="!isViewCharts">🔁 Save</button>
-        <button class="load-chart-btn" (click)="changeView()">🔁 {{isViewCharts ? 'Edit the
-            Designer' : 'Switch to Viewer' }}</button>
+        <!-- <button class="load-chart-btn" (click)="changeView()">🔁 {{isViewCharts ? 'Edit the
+            Designer' : 'Switch to Viewer' }}</button> -->
     </div>
 
     <div class="layout fade-in" *ngIf="rawData.length && !showOptions">

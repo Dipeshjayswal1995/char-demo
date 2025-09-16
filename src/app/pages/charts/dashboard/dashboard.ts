@@ -1,268 +1,137 @@
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { SplitAreaComponent, SplitAreaSize, SplitComponent, SplitGutterInteractionEvent } from 'angular-split';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { AngularSplitModule } from 'angular-split';
-import {
-  CompactType,
-  DisplayGrid,
-  GridsterConfig,
-  GridsterItem,
-  GridType,
-  GridsterModule
-} from 'angular-gridster2';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-interface DashboardItem extends GridsterItem {
-  label?: string;
+// Interfaces and default configuration
+interface IConfig {
+  columns: Array<{
+    visible: boolean;
+    size: SplitAreaSize;
+    rows: Array<{
+      visible: boolean;
+      size: SplitAreaSize;
+      type: string;
+    }>;
+  }>;
+  disabled: boolean;
 }
 
-interface Widget {
-  id: string;
-  content: string;
-}
-
-declare const Highcharts: any;
+const defaultConfig: IConfig = {
+  columns: [
+    {
+      visible: true,
+      size: 25,
+      rows: [
+        { visible: true, size: 25, type: 'A' },
+        { visible: true, size: 75, type: 'B' },
+      ],
+    },
+    {
+      visible: true,
+      size: 50,
+      rows: [
+        { visible: true, size: 60, type: 'doc' },
+        { visible: true, size: 40, type: 'C' },
+      ],
+    },
+    {
+      visible: true,
+      size: 25,
+      rows: [
+        { visible: true, size: 20, type: 'D' },
+        { visible: true, size: 30, type: 'E' },
+        { visible: true, size: 50, type: 'F' },
+      ],
+    },
+  ],
+  disabled: false,
+};
 
 @Component({
-  selector: 'app-dashboard',
-  imports: [AngularSplitModule, CommonModule, GridsterModule, FormsModule, ReactiveFormsModule, AngularSplitModule],
+selector: 'app-dashboard',
+  standalone: true,
+  imports: [SplitComponent, SplitAreaComponent, CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class Dashboard {
-  options: GridsterConfig;
-  dashboard: Array<DashboardItem>;
-  currentChart: any;
-  direction: 'horizontal' | 'vertical' = 'horizontal';
+export class Dashboard implements OnInit {
+  localStorageName = 'angular-split-ws';
+  config: IConfig | null = null;
 
-  widgets: Widget[] = [
-    { id: 'w1', content: 'Widget 1' },
-    { id: 'w2', content: 'Widget 2' }
-  ];
-
-   private counter = 3;
-
-
-  constructor() {
-    this.options = {
-      gridType: GridType.Fit,
-      compactType: CompactType.None,
-      margin: 10,
-      outerMargin: true,
-      draggable: { enabled: true },
-      resizable: { enabled: true },
-      pushItems: true,
-      displayGrid: DisplayGrid.OnDragAndResize,
-      minCols: 6,
-      maxCols: 12,
-      minRows: 4,
-      maxRows: 12
-    };
-
-
-    this.dashboard = [
-      { cols: 6, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
-    ];
-
-  }
-
-    addWidget() {
-    this.widgets.push({
-      id: `w${this.counter}`,
-      content: `Widget ${this.counter}`
-    });
-    this.counter++;
-  }
-
-  removeWidget(widget: Widget) {
-    this.widgets = this.widgets.filter(w => w.id !== widget.id);
-  }
-
-  toggleDirection() {
-    this.direction = this.direction === 'horizontal' ? 'vertical' : 'horizontal';
-  }
-
-
-  ngAfterViewInit(): void {
-    this.loadChart();
-  }
-
-  loadChart() {
-    const chartOptions = {
-      "chart": {
-        "zooming": {
-          "type": "xy"
-        }
-      },
-      "title": {
-        "text": ""
-      },
-      "subtitle": {
-        "text": ""
-      },
-      "xAxis": [
-        {
-          "categories": [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
-          ],
-          "crosshair": true
-        }
-      ],
-      "yAxis": [
-        {
-          "title": {
-            "text": "Rainfall",
-            "style": {
-              "color": "#5856d2"
-            }
-          },
-          "labels": {
-            "format": "{value}mm",
-            "style": {
-              "color": "#5856d2"
-            }
-          },
-          "opposite": true
-        },
-        {
-          "title": {
-            "text": "Tempture",
-            "style": {
-              "color": "#29d13d"
-            }
-          },
-          "labels": {
-            "format": "{value}C",
-            "style": {
-              "color": "#29d13d"
-            }
-          },
-          "opposite": true
-        },
-        {
-          "title": {
-            "text": "Sea Level Pressure",
-            "style": {
-              "color": "#49b4b6"
-            }
-          },
-          "labels": {
-            "format": "{value}mn",
-            "style": {
-              "color": "#49b4b6"
-            }
-          },
-          "opposite": false
-        }
-      ],
-      "tooltip": {
-        "shared": true
-      },
-      "legend": {
-        "enabled": true
-      },
-      "series": [
-        {
-          "name": "Rainfall",
-          "type": "column",
-          "dataLabels": {
-            "enabled": false
-          },
-          "enableMouseTracking": true,
-          "yAxis": 0,
-          "tooltip": {
-            "valueSuffix": " mm"
-          },
-          "color": "#5856d2",
-          "data": [
-            49.9,
-            71.5,
-            106.4,
-            129.2,
-            144,
-            176,
-            135.6,
-            148.5,
-            216.4,
-            194.1,
-            95.6,
-            54.4
-          ]
-        },
-        {
-          "name": "Tempture",
-          "type": "spline",
-          "dataLabels": {
-            "enabled": false
-          },
-          "enableMouseTracking": true,
-          "yAxis": 1,
-          "tooltip": {
-            "valueSuffix": " C"
-          },
-          "color": "#29d13d",
-          "data": [
-            7,
-            6.9,
-            9.5,
-            14.5,
-            18.2,
-            21.5,
-            25.2,
-            26.5,
-            23.3,
-            18.3,
-            13.9,
-            9.6
-          ]
-        },
-        {
-          "name": "Sea Level Pressure",
-          "type": "spline",
-          "dataLabels": {
-            "enabled": false
-          },
-          "enableMouseTracking": true,
-          "yAxis": 2,
-          "tooltip": {
-            "valueSuffix": " mn"
-          },
-          "color": "#49b4b6",
-          "data": [
-            1016,
-            1016,
-            1015.9,
-            1015.5,
-            1012.3,
-            1009.5,
-            1009.6,
-            1010.2,
-            1013.1,
-            1016.9,
-            1018.2,
-            1016.7
-          ]
-        }
-      ]
+  ngOnInit() {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem(this.localStorageName)) {
+      try {
+        this.config = JSON.parse(localStorage.getItem(this.localStorageName) as string);
+      } catch (e) {
+        console.error("Could not parse local storage configuration, resetting to default.", e);
+        this.resetConfig();
+      }
+    } else {
+      this.resetConfig();
     }
-    this.currentChart = Highcharts.chart('chart-container', chartOptions);
   }
 
-  // addWidget() {
-  //   this.dashboard.push({ cols: 2, rows: 2, y: 0, x: 0, label: 'New Widget' });
-  // }
+  resetConfig() {
+    this.config = structuredClone(defaultConfig);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(this.localStorageName);
+    }
+  }
 
-  // removeWidget(item: DashboardItem) {
-  //   this.dashboard.splice(this.dashboard.indexOf(item), 1);
-  // }
+  onDragEnd(columnIndex: number, e: SplitGutterInteractionEvent) {
+    if (!this.config) return;
+
+    if (columnIndex === -1) {
+      // Horizontal drag (columns)
+      this.config.columns.filter((c) => c.visible).forEach((column, index) => (column.size = e.sizes[index]));
+    } else {
+      // Vertical drag (rows within a column)
+      this.config.columns[columnIndex].rows
+        .filter((r) => r.visible)
+        .forEach((row, index) => (row.size = e.sizes[index]));
+    }
+    this.saveLocalStorage();
+  }
+
+  toggleDisabled() {
+    if (!this.config) return;
+    this.config.disabled = !this.config.disabled;
+    this.saveLocalStorage();
+  }
+
+  refreshColumnVisibility(column: IConfig['columns'][number]) {
+    column.visible = column.rows.some((row) => row.visible === true);
+    this.refreshColumnSizes(column);
+    this.saveLocalStorage();
+  }
+
+  addWidget(columnIndex: number) {
+    if (!this.config) return;
+
+    const column = this.config.columns[columnIndex];
+    const newWidget = {
+      visible: true,
+      size: 0,
+      type: `New Widget ${column.rows.length + 1}`
+    };
+    
+    column.rows.push(newWidget);
+    this.refreshColumnSizes(column);
+    this.saveLocalStorage();
+  }
+
+  private refreshColumnSizes(column: IConfig['columns'][number]) {
+    const visibleRows = column.rows.filter(r => r.visible);
+    if (visibleRows.length > 0) {
+      const newSize = 100 / visibleRows.length;
+      visibleRows.forEach(r => r.size = newSize);
+    }
+  }
+
+  saveLocalStorage() {
+    if (typeof localStorage !== 'undefined' && this.config) {
+      localStorage.setItem(this.localStorageName, JSON.stringify(this.config));
+    }
+  }
 }

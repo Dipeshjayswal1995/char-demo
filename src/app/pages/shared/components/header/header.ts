@@ -7,10 +7,13 @@ import { StorageService } from '../../../../@core/services/storage-service';
 import { LOCAL_STORAGE_KEYS } from './../../../../@core/utils/local-storage-key.utility';
 import { CommonModule } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+
+
 
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, MatButtonModule, MatDialogModule, CommonModule, MatButtonToggleModule],
+  imports: [MatIconModule, MatButtonModule, MatDialogModule, CommonModule, MatButtonToggleModule,MatSlideToggleModule],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   standalone: true,
@@ -18,28 +21,25 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 export class Header {
   @Output() sidebarToggle = new EventEmitter<void>();
   filesList = [];
-  isDesignerMode = false; // Default is viewer
+  isViewCharts = true;
+
   constructor(private readonly dialog: MatDialog, private readonly router: Router, private readonly storage: StorageService, private readonly route: ActivatedRoute,) {
     this.filesList = JSON.parse(storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
 
- this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
-      this.isDesignerMode = mode === 'designer';
+      this.isViewCharts = mode !== 'designer';
     });
   }
 
-  toggleMode(event: any): void {
-    const selectedValue = event.value;
-
-    // Update the mode based on selected toggle
-    this.isDesignerMode = selectedValue === 'designer';
-
-    // Update URL with new query param
-    this.router.navigate([], {
-      queryParams: { mode: this.isDesignerMode ? 'designer' : 'viewer' },
-      queryParamsHandling: 'merge', // keep other params if present
+  toggleView(event: any): void {
+    this.isViewCharts = !event.checked; // event.checked = true → designer mode
+    this.router.navigate(['map3'], {
+      queryParams: { mode: this.isViewCharts ? 'viewer' : 'designer' },
+      queryParamsHandling: 'merge'
     });
   }
+
   toggleSidebar() {
     this.sidebarToggle.emit();
   }
