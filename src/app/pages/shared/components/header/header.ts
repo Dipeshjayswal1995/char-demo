@@ -7,13 +7,13 @@ import { StorageService } from '../../../../@core/services/storage-service';
 import { LOCAL_STORAGE_KEYS } from './../../../../@core/utils/local-storage-key.utility';
 import { CommonModule } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 
 
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, MatButtonModule, MatDialogModule, CommonModule, MatButtonToggleModule,MatSlideToggleModule],
+  imports: [MatIconModule, MatButtonModule, MatDialogModule, CommonModule, MatButtonToggleModule, MatSlideToggleModule],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   standalone: true,
@@ -33,10 +33,19 @@ export class Header {
   }
 
   toggleView(event: any): void {
-    this.isViewCharts = !event.checked; // event.checked = true → designer mode
+    // this.isViewCharts = !event.checked; // event.checked = true → designer mode
+    // this.router.navigate(['map3'], {
+    //   queryParams: { mode: this.isViewCharts ? 'viewer' : 'designer' },
+    //   queryParamsHandling: 'merge'
+    // });
+
+    this.isViewCharts = !event.checked;
+    const mode = this.isViewCharts ? 'viewer' : 'designer';
     this.router.navigate(['map3'], {
-      queryParams: { mode: this.isViewCharts ? 'viewer' : 'designer' },
+      queryParams: { mode },
       queryParamsHandling: 'merge'
+    }).then(() => {
+      // window.location.reload(); // full browser reload
     });
   }
 

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -24,6 +25,8 @@ import {
   GridType
 } from 'angular-gridster2';
 import { MarkdownModule } from 'ngx-markdown';
+import { ApiServices } from '../../../@core/services/api-services';
+import { ChartEventService } from '../../../@core/services/chart-event-service';
 
 declare var Highcharts: any;
 
@@ -50,7 +53,7 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   charts: any[] = [];
   remove = false;
   isViewCharts = true;
-
+  selectedChartFiles: any = null;
 
   // @HostListener('window:resize')
   // onWindowResize() {
@@ -67,10 +70,21 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   //   // }
   // }
 
-  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router) {
+  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router, private readonly http: HttpClient,
+    private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService
+  ) {
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       this.isViewCharts = mode !== 'designer';
+    });
+
+    this.chartEventService.changeTabEvent.subscribe((data) => {
+      console.log('🔥 New chart mode activated!', data);
+      if (data) {
+        this.selectedChartFiles = data;
+        // this.loadChartCategories();
+        this.getFilesData();
+      }
     });
   }
 
@@ -95,28 +109,66 @@ export class Mapchart2 implements OnInit, AfterViewInit {
     // };
 
     this.options = {
-      draggable: { enabled: true },
-      resizable: { enabled: true },
+      draggable: { enabled: !this.isViewCharts },
+      resizable: { enabled: !this.isViewCharts },
       // displayGrid: 'always',
       displayGrid: DisplayGrid.None,
       pushItems: true,
       gridType: GridType.Fit,
       compactType: 'compactUp',
-      // minCols: 6, // Define a minimum number of columns for the grid
-      // minRows: 6, // Define a minimum number of rows for the grid
+      margin: 5,
     };
 
 
-    this.dashboard = [
-      { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
-      { cols: 4, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
-      { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' }
-    ];
+    // this.dashboard = [
+    //   { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
+    //   { cols: 4, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
+    //   { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' }
+    // ];
   }
 
   ngAfterViewInit(): void {
     // Load initial chart if there are items
-    setTimeout(() => this.loadAllCharts(), 0);
+    this.loadChartCategories();
+  }
+
+
+  loadChartCategories(): void {
+    this.http.get<any>('assets/test-data/charts2.json').subscribe(
+      data => {
+        this.dashboard = data;
+        this.cdr.detectChanges();
+        setTimeout(() => this.loadAllCharts(), 2000);
+        console.log('Loaded chart categories:', this.dashboard);
+      },
+      error => {
+        console.error('Error loading common.json:', error);
+      }
+    );
+  }
+
+  getFilesData(): void {
+    this.apiServices.getFile(this.selectedChartFiles.name).subscribe({
+      next: (res: any) => {
+        if (!res?.status) {
+          console.error("API Error:", res?.message || "Unknown error");
+          return;
+        }
+        const data = res.data;
+        this.dashboard = data;
+        this.cdr.detectChanges();
+        setTimeout(() => this.loadAllCharts(), 20);
+        console.log('Loaded chart categories:', this.dashboard);
+        console.log("Fetched file data:", data);
+
+      },
+      error: (err) => {
+        console.error("HTTP Error:", err);
+      },
+      complete: () => {
+        console.log("Request completed.");
+      }
+    });
   }
 
   static itemChange(item: GridsterItem, itemComponent: GridsterItemComponentInterface): void {
@@ -144,9 +196,10 @@ export class Mapchart2 implements OnInit, AfterViewInit {
     console.info('gridSizeChanged', grid);
   }
 
-  /** Add a new grid item + chart */
   addItem(): void {
-    this.dashboard.push({ x: 0, y: 0, cols: 2, rows: 2 });
+    const wigetSize: any = { "wigetSize": { cols: 2, rows: 2, x: 0, y: 0 } };
+    this.dashboard.push(wigetSize);
+    console.log('Added new item:', this.dashboard);
     this.cdr.detectChanges();
     setTimeout(() => this.loadChart(this.dashboard.length - 1), 0);
   }
@@ -160,9 +213,12 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   loadChart(index: number): void {
     const container = document.getElementById('chart-container' + index);
     if (!container) return;
-
-    const chartOptions = this.getChartOptions();
-    const chart = Highcharts.chart(container, chartOptions);
+    let chart;
+    if (this.dashboard[index]['type'] == 'map') {
+      chart = Highcharts.mapChart(container, this.dashboard[index]);
+    } else {
+      chart = Highcharts.chart(container, this.dashboard[index]);
+    }
     this.charts[index] = chart;
   }
 

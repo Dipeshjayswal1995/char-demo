@@ -469,6 +469,7 @@ export class Mapchart7 {
     );
     try {
       this.currentChart = Highcharts.chart('chart-container', chartOptions);
+      console.log("chartOptions =>", chartOptions);
     } catch (error: any) {
       this.currentChart = null;
       console.error('Highcharts error:', error);
@@ -505,6 +506,7 @@ export class Mapchart7 {
     );
     try {
       this.currentChart = Highcharts.chart('chart-container', chartOptions);
+      console.log("chartOptions =>", chartOptions);
     } catch (error: any) {
       console.error('Highcharts error:', error);
       this.currentChart = null;
@@ -541,6 +543,7 @@ export class Mapchart7 {
     );
     try {
       this.currentChart = Highcharts.chart('chart-container', chartOptions);
+      console.log("chartOptions =>", chartOptions);
     } catch (error: any) {
       console.error('Highcharts error:', error);
       this.currentChart = null;
@@ -597,6 +600,7 @@ export class Mapchart7 {
         this.enableMouseTracking,
       );
       this.currentChart = Highcharts.mapChart('chart-container', chartOptions);
+      console.log("chartOptions =>", chartOptions);
     } catch (err) {
       this.currentChart = null;
       this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
