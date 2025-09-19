@@ -8,7 +8,6 @@ import {
   OnInit,
   AfterViewInit,
   ViewEncapsulation,
-  HostListener
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -89,35 +88,35 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // this.options = {
-    //   gridType: GridType.Fit,
-    //   compactType: 'compactUp',
-    //   displayGrid: DisplayGrid.None,
-    //   initCallback: Mapchart2.gridInit,
-    //   margin: 5,
-    //   outerMargin: true,
-    //   destroyCallback: Mapchart2.gridDestroy,
-    //   gridSizeChangedCallback: Mapchart2.gridSizeChanged,
-    //   itemChangeCallback: Mapchart2.itemChange,
-    //   itemResizeCallback: Mapchart2.itemResize,
-    //   itemInitCallback: Mapchart2.itemInit,
-    //   itemRemovedCallback: Mapchart2.itemRemoved,
-    //   itemValidateCallback: Mapchart2.itemValidate,
-    //   pushItems: true,
-    //   draggable: { enabled: false },
-    //   resizable: { enabled: true },
-    // };
-
     this.options = {
-      draggable: { enabled: !this.isViewCharts },
-      resizable: { enabled: !this.isViewCharts },
-      // displayGrid: 'always',
-      displayGrid: DisplayGrid.None,
-      pushItems: true,
       gridType: GridType.Fit,
       compactType: 'compactUp',
+      displayGrid: DisplayGrid.None,
+      initCallback: Mapchart2.gridInit,
       margin: 5,
+      outerMargin: true,
+      destroyCallback: Mapchart2.gridDestroy,
+      gridSizeChangedCallback: Mapchart2.gridSizeChanged,
+      itemChangeCallback: Mapchart2.itemChange,
+      itemResizeCallback: Mapchart2.itemResize,
+      itemInitCallback: Mapchart2.itemInit,
+      itemRemovedCallback: Mapchart2.itemRemoved,
+      itemValidateCallback: Mapchart2.itemValidate,
+      pushItems: true,
+      draggable: { enabled: true },
+      resizable: { enabled: true },
     };
+
+    // this.options = {
+    //   draggable: { enabled: !this.isViewCharts },
+    //   resizable: { enabled: !this.isViewCharts },
+    //   // displayGrid: 'always',
+    //   displayGrid: DisplayGrid.None,
+    //   pushItems: true,
+    //   gridType: GridType.Fit,
+    //   compactType: 'compactUp',
+    //   margin: 5,
+    // };
 
 
     // this.dashboard = [
@@ -160,7 +159,6 @@ export class Mapchart2 implements OnInit, AfterViewInit {
         setTimeout(() => this.loadAllCharts(), 20);
         console.log('Loaded chart categories:', this.dashboard);
         console.log("Fetched file data:", data);
-
       },
       error: (err) => {
         console.error("HTTP Error:", err);
@@ -197,7 +195,7 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   }
 
   addItem(): void {
-    const wigetSize: any = { "wigetSize": { cols: 2, rows: 2, x: 0, y: 0 } };
+    const wigetSize: any = { "wigetSize": { cols: 4, rows: 4, x: 0, y: 0 } };
     this.dashboard.push(wigetSize);
     console.log('Added new item:', this.dashboard);
     this.cdr.detectChanges();
@@ -238,11 +236,9 @@ export class Mapchart2 implements OnInit, AfterViewInit {
       this.charts.splice(index, 1);
       this.dashboard.splice(index, 1);
     }
-
     if (this.options.api && this.options.api.optionsChanged) {
       this.options.api.optionsChanged();
     }
-
     // ✅ Allow DOM to update, then reflow all Highcharts
     setTimeout(() => {
       Highcharts.charts.forEach((chart: any) => {

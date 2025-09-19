@@ -45,7 +45,7 @@ export class Header {
       queryParams: { mode },
       queryParamsHandling: 'merge'
     }).then(() => {
-      // window.location.reload(); // full browser reload
+      window.location.reload(); // full browser reload
     });
   }
 
