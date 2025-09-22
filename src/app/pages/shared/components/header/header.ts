@@ -9,8 +9,6 @@ import { CommonModule } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-
-
 @Component({
   selector: 'app-header',
   imports: [MatIconModule, MatButtonModule, MatDialogModule, CommonModule, MatButtonToggleModule, MatSlideToggleModule],
@@ -41,11 +39,11 @@ export class Header {
 
     this.isViewCharts = !event.checked;
     const mode = this.isViewCharts ? 'viewer' : 'designer';
-    this.router.navigate(['chart'], {
+    this.router.navigate(['map3'], {
       queryParams: { mode },
       queryParamsHandling: 'merge'
     }).then(() => {
-      // window.location.reload(); // full browser reload
+      window.location.reload(); // full browser reload
     });
   }
 

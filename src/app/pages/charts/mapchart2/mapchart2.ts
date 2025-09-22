@@ -27,6 +27,8 @@ import { MarkdownModule } from 'ngx-markdown';
 import { ApiServices } from '../../../@core/services/api-services';
 import { ChartEventService } from '../../../@core/services/chart-event-service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { SidePannel } from '../../shared/components/side-pannel/side-pannel';
+import { MatDialog } from '@angular/material/dialog';
 
 
 declare var Highcharts: any;
@@ -72,7 +74,7 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   // }
 
   constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router,
-    private readonly http: HttpClient, private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService,
+    private readonly http: HttpClient, private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService,public dialog: MatDialog,
     private readonly breakpointObserver: BreakpointObserver
   ) {
     this.route.queryParams.subscribe(params => {
@@ -183,6 +185,14 @@ export class Mapchart2 implements OnInit, AfterViewInit {
     //   { cols: 4, rows: 2, y: 0, x: 0, label: 'Sales Chart' },
     //   { cols: 2, rows: 2, y: 0, x: 0, label: 'Sales Chart' }
     // ];
+  }
+
+  addEditChatGroupModal() {
+    this.dialog.open(SidePannel, { data: 'groupItem', panelClass: ['modal-fullscreen-right', 'modal-md'], disableClose: true }).afterClosed().subscribe((data) => {
+      if (data) {
+        
+      }
+    });
   }
 
   ngAfterViewInit(): void {
