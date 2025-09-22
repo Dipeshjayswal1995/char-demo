@@ -26,6 +26,8 @@ import {
 import { MarkdownModule } from 'ngx-markdown';
 import { ApiServices } from '../../../@core/services/api-services';
 import { ChartEventService } from '../../../@core/services/chart-event-service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+
 
 declare var Highcharts: any;
 
@@ -69,8 +71,9 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   //   // }
   // }
 
-  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router, private readonly http: HttpClient,
-    private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService
+  constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router,
+    private readonly http: HttpClient, private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService,
+    private readonly breakpointObserver: BreakpointObserver
   ) {
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
@@ -105,7 +108,63 @@ export class Mapchart2 implements OnInit, AfterViewInit {
       pushItems: true,
       draggable: { enabled: true },
       resizable: { enabled: true },
+      // responsiveOptions: [
+      //   {
+      //     breakpoint: 'sm', // Small (mobile)
+      //     minWidth: 0,
+      //     maxWidth: 600,
+      //     cols: 1,
+      //     rowHeight: 300
+      //   },
+      //   {
+      //     breakpoint: 'md', // Tablet
+      //     minWidth: 601,
+      //     maxWidth: 960,
+      //     cols: 2,
+      //     rowHeight: 350
+      //   },
+      //   {
+      //     breakpoint: 'lg', // Desktop
+      //     minWidth: 961,
+      //     maxWidth: 1400,
+      //     cols: 4,
+      //     rowHeight: 400
+      //   }
+      // ]
+
     };
+
+    // this.options = {
+    //   gridType: GridType.Fit,
+    //   compactType: 'compactUp',
+    //   displayGrid: DisplayGrid.None,
+    //   margin: 5,
+    //   outerMargin: true,
+    //   pushItems: true,
+    //   draggable: { enabled: true },
+    //   resizable: { enabled: true },
+    //   rowHeight: 300,  // default
+    //   minCols: 1,
+    //   maxCols: 6
+    // };
+
+    // this.breakpointObserver.observe([
+    //   Breakpoints.Handset,  // mobile
+    //   Breakpoints.Tablet,   // tablet
+    //   Breakpoints.Web       // desktop
+    // ]).subscribe(result => {
+    //   if (result.breakpoints[Breakpoints.Handset]) {
+    //     this.options.rowHeight = 200;
+    //     this.options.minCols = 1;
+    //   } else if (result.breakpoints[Breakpoints.Tablet]) {
+    //     this.options.rowHeight = 250;
+    //     this.options.minCols = 2;
+    //   } else {
+    //     this.options.rowHeight = 300;
+    //     this.options.minCols = 4;
+    //   }
+    //   this.options.api?.optionsChanged?.(); // refresh Gridster
+    // });
 
     // this.options = {
     //   draggable: { enabled: !this.isViewCharts },

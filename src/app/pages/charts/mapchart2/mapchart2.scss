@@ -23,11 +23,17 @@
   min-height: 250px;
 }
 
-.chart-area {
-  flex: 1;
-  min-width: 600px;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  background: #fff;
-  padding: 1rem;
+/* Tablet */
+@media (max-width: 960px) {
+  .chart-box {
+    min-height: 220px;
+  }
 }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .chart-box {
+    min-height: 180px;
+  }
+}
+

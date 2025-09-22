@@ -41,11 +41,11 @@ export class Header {
 
     this.isViewCharts = !event.checked;
     const mode = this.isViewCharts ? 'viewer' : 'designer';
-    this.router.navigate(['map3'], {
+    this.router.navigate(['chart'], {
       queryParams: { mode },
       queryParamsHandling: 'merge'
     }).then(() => {
-      window.location.reload(); // full browser reload
+      // window.location.reload(); // full browser reload
     });
   }
 
