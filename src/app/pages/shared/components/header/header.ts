@@ -8,6 +8,8 @@ import { LOCAL_STORAGE_KEYS } from './../../../../@core/utils/local-storage-key.
 import { CommonModule } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ChartEventService } from '../../../../@core/services/chart-event-service';
+import { CreatePage } from '../../create-page/create-page';
 
 @Component({
   selector: 'app-header',
@@ -20,10 +22,12 @@ export class Header {
   @Output() sidebarToggle = new EventEmitter<void>();
   filesList = [];
   isViewCharts = true;
-
-  constructor(private readonly dialog: MatDialog, private readonly router: Router, private readonly storage: StorageService, private readonly route: ActivatedRoute,) {
+  // isDesignerMode = false;
+  // selectedTab = '';
+  constructor(private readonly dialog: MatDialog, private readonly router: Router, private readonly storage: StorageService, private readonly route: ActivatedRoute,
+    private readonly chartEventService: ChartEventService,
+  ) {
     this.filesList = JSON.parse(storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
-
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       this.isViewCharts = mode !== 'designer';
@@ -31,21 +35,30 @@ export class Header {
   }
 
   toggleView(event: any): void {
-    // this.isViewCharts = !event.checked; // event.checked = true → designer mode
-    // this.router.navigate(['map3'], {
-    //   queryParams: { mode: this.isViewCharts ? 'viewer' : 'designer' },
-    //   queryParamsHandling: 'merge'
-    // });
-
     this.isViewCharts = !event.checked;
     const mode = this.isViewCharts ? 'viewer' : 'designer';
-    this.router.navigate(['map3'], {
+    this.router.navigate(['dashboard'], {
       queryParams: { mode },
       queryParamsHandling: 'merge'
     }).then(() => {
-      window.location.reload(); // full browser reload
+      // window.location.reload();
     });
   }
+
+  createNewChart() {
+    // // this.selectedTab = '';
+    // this.router.navigate(['/dashboard']);
+    // this.chartEventService.createChart(true);
+    console.log('Create New Chart');
+    this.dialog.open(CreatePage, { data: 'data', disableClose: true }).afterClosed().subscribe((data) => {
+      if (data) {
+        // this.router.navigate(['/dashboard?mode=designer']);        // this.router.navigate(['/dashboard?mode=designer']);
+        this.chartEventService.createChart(data);
+      }
+    });
+  }
+
+
 
   toggleSidebar() {
     this.sidebarToggle.emit();

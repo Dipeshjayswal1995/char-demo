@@ -1,0 +1,430 @@
+.chart-dashboard {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: auto;
+
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+  }
+
+  h4 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+    margin-top: 0;
+  }
+}
+
+.file-icon {
+  margin-right: 8px;
+  color: #607d8b;
+  /* grey-blue for files */
+}
+
+.error-text {
+  color: red;
+  font-size: 13px;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.warn-text {
+  color: #cc3300;
+  font-size: 13px;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.form-container {
+  background: #fff;
+  padding: 2rem;
+  margin: 0 auto;
+  max-width: 650px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.4s ease;
+}
+
+.form-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+label {
+    flex: 0 0 140px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+input[type="text"],
+select {
+  flex: 1;
+  padding: 0.7rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Focus state (same as text input focus) */
+input[type="text"]:focus,
+select:focus {
+  border-color: #3388ff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(51, 136, 255, 0.2);
+}
+
+/* Make option dropdown cleaner */
+select option {
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+input[type="text"],
+input[type="file"] {
+    flex: 1;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* --- File Upload Box Styling --- */
+.file-upload-box {
+    flex: 1;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-upload-box:hover {
+    border-color: #007bff;
+}
+
+/* --- Empty State Styling --- */
+.empty-state-design {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #888;
+}
+
+.upload-icon-container .upload-icon {
+    font-size: 48px;
+    color: #3388ff;
+}
+
+.empty-state-design .upload-text {
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+}
+
+.empty-state-design .recommended-size {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0;
+}
+
+/* --- Uploaded State Styling --- */
+.uploaded-file-icon {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.file-icon-container {
+    background-color: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 6px;
+    width: 60px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.file-icon {
+    font-size: 23px;
+    color: #0d47a1;
+}
+
+.file-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.file-name {
+    font-weight: 600;
+    color: #333;
+    word-break: break-all;
+}
+
+.remove-btn {
+    color: #ff4d4d;
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+}
+
+.or-separator {
+  text-align: center;
+  font-weight: bold;
+  color: #888;
+  margin: 1.5rem 0;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+
+  button {
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    color: white;
+    background-color: #007bff;
+
+    &:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    &.load-chart-btn {
+      background-color: #28a745;
+    }
+  }
+}
+
+.data-loaded-banner {
+  background: #e8f5e9;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 5px solid #4caf50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 6px;
+
+  button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.sidebar {
+  width: 320px;
+  background: #f8f9fa;
+  padding: 1.2rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    input,
+    select {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .checkbox-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-left: 0.5rem;
+
+      div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+  }
+}
+
+.theme-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Segoe UI', sans-serif;
+  margin-bottom: 1rem;
+}
+
+.theme-color-field label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.theme-color-field .required {
+  color: #888;
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.theme-color-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-color-text {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+}
+
+.theme-color-picker {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+
+.chart-area {
+  flex: 1;
+  min-width: 600px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fff;
+  padding: 1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease-out;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.sidebar-footer .btn {
+  flex: 1;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.sidebar-footer .cancel-btn {
+  background-color: #f1f1f1;
+  color: #444;
+}
+
+.sidebar-footer .cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.sidebar-footer .apply-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.sidebar-footer .apply-btn:hover {
+  background-color: #0056b3;
+}

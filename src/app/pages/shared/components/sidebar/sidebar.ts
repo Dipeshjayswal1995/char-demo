@@ -19,6 +19,7 @@ import { ChartEventService } from '../../../../@core/services/chart-event-servic
 export class Sidebar {
   files: { name: string; createdAt?: string }[] = [];
   selectedTab: string = '';
+  sidebarVisible = true;
   constructor(private readonly router: Router, private readonly apiServices: ApiServices, private readonly route: ActivatedRoute, private readonly storage: StorageService,
     private readonly chartEventService: ChartEventService,
   ) {
@@ -27,6 +28,10 @@ export class Sidebar {
     //   console.log(params.get('filename'));
     // });
 
+    this.route.queryParams.subscribe(params => {
+      const mode = params['mode'];
+      this.sidebarVisible = mode !== 'designer';
+    });
     this.chartEventService.createChartEventApi.subscribe((data) => {
       if (data) {
         console.log('🔥 New chart mode activated!', data);

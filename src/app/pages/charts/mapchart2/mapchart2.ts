@@ -57,6 +57,7 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   remove = false;
   isViewCharts = true;
   selectedChartFiles: any = null;
+  allDataFromChart: any = null;
 
   // @HostListener('window:resize')
   // onWindowResize() {
@@ -74,7 +75,7 @@ export class Mapchart2 implements OnInit, AfterViewInit {
   // }
 
   constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router,
-    private readonly http: HttpClient, private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService,public dialog: MatDialog,
+    private readonly http: HttpClient, private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService, public dialog: MatDialog,
     private readonly breakpointObserver: BreakpointObserver
   ) {
     this.route.queryParams.subscribe(params => {
@@ -187,10 +188,13 @@ export class Mapchart2 implements OnInit, AfterViewInit {
     // ];
   }
 
-  addEditChatGroupModal() {
-    this.dialog.open(SidePannel, { data: 'groupItem', panelClass: ['modal-fullscreen-right', 'modal-md'], disableClose: true }).afterClosed().subscribe((data) => {
+  openModal(groupItem?: any): void {
+    // console.log("openModal called", groupItem);
+    // console.log("openModal called", this.allDataFromChart.sourceData);
+    // console.log("openModal called", { ...groupItem, rawData: this.allDataFromChart.sourceData[groupItem.rawData] });
+    this.dialog.open(SidePannel, { data: { ...groupItem, rawData: this.allDataFromChart.sourceData[groupItem.rawData] }, panelClass: ['modal-fullscreen-right', 'modal-md'], disableClose: true }).afterClosed().subscribe((data) => {
       if (data) {
-        
+
       }
     });
   }
@@ -223,7 +227,9 @@ export class Mapchart2 implements OnInit, AfterViewInit {
           return;
         }
         const data = res.data;
-        this.dashboard = data;
+        this.allDataFromChart = data;
+        this.dashboard = data.listOfChartOption;
+        console.log("Fetched file data:", data);
         this.cdr.detectChanges();
         setTimeout(() => this.loadAllCharts(), 20);
         console.log('Loaded chart categories:', this.dashboard);

@@ -7,12 +7,12 @@
 @if (!remove) {
   <gridster [options]="options" (resize)="onResize()">
     @for (item of dashboard; track item; let i = $index) {
-      <gridster-item [item]="item?.['wigetSize']" (click)="addEditChatGroupModal()">
+      <gridster-item [item]="item?.['wigetSize']" (click)="openModal(item?.['chartConfig'])">
         <div class="button-holder">
           <button mat-mini-fab (mousedown)="removeItem($event, item)" (touchstart)="removeItem($event, item)">
             <mat-icon>delete</mat-icon>
           </button>
-          <div [id]="'chart-container' + i" class="chart-box"></div>
+          <!-- <div [id]="'chart-container' + i" class="chart-box"></div> -->
         </div>
       </gridster-item>
     }

@@ -14,7 +14,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class ApiServices {
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = 'http://172.16.50.100:3000';
   constructor(private readonly http: HttpClient) { }
 
   saveJson(filename: string, data: any): Observable<ApiResponse<any>> {

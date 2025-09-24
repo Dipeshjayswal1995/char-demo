@@ -1,10 +1,10 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav mode="side" opened class="sidenav">
+  <mat-sidenav mode="side" opened class="sidenav" *ngIf="sidebarVisible">
     <div class="sidebar-header">
-      <button mat-raised-button color="primary" class="sidebar-btn" (click)="createNewChart()">
+      <!-- <button mat-raised-button color="primary" class="sidebar-btn" (click)="createNewChart()">
         <mat-icon>add</mat-icon>
         Create New Chart
-      </button>
+      </button> -->
     </div>
     <mat-nav-list>
       <a  [ngClass]="{'active-link': selectedTab === file.name}" mat-list-item *ngFor="let file of files" (click)="viewChart(file)">

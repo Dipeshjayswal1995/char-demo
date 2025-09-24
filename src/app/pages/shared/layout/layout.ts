@@ -18,10 +18,10 @@ export class Layout {
   constructor(public router: Router, private readonly storage: StorageService, private readonly route: ActivatedRoute) {
     // this.filesList = JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
 
-    this.route.queryParams.subscribe(params => {
-      const mode = params['mode'];
-      this.sidebarVisible = mode !== 'designer';
-    });
+    // this.route.queryParams.subscribe(params => {
+    //   const mode = params['mode'];
+    //   this.sidebarVisible = mode !== 'designer';
+    // });
   }
 
   toggleSidebar() {
