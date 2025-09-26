@@ -50,7 +50,7 @@ export class Header {
     // this.router.navigate(['/dashboard']);
     // this.chartEventService.createChart(true);
     console.log('Create New Chart');
-    this.dialog.open(CreatePage, { data: 'data', disableClose: true }).afterClosed().subscribe((data) => {
+    this.dialog.open(CreatePage, { disableClose: true }).afterClosed().subscribe((data) => {
       if (data) {
         // this.router.navigate(['/dashboard?mode=designer']);        // this.router.navigate(['/dashboard?mode=designer']);
         this.chartEventService.createChart(data);

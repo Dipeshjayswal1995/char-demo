@@ -689,47 +689,47 @@ export class Mapchart7 {
   }
 
   updateFiles() {
-    console.log('apiUrl', this.apiUrl);
-    console.log('uploadedFileName', this.uploadedFileName);
-    console.log('sourceType', this.sourceType);
-    this.apiServices.updateFile(this.selectedChartFiles.name, {
-      sourceType: this.sourceType,
-      sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
-      selectedChartCate: this.selectedChartCate,
-      selectedChartType: this.selectedChartType,
-      selectedMatchValue: this.selectedMatchValue,
-      selectedMapOption: this.selectedMapOption,
-      rawData: this.rawData,
-      title: this.title,
-      subTitle: this.subTitle,
-      selectedXAxis: this.selectedXAxis,
-      selectedYAxis: this.selectedYAxis,
-      zooming: this.zooming,
-      showLengend: this.showLengend,
-      dataLabel: this.dataLabel,
-      enableMouseTracking: this.enableMouseTracking,
-      selectedThirdArgument: this.selectedThirdArgument,
-      pieInnerSize: this.pieInnerSize,
-      pieStartAngal: this.pieStartAngal,
-      pieENDAngal: this.pieENDAngal,
-      stacking: this.stacking,
-      selectedSeriesFields: this.selectedSeriesFields,
-      yAxes: this.yAxes
-    }).subscribe({
-      next: (res: any) => {
-        if (res.status) {
-          this.chartEventService.emitCreateChart(this.newFileName);
-          this.notifyService.success(res.message, 'success');
-        }
-      },
-      error: (err) => {
-        console.error('HTTP Error:', err);
-        this.notifyService.success(err.message, 'error');
-      },
-      complete: () => {
-        console.log('Request completed.');
-      }
-    });
+    // console.log('apiUrl', this.apiUrl);
+    // console.log('uploadedFileName', this.uploadedFileName);
+    // console.log('sourceType', this.sourceType);
+    // this.apiServices.updateFile(this.selectedChartFiles.name, {
+    //   sourceType: this.sourceType,
+    //   sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
+    //   selectedChartCate: this.selectedChartCate,
+    //   selectedChartType: this.selectedChartType,
+    //   selectedMatchValue: this.selectedMatchValue,
+    //   selectedMapOption: this.selectedMapOption,
+    //   rawData: this.rawData,
+    //   title: this.title,
+    //   subTitle: this.subTitle,
+    //   selectedXAxis: this.selectedXAxis,
+    //   selectedYAxis: this.selectedYAxis,
+    //   zooming: this.zooming,
+    //   showLengend: this.showLengend,
+    //   dataLabel: this.dataLabel,
+    //   enableMouseTracking: this.enableMouseTracking,
+    //   selectedThirdArgument: this.selectedThirdArgument,
+    //   pieInnerSize: this.pieInnerSize,
+    //   pieStartAngal: this.pieStartAngal,
+    //   pieENDAngal: this.pieENDAngal,
+    //   stacking: this.stacking,
+    //   selectedSeriesFields: this.selectedSeriesFields,
+    //   yAxes: this.yAxes
+    // }).subscribe({
+    //   next: (res: any) => {
+    //     if (res.status) {
+    //       this.chartEventService.emitCreateChart(this.newFileName);
+    //       this.notifyService.success(res.message, 'success');
+    //     }
+    //   },
+    //   error: (err) => {
+    //     console.error('HTTP Error:', err);
+    //     this.notifyService.success(err.message, 'error');
+    //   },
+    //   complete: () => {
+    //     console.log('Request completed.');
+    //   }
+    // });
   }
 
 

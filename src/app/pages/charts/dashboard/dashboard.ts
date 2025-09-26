@@ -34,6 +34,7 @@ import { LoadChart } from '../../../@core/services/load-chart';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
+import { CreatePage } from '../../shared/create-page/create-page';
 
 
 declare var Highcharts: any;
@@ -94,8 +95,24 @@ export class Dashboard implements OnInit, AfterViewInit {
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       console.log('Query param mode:', mode);
-      // this.cdr.detectChanges();
       this.isViewCharts = mode !== 'designer';
+      if (this.options) {
+        if (this.options.draggable) {
+          this.options.draggable.enabled = !this.isViewCharts;
+        }
+        if (this.options.resizable) {
+          this.options.resizable.enabled = !this.isViewCharts;
+        }
+
+        if (this.options.api && this.options.api.optionsChanged) {
+          this.options.api.optionsChanged();
+        }
+      }
+
+      // Tell gridster to re-read options
+      // if (this.options.api && this.options.api.optionsChanged) {
+      //   this.options.api.optionsChanged();
+      // }
       setTimeout(() => {
         this.cdr.detectChanges(); // ✅ runs in next tick, no assertion error
       });
@@ -127,6 +144,24 @@ export class Dashboard implements OnInit, AfterViewInit {
         this.addItem();
       }
     })
+  }
+
+  editNameOfReportFiles(reportName: string) {
+    console.log('Create New Chart');
+    this.dialog.open(CreatePage, { data: reportName, disableClose: true }).afterClosed().subscribe((data) => {
+      if (data) {
+        console.log('Dialog result:', data);
+        if (this.selectedChartFiles && this.selectedChartFiles.name) {
+          this.selectedChartFiles['oldName'] = this.selectedChartFiles.name;
+          this.selectedChartFiles['name'] = data;
+        } else {
+          this.createNewFiles = data;
+        }
+        this.cdr.detectChanges();
+        console.log('Updated file name:', this.selectedChartFiles);
+        console.log('Updated file name:', this.createNewFiles);
+      }
+    });
   }
 
   createDataSource() {
@@ -189,6 +224,17 @@ export class Dashboard implements OnInit, AfterViewInit {
       draggable: { enabled: !this.isViewCharts },
       resizable: { enabled: !this.isViewCharts },
     };
+    // this.options = {
+    //   draggable: { enabled: !this.isViewCharts },
+    //   resizable: { enabled: !this.isViewCharts },
+    //   // displayGrid: 'always',
+    //   displayGrid: DisplayGrid.None,
+    //   pushItems: true,
+    //   gridType: GridType.Fit,
+    //   compactType: 'compactUp',
+    //   margin: 5,
+    // };
+    console.log('isViewCharts on init:', this.options);
     this.cdr.detectChanges();
   }
 
@@ -208,18 +254,20 @@ export class Dashboard implements OnInit, AfterViewInit {
 
 
   getFilesData(): void {
-    this.apiServices.getFile(this.selectedChartFiles.name).subscribe({
+    this.apiServices.getFile(this.selectedChartFiles.id).subscribe({
       next: (res: any) => {
         if (!res?.status) {
           console.error("API Error:", res?.message || "Unknown error");
           return;
         }
         const data = res.data;
-        this.allDataFromChart = data;
-        this.dashboard = data.listOfChartOption;
+        this.allDataFromChart = data.data;
+        this.dashboard = data.data.listOfChartOption;
         console.log("Fetched file data:", data);
         this.cdr.detectChanges();
+        // if (this.allDataFromChart.length) {
         setTimeout(() => this.loadAllCharts(), 20);
+        // }
         console.log('Loaded chart categories:', this.dashboard);
         console.log("Fetched file data:", data);
       },
@@ -241,21 +289,11 @@ export class Dashboard implements OnInit, AfterViewInit {
   // }
 
   addItem(partial?: any): void {
-    // default grid size (you can make it dynamic if needed)
     const wigetSize = { cols: 2, rows: 2, x: 0, y: 0 };
-
     const cfg: any = this.createChartConfig(partial, wigetSize);
-
     this.dashboard.push(cfg);
     console.log('Added new dashboard item:', this.dashboard);
-
     this.cdr.detectChanges();
-
-    // wait for DOM to render, then load chart
-    // setTimeout(() => {
-    // const newIndex = this.dashboard.length - 1;
-    // this.renderChart(newIndex);
-    // }, 0);
   }
 
   createChartConfig(partial: any = {}, wigetSize: any = { cols: 2, rows: 2, x: 0, y: 0 }) {
@@ -264,15 +302,10 @@ export class Dashboard implements OnInit, AfterViewInit {
     };
   }
 
-  /** Load all charts after grid initializes */
   loadAllCharts(): void {
-    // this.dashboard.forEach((_, i) => this.loadChart(i));
     this.dashboard.forEach((_, i) => this.renderChart(i));
   }
 
-
-
-  /** Load a chart inside given index */
   loadChart(index: number): void {
     const container = document.getElementById('chart-container' + index);
     if (!container) return;
@@ -549,7 +582,7 @@ export class Dashboard implements OnInit, AfterViewInit {
         }
       },
       error: (err) => {
-        this.notifyService.success(err.message, 'success');
+        this.notifyService.error(err.error.message, 'error');
         console.error('HTTP Error:', err);
       },
       complete: () => {
@@ -560,10 +593,10 @@ export class Dashboard implements OnInit, AfterViewInit {
 
   updatFileName() {
     console.log('uploadedFileName', this.selectedChartFiles.name);
-    this.apiServices.updateFile(this.selectedChartFiles.name, {
+    this.apiServices.updateFile(this.selectedChartFiles.id, {
       listOfChartOption: this.dashboard,
       sourceData: this.allDataFromChart.sourceData
-    }).subscribe({
+    }, this.selectedChartFiles.name,).subscribe({
       next: (res: any) => {
         if (res.status) {
           this.chartEventService.emitCreateChart(this.selectedChartFiles.name);
@@ -572,7 +605,7 @@ export class Dashboard implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error('HTTP Error:', err);
-        this.notifyService.success(err.message, 'error');
+        this.notifyService.error(err.error.message, 'error');
       },
       complete: () => {
         console.log('Request completed.');

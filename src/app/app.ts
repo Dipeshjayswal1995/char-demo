@@ -19,7 +19,37 @@ export class App {
 
   ngOnInit() {
     // this.loadFileList();
+    this.loadConfig();
+    // this.saveConfig();
   }
+
+  loadConfig() {
+    this.apiServices.getConfig().subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          // this.config = res.config;
+        }
+        // this.loading = false;
+      },
+      error: (err) => {
+        console.error("Error loading config", err);
+        // this.loading = false;
+      }
+    });
+  }
+
+  saveConfig() {
+    this.apiServices.saveConfig({ "manoj": "jayswal" }).subscribe({
+      next: (res) => {
+        console.log("Config saved:", res);
+        alert("✅ Config saved successfully!");
+      },
+      error: (err) => {
+        console.error("Error saving config", err);
+      }
+    });
+  }
+
 
 
   loadFileList() {

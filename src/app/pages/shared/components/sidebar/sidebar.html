@@ -1,5 +1,5 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav mode="side" opened class="sidenav" *ngIf="sidebarVisible">
+  <mat-sidenav mode="side" opened class="sidenav" >
     <div class="sidebar-header">
       <!-- <button mat-raised-button color="primary" class="sidebar-btn" (click)="createNewChart()">
         <mat-icon>add</mat-icon>
@@ -7,9 +7,10 @@
       </button> -->
     </div>
     <mat-nav-list>
-      <a  [ngClass]="{'active-link': selectedTab === file.name}" mat-list-item *ngFor="let file of files" (click)="viewChart(file)">
-        <span class="file-name">{{ file.name }}</span>
+      <a  [ngClass]="{'active-link': selectedTab === file.displayName}" mat-list-item *ngFor="let file of files" (click)="viewChart(file)">
+        <span class="file-name">{{ file?.displayName }}</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>
+
 </mat-sidenav-container>

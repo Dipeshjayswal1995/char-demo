@@ -1,20 +1,64 @@
-.options-header {
+/* Top Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.left-controls {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
-.button-holder {
+.save-btn {
+  padding: 6px 12px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #145a9e;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.file-name {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Chart Card */
+.chart-card {
   position: relative;
-  width: 100%;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-.button-holder button {
+/* Chart action buttons inside gridster item */
+.chart-actions {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  z-index: 2;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
 }
 
 .chart-box {
@@ -36,50 +80,3 @@
     min-height: 180px;
   }
 }
-
-// new css
-.create-dashboard {
-  padding: 20px;
-  background: #f2f2f2;
-  border-radius: 4px;
-
-  .full-width {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-
-  .section-title {
-    font-size: 14px;
-    font-weight: 500;
-    margin: 15px 0 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .link {
-      font-size: 13px;
-      color: #1976d2;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-
-  .search-box {
-    margin-bottom: 10px;
-  }
-
-  mat-selection-list {
-    max-height: 200px;
-    overflow-y: auto;
-    background: #fff;
-    border: 1px solid #ddd;
-  }
-
-  .footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-}
-
-

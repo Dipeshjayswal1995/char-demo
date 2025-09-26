@@ -287,6 +287,7 @@ export class LoadChart {
     console.log(series);
     return {
       chart: {
+        backgroundColor: 'transparent',
         zooming: {
           type: zooming
         }

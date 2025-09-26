@@ -17,7 +17,7 @@ import { ChartEventService } from '../../../../@core/services/chart-event-servic
   standalone: true,
 })
 export class Sidebar {
-  files: { name: string; createdAt?: string }[] = [];
+  files: { filename: string; createdAt?: string, id: string,  updatedAt?:string, displayName:string}[] = [];
   selectedTab: string = '';
   sidebarVisible = true;
   constructor(private readonly router: Router, private readonly apiServices: ApiServices, private readonly route: ActivatedRoute, private readonly storage: StorageService,
@@ -48,13 +48,13 @@ export class Sidebar {
     return name.replace(/[^a-zA-Z0-9-]/g, '-');
   }
 
-  loadFileList(fileName: string = '') {
+  loadFileList(name: string = '') {
     this.apiServices.getFiles().subscribe({
       next: (res: any) => {
         if (res.status) {
           this.files = res.data;
-          if (fileName) {
-            const index = this.files.findIndex(file => file.name === fileName);
+          if (name) {
+            const index = this.files.findIndex(file => file.displayName === name);
             if (this.files[index]) {
               this.viewChart(this.files[index]);
             }
@@ -87,7 +87,7 @@ export class Sidebar {
 
   viewChart(item: any) {
     console.log('item', item);
-    this.selectedTab = item.name;
+    this.selectedTab = item;
     this.chartEventService.changeTab(item);
   }
 

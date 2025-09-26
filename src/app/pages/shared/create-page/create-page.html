@@ -1,12 +1,22 @@
-<!-- <h2 mat-dialog-title>Enter File Name</h2> -->
-<mat-dialog-content>
-  <p>Enter FileName</p>
-  <mat-form-field>
-    <!-- <mat-label>Favorite Animal</mat-label> -->
-    <input matInput [(ngModel)]="fileName" />
+<mat-dialog-content [formGroup]="reportForm">
+  <p>Enter Report Name</p>
+  <mat-form-field appearance="outline" style="width: 100%">
+    <mat-label>Report Name</mat-label>
+    <input matInput formControlName="fileName" />
+    <mat-error *ngIf="reportForm.get('fileName')?.hasError('required')">
+      Report name is required
+    </mat-error>
+    <mat-error *ngIf="reportForm.get('fileName')?.hasError('whitespace')">
+      Report name cannot be blank spaces
+    </mat-error>
+    <mat-error *ngIf="reportForm.get('fileName')?.hasError('maxlength')">
+      Maximum 30 characters allowed
+    </mat-error>
   </mat-form-field>
 </mat-dialog-content>
-<mat-dialog-actions>
-  <button matButton (click)="animal()">Cancel</button>
-  <button matButton  (click)="selectName()" cdkFocusInitial>Ok</button>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="selectName()" [disabled]="reportForm.invalid" cdkFocusInitial>
+    Ok
+  </button>
 </mat-dialog-actions>
