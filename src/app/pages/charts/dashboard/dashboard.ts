@@ -151,9 +151,10 @@ export class Dashboard implements OnInit, AfterViewInit {
     this.dialog.open(CreatePage, { data: reportName, disableClose: true }).afterClosed().subscribe((data) => {
       if (data) {
         console.log('Dialog result:', data);
-        if (this.selectedChartFiles && this.selectedChartFiles.name) {
-          this.selectedChartFiles['oldName'] = this.selectedChartFiles.name;
-          this.selectedChartFiles['name'] = data;
+        if (this.selectedChartFiles && this.selectedChartFiles.displayName) {
+          this.selectedChartFiles['oldName'] = this.selectedChartFiles.displayName;
+          const data1 = JSON.stringify(data)
+          this.selectedChartFiles['displayName'] = JSON.parse(data1);
         } else {
           this.createNewFiles = data;
         }
@@ -592,14 +593,14 @@ export class Dashboard implements OnInit, AfterViewInit {
   }
 
   updatFileName() {
-    console.log('uploadedFileName', this.selectedChartFiles.name);
+    // console.log('uploadedFileName', this.selectedChartFiles.name);
     this.apiServices.updateFile(this.selectedChartFiles.id, {
       listOfChartOption: this.dashboard,
       sourceData: this.allDataFromChart.sourceData
-    }, this.selectedChartFiles.name,).subscribe({
+    }, this.selectedChartFiles.displayName).subscribe({
       next: (res: any) => {
         if (res.status) {
-          this.chartEventService.emitCreateChart(this.selectedChartFiles.name);
+          this.chartEventService.emitCreateChart(this.selectedChartFiles.displayName);
           this.notifyService.success(res.message, 'success');
         }
       },

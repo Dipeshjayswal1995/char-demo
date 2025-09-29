@@ -1,25 +1,20 @@
 <header class="app-header">
   <div class="header-left">
-    <span class="app-title">📊 Ace High Charts</span>
+    <span class="app-title">Ace High Charts</span>
+  </div>
 
-    <button
-      mat-raised-button
-      color="primary"
-      class="sidebar-btn"
-      (click)="createNewChart()"
-      *ngIf="!isViewCharts"
-    >
+  <div class="header-actions">
+    <button mat-raised-button color="primary" class="sidebar-btn" (click)="createNewChart()" *ngIf="!isViewCharts">
       <mat-icon>add</mat-icon>
       Create Report
     </button>
-  </div>
 
-  <div class="header-right">
-    <mat-slide-toggle
-      class="mode-switch"
-      [checked]="!isViewCharts"
-      (change)="toggleView($event)"
-    >
+    <button mat-raised-button color="primary" class="sidebar-btn" (click)="openProjectSettion()" *ngIf="!isViewCharts">
+      <mat-icon>settings</mat-icon>
+      Project Settings
+    </button>
+
+    <mat-slide-toggle class="mode-switch" [checked]="!isViewCharts" (change)="toggleView($event)">
       {{ isViewCharts ? 'Switch to Designer' : 'Switch to Viewer' }}
     </mat-slide-toggle>
   </div>

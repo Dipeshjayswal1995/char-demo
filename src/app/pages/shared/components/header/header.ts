@@ -10,6 +10,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ChartEventService } from '../../../../@core/services/chart-event-service';
 import { CreatePage } from '../../create-page/create-page';
+import { ProjectConfiguration } from '../project-configuration/project-configuration';
 
 @Component({
   selector: 'app-header',
@@ -46,22 +47,24 @@ export class Header {
   }
 
   createNewChart() {
-    // // this.selectedTab = '';
-    // this.router.navigate(['/dashboard']);
-    // this.chartEventService.createChart(true);
     console.log('Create New Chart');
     this.dialog.open(CreatePage, { disableClose: true }).afterClosed().subscribe((data) => {
       if (data) {
-        // this.router.navigate(['/dashboard?mode=designer']);        // this.router.navigate(['/dashboard?mode=designer']);
         this.chartEventService.createChart(data);
       }
     });
   }
 
-
-
   toggleSidebar() {
     this.sidebarToggle.emit();
+  }
+
+  openProjectSettion() {
+    this.dialog.open(ProjectConfiguration, { data: 'reportName',  panelClass: ['modal-fullscreen-right', 'modal-md'], disableClose: true }).afterClosed().subscribe((data) => {
+      if (data) {
+        console.log('Dialog result:', data);
+      }
+    });
   }
 
 }

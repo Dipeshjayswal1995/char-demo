@@ -10,11 +10,11 @@
 
   <div class="file-info">
     <span class="file-name">
-      {{selectedChartFiles?.name ? selectedChartFiles?.name : createNewFiles}}
+      {{selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles}}
     </span>
     @if(!isViewCharts) {
     <button mat-mini-fab
-      (click)="editNameOfReportFiles(selectedChartFiles?.name ? selectedChartFiles?.name : createNewFiles)">
+      (click)="editNameOfReportFiles(selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles)">
       <mat-icon>edit</mat-icon>
     </button>
     }

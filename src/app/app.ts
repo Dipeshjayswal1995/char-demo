@@ -18,22 +18,20 @@ export class App {
   }
 
   ngOnInit() {
-    // this.loadFileList();
     this.loadConfig();
-    // this.saveConfig();
   }
 
   loadConfig() {
     this.apiServices.getConfig().subscribe({
       next: (res: any) => {
         if (res.success) {
-          // this.config = res.config;
+          this.storage.setPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION, JSON.stringify(res.config));
+          console.log(res.config);
         }
-        // this.loading = false;
       },
       error: (err) => {
         console.error("Error loading config", err);
-        // this.loading = false;
+
       }
     });
   }

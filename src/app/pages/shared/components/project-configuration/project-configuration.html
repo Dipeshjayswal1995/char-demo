@@ -1,0 +1,58 @@
+<mat-card class="config-card">
+    <mat-card-header>
+        <mat-card-title>Project Configuration</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <form [formGroup]="projectForm" class="form-container"> <!-- Project Name -->
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Project Name</mat-label>
+                <input matInput formControlName="projectName" placeholder="Enter project name" />
+                <mat-error *ngIf="projectForm.get('projectName')?.hasError('required')"> Project name is required
+                </mat-error>
+            </mat-form-field> <!-- Logo Upload / Preview -->
+
+            <div class="logo-section">
+                <div class="upload-box" *ngIf="!logoPreview"> <label for="logoInput" class="upload-label">
+                        <div class="upload-content"> <i class="fa fa-upload"></i>
+                            <p>Upload Logo</p>
+                        </div>
+                    </label> <input id="logoInput" type="file" accept="image/*" (change)="onLogoChange($event)"
+                        hidden /> </div>
+                <div class="logo-preview" *ngIf="logoPreview"> <img [src]="logoPreview" alt="Logo Preview" /> <button
+                        class="close-btn" type="button" (click)="removeLogo()">×</button> </div>
+            </div> <!-- Color Picker Section -->
+
+            <div class="color-grid">
+                <div class="form-group">
+                    <label class="label">Sidebar Color</label>
+                    <input type="color" formControlName="sidebarColor" />
+                </div>
+                <div class="form-group">
+                    <label class="label">Container Background</label>
+                    <input type="color" formControlName="mainBackgroundColor" />
+                </div>
+                <div class="form-group">
+                    <label class="label">Text Color</label>
+                    <input type="color" formControlName="textColour" />
+                </div>
+                <div class="form-group">
+                    <label class="label">Chart Background</label>
+                    <input type="color" formControlName="chartBackgroundColor" />
+                </div>
+                <div class="form-group">
+                    <label class="label">Selection Color</label>
+                    <input type="color" formControlName="selectedColor" />
+                </div>
+                <div class="form-group">
+                    <label class="label">Tiles Color</label>
+                    <input type="color" formControlName="tilesColor" />
+                </div>
+            </div>
+        </form>
+    </mat-card-content>
+    
+    <mat-card-actions align="end"> 
+        <button mat-button color="warn" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="projectForm.invalid"> Save </button>
+    </mat-card-actions> </mat-card>

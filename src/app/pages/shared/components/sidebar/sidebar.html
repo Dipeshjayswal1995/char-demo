@@ -7,7 +7,7 @@
       </button> -->
     </div>
     <mat-nav-list>
-      <a  [ngClass]="{'active-link': selectedTab === file.displayName}" mat-list-item *ngFor="let file of files" (click)="viewChart(file)">
+      <a  [ngClass]="{'active-link': selectedTab === file.id}" mat-list-item *ngFor="let file of files" (click)="viewChart(file)">
         <span class="file-name">{{ file?.displayName }}</span>
       </a>
     </mat-nav-list>

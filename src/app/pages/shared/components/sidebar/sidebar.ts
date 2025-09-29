@@ -17,7 +17,7 @@ import { ChartEventService } from '../../../../@core/services/chart-event-servic
   standalone: true,
 })
 export class Sidebar {
-  files: { filename: string; createdAt?: string, id: string,  updatedAt?:string, displayName:string}[] = [];
+  files: { filename: string; createdAt?: string, id: string, updatedAt?: string, displayName: string }[] = [];
   selectedTab: string = '';
   sidebarVisible = true;
   constructor(private readonly router: Router, private readonly apiServices: ApiServices, private readonly route: ActivatedRoute, private readonly storage: StorageService,
@@ -53,13 +53,15 @@ export class Sidebar {
       next: (res: any) => {
         if (res.status) {
           this.files = res.data;
-          if (name) {
-            const index = this.files.findIndex(file => file.displayName === name);
-            if (this.files[index]) {
-              this.viewChart(this.files[index]);
+          if (this.files.length) {
+            if (name) {
+              const index = this.files.findIndex(file => file.displayName === name);
+              if (this.files[index]) {
+                this.viewChart(this.files[index]);
+              }
+            } else {
+              this.viewChart(this.files[0]);
             }
-          } else {
-            this.viewChart(this.files[0]);
           }
         } else {
           this.files = [];
@@ -86,9 +88,11 @@ export class Sidebar {
   }
 
   viewChart(item: any) {
-    console.log('item', item);
-    this.selectedTab = item;
-    this.chartEventService.changeTab(item);
+    if (item) {
+      console.log('item', item);
+      this.selectedTab = item.id;
+      this.chartEventService.changeTab(item);
+    }
   }
 
 }
