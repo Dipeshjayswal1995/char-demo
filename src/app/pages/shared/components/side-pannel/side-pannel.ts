@@ -12,6 +12,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { LOCAL_STORAGE_KEYS } from '../../../../@core/utils/local-storage-key.utility';
 
 declare const Highcharts: any;
 
@@ -53,7 +54,7 @@ export class SidePannel {
   pieStartAngal: number = 0;
   pieENDAngal: number = 0;
   uploadedExcelData: any[] | null = null;
-  
+
   chartCategories: any[] = [];
   selectedChartCate: any = null;
   selectedChartType: any = null;
@@ -75,17 +76,31 @@ export class SidePannel {
   sourceType = 1; // 1: API, 2: Excel
   addNewSource = false;
   sourceName: string = '';
+  projectData: any = null;
 
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private readonly ngZone: NgZone,
     private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
     private readonly chartEventService: ChartEventService, private readonly route: ActivatedRoute, public dialogRef: MatDialogRef<SidePannel>,
     @Inject(MAT_DIALOG_DATA) public modalData: any) {
+    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
   }
 
   ngOnInit() {
     console.log("modalData =>", this.modalData);
+    this.setDynamicThemeing();
   }
 
+  setDynamicThemeing() {
+    if (this.projectData) {
+      document.documentElement.style.setProperty('--bg-color', this.projectData.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--color-text', this.projectData.textColor || '#333');
+      document.documentElement.style.setProperty('--button-bg', this.projectData.selectedColor || '#1976d2');
+      document.documentElement.style.setProperty('--chart-background', this.projectData.chartBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--button-bg-hover', this.projectData.mainBackgroundColor || '#145a9e');
+      document.documentElement.style.setProperty('--card-bg', this.projectData.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--card-text', this.projectData.mainBackgroundColor || '#333');
+    }
+  }
 
   ngAfterViewInit(): void {
     this.loadChartCategories();
@@ -207,36 +222,125 @@ export class SidePannel {
     this.selectedSeriesFields.splice(index, 1);
   }
 
+  //   onFileChange(event: any): void {
+  //   const target: DataTransfer = <DataTransfer>(event.target);
+  //   if (target.files.length !== 1) throw new Error('Cannot use multiple files');
+
+  //   const reader: FileReader = new FileReader();
+  //   reader.onload = (e: any) => {
+  //     const bstr: string = e.target.result;
+  //     const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+  //     // Get first sheet
+  //     const wsname: string = wb.SheetNames[0];
+  //     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+  //     // Read raw rows (2D array)
+  //     const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as any[][];
+  //     const filteredRows = data.filter(row => row.some(cell => cell !== ''));
+  //     const [headerRow, ...rows] = filteredRows;
+
+  //     // ✅ Build clean JSON with formatted values
+  //     const cleanJson = rows.map((row, rowIndex) => {
+  //       const obj: any = {};
+  //       headerRow.forEach((header, colIndex) => {
+  //         const cellAddress = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
+  //         const cell = ws[cellAddress];
+
+  //         if (cell && cell.w) {
+  //           // If Excel stored formatted text (e.g. dates) → use it
+  //           obj[header] = cell.w;
+  //         } else {
+  //           // Otherwise use raw value
+  //           obj[header] = row[colIndex];
+  //         }
+  //       });
+  //       return obj;
+  //     });
+
+  //     console.log(cleanJson); // ✅ Dates show as "24-Apr-25"
+  //     this.uploadedExcelData = cleanJson;
+  //   };
+
+  //   reader.readAsBinaryString(target.files[0]);
+  // }
+
   onFileChange(event: any): void {
     const target: DataTransfer = <DataTransfer>(event.target);
-
-    if (target.files.length !== 1) {
-      console.error('Please select a single Excel file.');
-      return;
-    }
+    if (target.files.length !== 1) throw new Error('Cannot use multiple files');
 
     const file: File = target.files[0];
     const reader: FileReader = new FileReader();
     this.uploadedFileName = file.name;
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
-      const workbook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+      const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as any[][];
       const filteredRows = data.filter(row => row.some(cell => cell !== ''));
       const [headerRow, ...rows] = filteredRows;
-      const cleanJson = rows.map(row => {
+
+      const cleanJson = rows.map((row, rowIndex) => {
         const obj: any = {};
-        headerRow.forEach((header, i) => {
-          obj[header] = row[i];
+        headerRow.forEach((header, colIndex) => {
+          const cellAddress = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
+          const cell = ws[cellAddress];
+
+          if (!cell) {
+            obj[header] = null;
+            return;
+          }
+
+          if (cell.w && isNaN(Number(cell.w))) {
+            // ✅ If Excel already shows a formatted string (like "24-Apr-25" or "Ahmedabad")
+            obj[header] = cell.w;
+          } else if (cell.t === 'n') {
+            // ✅ If it's a number, keep as number
+            obj[header] = Number(cell.v);
+          } else if (cell.t === 's' || cell.t === 'str') {
+            obj[header] = String(cell.v);
+          } else if (cell.t === 'b') {
+            obj[header] = Boolean(cell.v);
+          } else {
+            obj[header] = cell.v;
+          }
         });
         return obj;
       });
+
+      console.log(cleanJson);
       this.uploadedExcelData = cleanJson;
     };
-    reader.readAsBinaryString(file);
+
+    reader.readAsBinaryString(target.files[0]);
   }
+
+  detectColumnTypes(data: any[][]): void {
+    const headers = data[0];
+    const rows = data.slice(1);
+
+    const columnTypes: Record<string, string> = {};
+
+    headers.forEach((header: string, colIndex: number) => {
+      const values = rows.map(r => r[colIndex]).filter(v => v !== undefined && v !== null && v !== '');
+
+      if (values.every(v => !isNaN(Date.parse(v)))) {
+        columnTypes[header] = 'date';
+      } else if (values.every(v => typeof v === 'number' || !isNaN(Number(v)))) {
+        columnTypes[header] = 'number';
+      } else if (values.every(v => typeof v === 'boolean' || v === 'true' || v === 'false')) {
+        columnTypes[header] = 'boolean';
+      } else {
+        columnTypes[header] = 'string';
+      }
+    });
+
+    console.log('Detected Column Types:', columnTypes);
+  }
+
 
   removeFile(): void {
     this.uploadedFileName = '';
@@ -329,9 +433,9 @@ export class SidePannel {
     // if (!this.validateRowData(data)) {
     //   this.notifyService.error('Row data not valid', 'Validation Failed', { timeOut: 5000 });
     //   return;
-    // }else 
-      if (this.modalData.sourceData.some((item: any) => item.name === this.sourceName)) {
-      this.notifyService.error('Source name already used can please use differnt','Failed', { timeOut: 5000 });
+    // }else
+    if (this.modalData.sourceData.some((item: any) => item.name === this.sourceName)) {
+      this.notifyService.error('Source name already used can please use differnt', 'Failed', { timeOut: 5000 });
       return;
     }
     this.addNewSource = false;
@@ -346,7 +450,7 @@ export class SidePannel {
     console.log(this.modalData);
   }
 
-  backToConfigChart(){
+  backToConfigChart() {
     this.addNewSource = false;
   }
 

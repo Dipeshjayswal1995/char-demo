@@ -7,6 +7,7 @@ export class ChartEventService {
   createChartEventApi = new EventEmitter();
   changeTabEvent = new EventEmitter();
   createNewChatEvent = new EventEmitter();
+  updateProjectConfig = new EventEmitter();
 
   emitCreateChart(fileName: string) {
     this.createChartEventApi.emit(fileName);
@@ -16,7 +17,11 @@ export class ChartEventService {
     this.changeTabEvent.emit(changeTab);
   }
 
-  createChart(createNew:any){
+  createChart(createNew: any) {
     this.createNewChatEvent.emit(createNew);
+  }
+
+  projectConfigFire(createNew: any) {
+    this.updateProjectConfig.emit(createNew);
   }
 }

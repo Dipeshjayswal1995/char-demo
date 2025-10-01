@@ -1,4 +1,3 @@
-
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
@@ -7,26 +6,49 @@
 @use '@angular/material' as mat;
 
 html {
-  @include mat.theme((
-    color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
+  @include mat.theme((color: (primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
 }
 
-.modal-fullscreen-right {position: fixed !important;right: 0;top: 0;height: 100vh;max-width: 100% !important;animation: show 0.4s ease normal;transform: inherit; transition: all ease-in-out 0.4s;}
+.modal-fullscreen-right {
+  position: fixed !important;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  background: var(----bg-color, #fff);
+  max-width: 100% !important;
+  animation: show 0.4s ease normal;
+  transform: inherit;
+  transition: all ease-in-out 0.4s;
+}
+
 .modal-md .mat-mdc-dialog-container,
-  .modal-md { width: 500px  }
-  @media (max-width:576px){
-  .modal-md,.modal-addon,.modal-md-lg,.modal-sm{max-width:100vw !important;min-width:100vw !important;width:100vw;overflow:auto;
-    .mat-mdc-dialog-container{
-      max-width:100vw !important;min-width:100vw;
+.modal-md {
+  width: 500px
+}
+
+@media (max-width:576px) {
+
+  .modal-md,
+  .modal-addon,
+  .modal-md-lg,
+  .modal-sm {
+    max-width: 100vw !important;
+    min-width: 100vw !important;
+    width: 100vw;
+    overflow: auto;
+
+    .mat-mdc-dialog-container {
+      max-width: 100vw !important;
+      min-width: 100vw;
     }
   }
 }
+
 body {
   // Default the application to a light color theme. This can be changed to
   // `dark` to enable the dark color theme, or to `light dark` to defer to the
@@ -43,8 +65,16 @@ body {
   // Reset the user agent margin.
   margin: 0;
 }
+
 /* You can add global styles to this file, and also import other style files */
 @import './../node_modules/ngx-toastr/toastr.css';
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

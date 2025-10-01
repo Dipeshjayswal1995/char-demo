@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { StorageService } from '../../../../@core/services/storage-service';
 import { ChartEventService } from '../../../../@core/services/chart-event-service';
+import { LOCAL_STORAGE_KEYS } from '../../../../@core/utils/local-storage-key.utility';
 
 @Component({
   selector: 'app-sidebar',
@@ -20,13 +21,12 @@ export class Sidebar {
   files: { filename: string; createdAt?: string, id: string, updatedAt?: string, displayName: string }[] = [];
   selectedTab: string = '';
   sidebarVisible = true;
+  projectData: any = null;
   constructor(private readonly router: Router, private readonly apiServices: ApiServices, private readonly route: ActivatedRoute, private readonly storage: StorageService,
     private readonly chartEventService: ChartEventService,
   ) {
-    // this.files = JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
-    // this.route.paramMap.subscribe(params => {
-    //   console.log(params.get('filename'));
-    // });
+    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
+    console.log('this.projectData==>', this.projectData);
 
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
@@ -38,6 +38,16 @@ export class Sidebar {
         this.loadFileList(data);
       }
     });
+    this.setDynamicThemeing();
+  }
+
+  setDynamicThemeing() {
+    if (this.projectData) {
+      document.documentElement.style.setProperty('--sidebar-bg', this.projectData.sidebarColor);
+      document.documentElement.style.setProperty('--text-color', this.projectData.textColor);
+      document.documentElement.style.setProperty('--active-link-bg', this.projectData.selectedColor);
+      document.documentElement.style.setProperty('--active-link-color', this.projectData.selectedColor);
+    }
   }
 
   ngOnInit() {

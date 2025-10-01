@@ -4,7 +4,7 @@
   justify-content: space-between;
   height: 64px;
   padding: 0 24px;
-  background: linear-gradient(90deg, #ffffff, #f9f9f9);
+  background: var(--sidebar-bg, #fff);
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 
@@ -17,7 +17,8 @@
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 16px; /* spacing between buttons + toggle */
+    gap: 16px;
+    /* spacing between buttons + toggle */
   }
 
   .sidebar-btn {
@@ -25,15 +26,22 @@
     padding: 4px 14px;
     border-radius: 8px;
     transition: all 0.2s ease;
+    background-color: var(--button-bg, #1565c0);
+    color: var(--text-color, #fff);
 
     &:hover {
-      background-color: #1565c0;
-      color: #fff;
+      background-color: var(--button-bg, #1565c0);
+      color: var(--text-color, #fff);
     }
   }
 
   .mode-switch {
     font-weight: 500;
-    color: #555;
+    color: var(--text-color, #fff) !important;
+  }
+
+  span {
+    cursor: pointer;
+    color: var(--text-color, #fff) !important;
   }
 }

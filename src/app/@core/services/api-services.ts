@@ -17,7 +17,7 @@ export class ApiServices {
   // private readonly baseUrl = 'http://localhost:3000';
   private readonly baseUrl = 'http://172.16.50.100:3000';
   // private readonly baseUrl = 'http://localhost:5025';
-  // private readonly baseUrl = 'http://172.16.50.7:5025'; live
+  // private readonly baseUrl = 'http://172.16.50.7:5025'; // Live
   constructor(private readonly http: HttpClient) { }
 
   // saveJson(filename: string, data: any): Observable<ApiResponse<any>> {
@@ -46,8 +46,8 @@ export class ApiServices {
 
 
   // ✅ Save JSON (filename is optional, server will generate if not provided)
-  saveJson(filename: string, data: any): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/save-json`, { filename, data });
+  saveJson(displayName: string, data: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/save-json`, { displayName, data });
   }
 
   // ✅ Get list of files (from metadata)
@@ -61,8 +61,8 @@ export class ApiServices {
   }
 
   // ✅ Update file content (id + optional newFilename)
-  updateFile(id: string, data: any, newFilename?: string): Observable<ApiResponse<any>> {
-    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/file/${id}`, { data, newFilename });
+  updateFile(id: string, data: any, newDisplayName?: string): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/file/${id}`, { data, newDisplayName });
   }
 
   // ✅ Delete file by ID

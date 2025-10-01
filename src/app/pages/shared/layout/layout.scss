@@ -8,28 +8,35 @@
 /* Sidebar */
 app-sidebar {
   width: 300px;
-  min-width: 300px; /* Add a min-width to ensure it doesn't shrink prematurely */
+  min-width: 300px;
+  /* Add a min-width to ensure it doesn't shrink prematurely */
   background-color: #2f3e46;
   color: white;
   min-height: 100vh;
-  transition: all 0.3s ease; /* Transition for width, opacity, and padding */
-  overflow: hidden; /* Hide content when collapsed */
+  transition: all 0.3s ease;
+  /* Transition for width, opacity, and padding */
+  overflow: hidden;
+  /* Hide content when collapsed */
 }
 
 /* Styles for when the sidebar is hidden */
 .layout-wrapper.sidebar-hidden app-sidebar {
-  width: 0; /* Collapse the width */
+  width: 0;
+  /* Collapse the width */
   min-width: 0;
-  padding: 0; /* Remove padding */
-  margin: 0; /* Remove margin */
+  padding: 0;
+  /* Remove padding */
+  margin: 0;
+  /* Remove margin */
 }
 
 /* Layout Content */
 .layout-content {
-  flex: 1; /* This is what makes the content expand */
+  flex: 1;
+  /* This is what makes the content expand */
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--main-container-bg, white);
   overflow: auto;
   transition: all 0.3s ease;
 }

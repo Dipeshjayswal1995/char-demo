@@ -15,6 +15,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ApiServices } from '../../../../@core/services/api-services';
 import { StorageService } from '../../../../@core/services/storage-service';
 import { LOCAL_STORAGE_KEYS } from '../../../../@core/utils/local-storage-key.utility';
+import { NotificationMassageService } from '../../../../@core/services/notification-massage-service';
 
 @Component({
   selector: 'app-project-configuration',
@@ -34,25 +35,38 @@ import { LOCAL_STORAGE_KEYS } from '../../../../@core/utils/local-storage-key.ut
 export class ProjectConfiguration implements OnInit {
 
   projectForm: FormGroup;
-  logoPreview: string | null = null;
   projectData: any;
   constructor(private readonly fb: FormBuilder, public dialogRef: MatDialogRef<ProjectConfiguration>,
-    @Inject(MAT_DIALOG_DATA) public modalData: any, private readonly apiServices: ApiServices, private readonly storage: StorageService) {
+    @Inject(MAT_DIALOG_DATA) public modalData: any, private readonly apiServices: ApiServices, private readonly storage: StorageService, private readonly notifyService: NotificationMassageService) {
     this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
     console.log("Project Data:", this.projectData);
     this.projectForm = this.fb.group({
-      projectName: [this.projectData.projectName ? this.projectData.projectName : '' , Validators.required],
-      sidebarColor: ['#1976d2', Validators.required],
-      mainBackgroundColor: ['#ffffff', Validators.required],
-      textColour: ['#f5f5f5', Validators.required],
-      projectLogo: [null, Validators.required],
-      chartBackgroundColor: ['#ffffff', Validators.required],
-      selectedColor: ['#1976d2', Validators.required],
-      tilesColor: ['#e0e0e0', Validators.required],
+      projectName: [this.projectData.projectName ? this.projectData.projectName : '', Validators.required],
+      sidebarColor: [this.projectData.sidebarColor ? this.projectData.sidebarColor : '', Validators.required],
+      mainBackgroundColor: [this.projectData.mainBackgroundColor ? this.projectData.mainBackgroundColor : '', Validators.required],
+      textColor: [this.projectData.textColor ? this.projectData.textColor : '', Validators.required],
+      projectLogo: [this.projectData.projectLogo ? this.projectData.projectLogo : '', Validators.required],
+      chartBackgroundColor: [this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : '', Validators.required],
+      selectedColor: [this.projectData.selectedColor ? this.projectData.selectedColor : '', Validators.required],
+      // tilesColor: [this.projectData.tilesColor ? this.projectData.tilesColor : '', Validators.required],
     });
+    console.log(this.projectForm.value.projectLogo)
+    this.setDynamicThemeing();
   }
 
   ngOnInit(): void {
+  }
+
+  setDynamicThemeing() {
+    if (this.projectData) {
+      document.documentElement.style.setProperty('--header-bg', this.projectData.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--color-text', this.projectData.textColor || '#333');
+      document.documentElement.style.setProperty('--button-bg', this.projectData.selectedColor || '#1976d2');
+      document.documentElement.style.setProperty('--chart-background', this.projectData.chartBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--button-bg-hover', this.projectData.mainBackgroundColor || '#145a9e');
+      document.documentElement.style.setProperty('--card-bg', this.projectData.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--card-text', this.projectData.mainBackgroundColor || '#333');
+    }
   }
 
   getProjectData() {
@@ -87,8 +101,8 @@ export class ProjectConfiguration implements OnInit {
 
       const reader = new FileReader();
       reader.onload = () => {
-        this.logoPreview = reader.result as string; // base64 string
-        this.projectForm.patchValue({ projectLogo: this.logoPreview });
+        const logoPreview = reader.result as string; // base64 string
+        this.projectForm.patchValue({ projectLogo: logoPreview });
         // this.logoPreview = this.logoBase64;
       };
       reader.readAsDataURL(file);
@@ -96,14 +110,40 @@ export class ProjectConfiguration implements OnInit {
   }
 
   removeLogo() {
-    this.logoPreview = null;
+    this.projectForm.value.projectLogo = null;
   }
 
   onSubmit() {
     if (this.projectForm.valid) {
       console.log('Project Configuration:', this.projectForm.value);
       // Here you can call API to save settings
+      this.updateProjectFiles();
     }
+  }
+
+  updateProjectFiles() {
+    this.apiServices.saveConfig({
+      id: this.projectData.id,
+      ...this.projectForm.value
+    }).subscribe({
+      next: (res: any) => {
+        if (!res?.success) {
+          console.error("API Error:", res?.message || "Unknown error");
+          return;
+        }
+        if (res.config) {
+          this.storage.setPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION, JSON.stringify(res.config));
+          this.notifyService.success(res.message, 'success');
+          this.dialogRef.close(true);
+        }
+      },
+      error: (err) => {
+        console.error("HTTP Error:", err);
+      },
+      complete: () => {
+        console.log("Request completed.");
+      }
+    });
   }
 
   onCancel() {

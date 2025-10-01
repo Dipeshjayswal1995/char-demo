@@ -71,7 +71,7 @@
                     <p class="recommended-size">Recommended size 5MB</p>
                 </div>
 
-                <input type="file" #fileInput (change)="onFileChange($event)" accept=".xlsx, .xls"
+                <input type="file" #fileInput (change)="onFileChange($event)" accept=".xlsx, .xls, .csv"
                     style="display: none;">
             </div>
         </div>
@@ -177,7 +177,6 @@
                             <option value="spline">Spline</option>
                             <option value="line">line</option>
                             <option value="area">area</option>
-                            <option value="scatter">Scatter</option>
                         </select>
                     </div>
 

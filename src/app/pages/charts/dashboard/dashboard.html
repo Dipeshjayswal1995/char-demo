@@ -1,10 +1,13 @@
+<!-- <div class="main-container"> -->
+
+@if (selectedChartFiles || createNewFiles) {
 <div class="dashboard-header">
   <div class="left-controls">
     @if(!isViewCharts) {
     <button mat-mini-fab (click)="addItem()" class="add-button">
       <mat-icon>add</mat-icon>
     </button>
-    <button class="save-btn" (click)="saveData()">🔁 Save</button>
+    <button class="save-btn" (click)="saveData()">Save</button>
     }
   </div>
 
@@ -13,14 +16,14 @@
       {{selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles}}
     </span>
     @if(!isViewCharts) {
-    <button mat-mini-fab
+    <button mat-mini-fab class="add-button"
       (click)="editNameOfReportFiles(selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles)">
       <mat-icon>edit</mat-icon>
     </button>
     }
   </div>
 </div>
-
+}
 
 @if (!remove) {
 <gridster [options]="options" (resize)="onResize()">
@@ -29,10 +32,10 @@
     <div class="chart-card">
       @if(!isViewCharts) {
       <div class="chart-actions">
-        <button mat-mini-fab (click)="openModal(item?.['chartConfig'], i)">
+        <button mat-mini-fab (click)="openModal(item?.['chartConfig'], i)" class="add-button">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-mini-fab (click)="removeItem($event, item)">
+        <button mat-mini-fab (click)="removeItem($event, item)" class="add-button">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
@@ -43,3 +46,4 @@
   }
 </gridster>
 }
+<!-- </div> -->

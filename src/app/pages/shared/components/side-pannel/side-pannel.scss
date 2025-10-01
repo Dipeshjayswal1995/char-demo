@@ -3,19 +3,21 @@
   padding: 1.5rem;
   max-width: 1400px;
   margin: auto;
+  background: var(--bg-color, #fff);
+  color: var(--color-text, #fff);
 
   h1 {
     text-align: center;
     font-size: 1.8rem;
     margin-bottom: 2rem;
-    color: #2c3e50;
+    color: var(--color-text, #fff);
   }
 
   h4 {
     text-align: center;
     font-size: 1.5rem;
     margin-bottom: 2rem;
-    color: #2c3e50;
+    color: var(--color-text, #fff);
     margin-top: 0;
   }
 }
@@ -45,7 +47,8 @@
 }
 
 .form-container {
-  background: #fff;
+  background: var(--bg-color, #fff);
+  color: var(--color-text, #fff);
   padding: 2rem;
   margin: 0 auto;
   max-width: 650px;
@@ -56,61 +59,61 @@
 }
 
 .form-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 
-label {
+  label {
     flex: 0 0 140px;
     font-weight: 600;
-    color: #333;
+    color: var(--color-text, #fff);
     display: flex;
     align-items: center;
     gap: 6px;
-}
+  }
 
-input[type="text"],
-select {
-  flex: 1;
-  padding: 0.7rem;
-  font-size: 0.95rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #fff;
-  color: #333;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* Focus state (same as text input focus) */
-input[type="text"]:focus,
-select:focus {
-  border-color: #3388ff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(51, 136, 255, 0.2);
-}
-
-/* Make option dropdown cleaner */
-select option {
-  padding: 0.6rem;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-input[type="text"],
-input[type="file"] {
+  input[type="text"],
+  select {
     flex: 1;
     padding: 0.7rem;
     font-size: 0.95rem;
     border: 1px solid #ccc;
     border-radius: 6px;
-}
+    background: var(--bg-color, #fff);
+    color: var(--color-text, #fff);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
 
-/* --- File Upload Box Styling --- */
-.file-upload-box {
+  /* Focus state (same as text input focus) */
+  input[type="text"]:focus,
+  select:focus {
+    border-color: #3388ff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(51, 136, 255, 0.2);
+  }
+
+  /* Make option dropdown cleaner */
+  select option {
+    padding: 0.6rem;
+    font-size: 0.95rem;
+    color: var(--color-text, #fff);
+  }
+
+  input[type="text"],
+  input[type="file"] {
+    flex: 1;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  /* --- File Upload Box Styling --- */
+  .file-upload-box {
     flex: 1;
     border: 2px dashed #ccc;
     border-radius: 8px;
@@ -123,48 +126,48 @@ input[type="file"] {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
+  }
 
-.file-upload-box:hover {
+  .file-upload-box:hover {
     border-color: #007bff;
-}
+  }
 
-/* --- Empty State Styling --- */
-.empty-state-design {
+  /* --- Empty State Styling --- */
+  .empty-state-design {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     color: #888;
-}
+  }
 
-.upload-icon-container .upload-icon {
+  .upload-icon-container .upload-icon {
     font-size: 48px;
-    color: #3388ff;
-}
+    color: var(--color-text, #fff);
+  }
 
-.empty-state-design .upload-text {
+  .empty-state-design .upload-text {
     font-weight: 600;
-    color: #555;
+    color: var(--color-text, #fff);
     margin: 0;
-}
+  }
 
-.empty-state-design .recommended-size {
+  .empty-state-design .recommended-size {
     font-size: 0.85rem;
-    color: #aaa;
+    color: var(--color-text, #fff);
     margin: 0;
-}
+  }
 
-/* --- Uploaded State Styling --- */
-.uploaded-file-icon {
+  /* --- Uploaded State Styling --- */
+  .uploaded-file-icon {
     display: flex;
     align-items: center;
     gap: 1rem;
     width: 100%;
-}
+  }
 
-.file-icon-container {
-    background-color: #e3f2fd;
+  .file-icon-container {
+    background: var(--bg-color, #fff);
     border: 1px solid #bbdefb;
     border-radius: 6px;
     width: 60px;
@@ -173,40 +176,40 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-}
+  }
 
-.file-icon {
+  .file-icon {
     font-size: 23px;
-    color: #0d47a1;
-}
+    color: var(--color-text, #fff);
+  }
 
-.file-info {
+  .file-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     flex-grow: 1;
     min-width: 0;
-}
+  }
 
-.file-name {
+  .file-name {
     font-weight: 600;
-    color: #333;
+    color: var(--color-text, #fff);
     word-break: break-all;
-}
+  }
 
-.remove-btn {
+  .remove-btn {
     color: #ff4d4d;
     font-size: 24px;
     cursor: pointer;
     margin-left: auto;
-}
+  }
 
 }
 
 .or-separator {
   text-align: center;
   font-weight: bold;
-  color: #888;
+  color: var(--color-text, #fff);
   margin: 1.5rem 0;
 }
 
@@ -223,22 +226,22 @@ input[type="file"] {
     border-radius: 6px;
     cursor: pointer;
     transition: background 0.3s;
-    color: white;
+    color: var(--color-text, #fff);
     background-color: #007bff;
 
     &:disabled {
-      background-color: #ccc;
+      background: var(--bg-color, #fff);
       cursor: not-allowed;
     }
 
     &.load-chart-btn {
-      background-color: #28a745;
+      background: var(--bg-color, #fff);
     }
   }
 }
 
 .data-loaded-banner {
-  background: #e8f5e9;
+  background: var(--button-bg, #fff);
   padding: 1rem;
   margin-bottom: 1rem;
   border-left: 5px solid #4caf50;
@@ -248,8 +251,8 @@ input[type="file"] {
   border-radius: 6px;
 
   button {
-    background-color: #007bff;
-    color: #fff;
+    background: var(--button-bg, #fff);
+    color: var(--color-text, #fff);
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -266,7 +269,7 @@ input[type="file"] {
 
 .sidebar {
   width: 320px;
-  background: #f8f9fa;
+background: var(--button-bg, #fff);
   padding: 1.2rem;
   border-radius: 10px;
   border: 1px solid #ddd;
@@ -421,10 +424,11 @@ input[type="file"] {
 }
 
 .sidebar-footer .apply-btn {
-  background-color: #007bff;
-  color: #fff;
+  color: var(--color-text, #fff);
+  background: var(--button-bg, #fff);
 }
 
 .sidebar-footer .apply-btn:hover {
-  background-color: #0056b3;
+  color: var(--color-text, #fff);
+  background: var(--button-bg, #fff);
 }

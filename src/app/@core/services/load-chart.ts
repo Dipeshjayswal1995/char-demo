@@ -1,12 +1,24 @@
 import { Injectable } from '@angular/core';
+import { StorageService } from './storage-service';
+import { LOCAL_STORAGE_KEYS } from '../utils/local-storage-key.utility';
+import { color } from 'highcharts';
+import { ChartEventService } from './chart-event-service';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoadChart {
-
-  constructor() { }
+  projectData: any = null;
+  constructor(private readonly storage: StorageService, private readonly chartEventService: ChartEventService) {
+    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
+    this.chartEventService.updateProjectConfig.subscribe((data) => {
+      // if (data) {
+      //   console.log('🔥 New chart mode activated!', data);
+      //   this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
+      // }
+    });
+  }
 
 
 
@@ -57,6 +69,18 @@ export class LoadChart {
           return this.getNoDataChart("xAxis or yAxis not provided");
         }
         if (selectedChartType.type === 'pie') {
+          const grouped = rawData.reduce((acc, r) => {
+            const key = r[xAxis];
+            if (!acc[key]) acc[key] = 0;
+            acc[key] += r[yAxis] ?? 0;
+            return acc;
+          }, {});
+
+          // ✅ Convert to Highcharts [{ name, y }] format
+          const data = Object.entries(grouped).map(([key, value]) => ({
+            name: key,
+            y: Number(value)
+          }));
           series = [{
             type: selectedChartType.type,
             innerSize: innerSize === '' ? 0 : innerSize + '%',
@@ -72,27 +96,32 @@ export class LoadChart {
             startAngle,
             endAngle,
             showInLegend: showLegend,
-            data: rawData.map(item => ({
-              name: item[xAxis],
-              y: Number(item[yAxis])
-            }))
+            data
           }];
           tooltip = {
             pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})'
           };
           console.log("series==>", series);
         } else {
-          categories = rawData.map(r => r[xAxis]);
+          const grouped = rawData.reduce((acc, r) => {
+            const key = r[xAxis];
+            if (!acc[key]) acc[key] = 0;
+            acc[key] += r[yAxis] ?? 0;
+            return acc;
+          }, {});
+          const categories = Object.keys(grouped);
+          const seriesData = Object.values(grouped);
           series = [{
             type: selectedChartType.type,
             stacking: stacking || undefined,
             name: yAxis,
             dataLabels: { enabled: dataLabel },
             enableMouseTracking,
-            data: rawData.map(r => r[yAxis] ?? null)
+            data: seriesData
           }];
           xAxisConfig = {
             categories,
+            // type: 'datetime',
             accessibility: {
               rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
             }
@@ -103,7 +132,7 @@ export class LoadChart {
 
         // XY CHARTS: spline, scatter
       } else if ([6].includes(selectedChartCate.id)) {
-        categories = rawData.map(r => r[xAxis]);
+
         if (!xAxis) {
           console.warn("⚠️ Missing xAxis  for  chart!");
           return this.getNoDataChart("xAxis not provided");
@@ -111,6 +140,16 @@ export class LoadChart {
           console.warn("⚠️ No series fields selected for XY Chart!");
           return this.getNoDataChart("No series fields selected");
         }
+        const yFields = selectedSeriesFields.map(f => f.field);
+        const grouped = rawData.reduce((acc, r) => {
+          const key = r[xAxis];
+          if (!acc[key]) acc[key] = {};
+          yFields.forEach(f => {
+            acc[key][f] = (acc[key][f] || 0) + (r[f] ?? 0);
+          });
+          return acc;
+        }, {});
+        const categories = Object.keys(grouped);
         series = selectedSeriesFields.map(field => ({
           type: selectedChartType.type,
           stacking: stacking || undefined,
@@ -118,7 +157,7 @@ export class LoadChart {
           dataLabels: { enabled: dataLabel },
           enableMouseTracking,
           color: field?.color,
-          data: rawData.map(r => r[field.field] ?? null),
+          data: categories.map(c => grouped[c][field.field] ?? 0),
         }));
         xAxisConfig = {
           categories,
@@ -129,10 +168,28 @@ export class LoadChart {
         yAxisConfig = undefined;
 
       } else if ([2].includes(selectedChartCate.id)) {
+        // const field = Array.isArray(yAxis) ? yAxis[0] : yAxis;
+        // const dataPoints: [number, number][] = rawData
+        //   .map(d => [Number(d[xAxis]), Number(d[field])] as [number, number])
+        //   .filter(([x, y]) => !isNaN(x) && !isNaN(y));
+
         const field = Array.isArray(yAxis) ? yAxis[0] : yAxis;
-        const dataPoints: [number, number][] = rawData
-          .map(d => [Number(d[xAxis]), Number(d[field])] as [number, number])
-          .filter(([x, y]) => !isNaN(x) && !isNaN(y));
+
+        // ✅ Group by xAxis
+        const grouped = rawData.reduce((acc: Record<number, number>, d) => {
+          const x = Number(d[xAxis]);
+          const y = Number(d[field]);
+          if (!isNaN(x) && !isNaN(y)) {
+            acc[x] = (acc[x] || 0) + y;
+          }
+          return acc;
+        }, {});
+
+        // ✅ Convert to Highcharts datapoints
+        const dataPoints: [number, number][] = Object.entries(grouped).map(
+          ([x, y]) => [Number(x), y]
+        );
+
         if (dataPoints.length === 0) {
           console.warn("⚠️ Invalid or missing numeric values for chart");
           return this.getNoDataChart("Invalid numeric values for chart");
@@ -167,11 +224,32 @@ export class LoadChart {
           console.warn("⚠️ X, Y or Third argument missing for  chart");
           return this.getNoDataChart("⚠️ X, Y or Third argument missing for  chart");
         }
-        const data: (string | number)[][] = rawData.map(item => [
-          item[xAxis],
-          item[yAxis],
-          item[thirdArgument]
-        ]);
+        // const data: (string | number)[][] = rawData.map(item => [
+        //   item[xAxis],
+        //   item[yAxis],
+        //   item[thirdArgument]
+        // ]);
+
+        // ✅ Strong typing for accumulator
+        const grouped: Record<string, { y: number; z: number }> = {};
+
+        rawData.forEach(row => {
+          const key = row[xAxis];
+          if (!grouped[key]) {
+            grouped[key] = { y: 0, z: 0 };
+          }
+          grouped[key].y += Number(row[yAxis] ?? 0);
+          if (thirdArgument) {
+            grouped[key].z += Number(row[thirdArgument] ?? 0);
+          }
+        });
+
+        // ✅ Correctly type Object.entries()
+        const data: (string | number)[][] = Object.entries(grouped).map(
+          ([x, vals]) =>
+            thirdArgument ? [x, vals.y, vals.z] : [x, vals.y]
+        );
+
         series = [{
           type: selectedChartType.type,
           name: xAxis,
@@ -198,11 +276,11 @@ export class LoadChart {
     // ✅ Final Safe Return
     return {
       chart: {
-        backgroundColor: 'transparent',
+        backgroundColor: this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : 'transparent',
         zooming: { type: zooming }
       },
-      title: { text: title || '', align: 'left' },
-      subtitle: { text: subTitle || '', align: 'left' },
+      title: { text: title || '', align: 'left', style: { color: this.projectData.textColor } },
+      subtitle: { text: subTitle || '', align: 'left', style: { color: this.projectData.textColor } },
       xAxis: xAxisConfig,
       yAxis: yAxisConfig,
       tooltip,
@@ -223,7 +301,7 @@ export class LoadChart {
   getNoDataChart(message: string) {
     return {
       chart: { backgroundColor: 'transparent' },
-      title: { text: '', align: 'center' },
+      title: { text: '', align: 'left' },
       series: [],
       lang: { noData: message },
       noData: {
@@ -252,7 +330,20 @@ export class LoadChart {
       console.warn("⚠️ Missing argument or yAxis fields for multi-dimensional chart!");
       return this.getNoDataChart("⚠️ Missing argument or yAxis fields for multi-dimensional chart!");
     }
-    const categories = rawData.map(item => item[selectedArgumentField]);
+    const grouped: Record<string, Record<string, number>> = {};
+    rawData.forEach(row => {
+      const key = row[selectedArgumentField];
+      if (!grouped[key]) grouped[key] = {};
+
+      yAxis.forEach(y => {
+        grouped[key][y.field] = (grouped[key][y.field] ?? 0) + Number(row[y.field] ?? 0);
+      });
+    });
+
+    // ✅ Categories (unique X values)
+    const categories = Object.keys(grouped);
+
+    // const categories = rawData.map(item => item[selectedArgumentField]);
     const series = yAxis.map((field, index) => ({
       name: field.title,
       type: field.chartType,
@@ -263,7 +354,7 @@ export class LoadChart {
         valueSuffix: ' ' + field.unit,
       },
       color: field.color,
-      data: rawData.map(r => r[field.field] ?? null),
+      data: categories.map(c => grouped[c][field.field] ?? 0),
     }));
     const yAxisData = yAxis.map((series, index) => ({
       title: {
@@ -287,13 +378,13 @@ export class LoadChart {
     console.log(series);
     return {
       chart: {
-        backgroundColor: 'transparent',
+        backgroundColor: this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : 'transparent',
         zooming: {
           type: zooming
         }
       },
-      title: { text: chatTitle },
-      subtitle: { text: subTitle },
+      title: { text: chatTitle || '', align: 'left', style: { color: this.projectData.textColor } },
+      subtitle: { text: subTitle || '', align: 'left', style: { color: this.projectData.textColor } },
       xAxis: [{
         categories: categories,
         crosshair: true
@@ -335,10 +426,10 @@ export class LoadChart {
     return {
       chart: {
         map: topology,
-        backgroundColor: 'transparent'
+        backgroundColor: this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : 'transparent',
       },
-      title: { text: title, align: 'left' },
-      subtitle: { text: subTitle, align: 'left' },
+      title: { text: title || '', align: 'left', style: { color: this.projectData.textColor } },
+      subtitle: { text: subTitle || '', align: 'left', style: { color: this.projectData.textColor } },
       mapNavigation: {
         enabled: true
       },

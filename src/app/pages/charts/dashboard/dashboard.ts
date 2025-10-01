@@ -35,6 +35,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { CreatePage } from '../../shared/create-page/create-page';
+import { LOCAL_STORAGE_KEYS } from '../../../@core/utils/local-storage-key.utility';
+import { StorageService } from '../../../@core/services/storage-service';
 
 
 declare var Highcharts: any;
@@ -72,6 +74,7 @@ export class Dashboard implements OnInit, AfterViewInit {
   selectedDataSource: any;
   searchText = '';
   createNewFiles = '';
+  projectData: any = null;
 
   // @HostListener('window:resize')
   // onWindowResize() {
@@ -90,8 +93,10 @@ export class Dashboard implements OnInit, AfterViewInit {
 
   constructor(private readonly cdr: ChangeDetectorRef, private readonly zone: NgZone, private readonly route: ActivatedRoute, private readonly router: Router,
     private readonly http: HttpClient, private readonly apiServices: ApiServices, private readonly chartEventService: ChartEventService, public dialog: MatDialog,
-    private readonly breakpointObserver: BreakpointObserver, private readonly notifyService: NotificationMassageService, private readonly chartBuilderService: LoadChart
+    private readonly breakpointObserver: BreakpointObserver, private readonly notifyService: NotificationMassageService, private readonly chartBuilderService: LoadChart,
+    private readonly storage: StorageService
   ) {
+    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       console.log('Query param mode:', mode);
@@ -108,11 +113,6 @@ export class Dashboard implements OnInit, AfterViewInit {
           this.options.api.optionsChanged();
         }
       }
-
-      // Tell gridster to re-read options
-      // if (this.options.api && this.options.api.optionsChanged) {
-      //   this.options.api.optionsChanged();
-      // }
       setTimeout(() => {
         this.cdr.detectChanges(); // ✅ runs in next tick, no assertion error
       });
@@ -127,7 +127,8 @@ export class Dashboard implements OnInit, AfterViewInit {
       console.log('🔥 New chart mode activated!', data);
       if (data) {
         console.log('Selected file:', data);
-        this.selectedChartFiles = data;
+        const tempData = JSON.stringify(data)
+        this.selectedChartFiles = JSON.parse(tempData);
         // this.loadChartCategories();
         this.getFilesData();
       }
@@ -144,7 +145,24 @@ export class Dashboard implements OnInit, AfterViewInit {
         this.addItem();
       }
     })
+    this.setDynamicThemeing();
   }
+
+
+  setDynamicThemeing() {
+    if (this.projectData) {
+      document.documentElement.style.setProperty('--header-bg', this.projectData.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--color-text', this.projectData.textColor || '#333');
+      document.documentElement.style.setProperty('--button-bg', this.projectData.selectedColor || '#1976d2');
+      document.documentElement.style.setProperty('--chart-background', this.projectData.chartBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--button-bg-hover', this.projectData.mainBackgroundColor || '#145a9e');
+      document.documentElement.style.setProperty('--card-bg', this.projectData.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--card-text', this.projectData.mainBackgroundColor || '#333');
+    }
+  }
+
+
+
 
   editNameOfReportFiles(reportName: string) {
     console.log('Create New Chart');
@@ -153,8 +171,7 @@ export class Dashboard implements OnInit, AfterViewInit {
         console.log('Dialog result:', data);
         if (this.selectedChartFiles && this.selectedChartFiles.displayName) {
           this.selectedChartFiles['oldName'] = this.selectedChartFiles.displayName;
-          const data1 = JSON.stringify(data)
-          this.selectedChartFiles['displayName'] = JSON.parse(data1);
+          this.selectedChartFiles['displayName'] = data;
         } else {
           this.createNewFiles = data;
         }
@@ -281,14 +298,6 @@ export class Dashboard implements OnInit, AfterViewInit {
     });
   }
 
-  // addItem(): void {
-  //   const wigetSize: any = { "wigetSize": { cols: 4, rows: 4, x: 0, y: 0 } };
-  //   this.dashboard.push(wigetSize);
-  //   console.log('Added new item:', this.dashboard);
-  //   this.cdr.detectChanges();
-  //   setTimeout(() => this.loadChart(this.dashboard.length - 1), 0);
-  // }
-
   addItem(partial?: any): void {
     const wigetSize = { cols: 2, rows: 2, x: 0, y: 0 };
     const cfg: any = this.createChartConfig(partial, wigetSize);
@@ -408,42 +417,6 @@ export class Dashboard implements OnInit, AfterViewInit {
     // same shape as above — re-use getChartOptions
     await this.renderSingleAndTwoLevelChart(index, cfg, container);
   }
-
-
-  // renderthreeAndFourLevelChart() {
-  //   if (!this.selectedXAxis && this.selectedYAxis) {
-  //     console.warn('Select at least one series field and argument field');
-  //     return;
-  //   }
-  //   let chartOptions: any = null;
-  //   chartOptions = this.chartBuilderService.getChartOptions(
-  //     this.selectedChartCate,
-  //     this.selectedChartType,
-  //     this.rawData,
-  //     this.title,
-  //     this.subTitle,
-  //     this.selectedXAxis,
-  //     this.selectedYAxis,
-  //     this.zooming,
-  //     this.showLengend,
-  //     this.dataLabel,
-  //     this.enableMouseTracking,
-  //     this.selectedThirdArgument,
-  //     this.pieInnerSize,
-  //     this.pieStartAngal,
-  //     this.pieENDAngal,
-  //     this.stacking,
-  //   );
-  //   try {
-  //     this.currentChart = Highcharts.chart('chart-container', chartOptions);
-  //     console.log("chartOptions =>", chartOptions);
-  //   } catch (error: any) {
-  //     console.error('Highcharts error:', error);
-  //     this.currentChart = null;
-  //     // Show user-friendly message
-  //     this.notifyService.error('Unable to render chart. Please check your data and chart configuration.', 'Error');
-  //   }
-  // }
 
   async rendertSeriesChart(index: number, cfg: any, container: HTMLElement) {
     const rawData = this.allDataFromChart.sourceData.find((data: any) => data.name === cfg.rawData);

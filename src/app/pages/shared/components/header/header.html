@@ -1,6 +1,6 @@
 <header class="app-header">
   <div class="header-left">
-    <span class="app-title">Ace High Charts</span>
+    <!-- <span class="app-title">Ace High Charts</span> -->
   </div>
 
   <div class="header-actions">
@@ -15,7 +15,7 @@
     </button>
 
     <mat-slide-toggle class="mode-switch" [checked]="!isViewCharts" (change)="toggleView($event)">
-      {{ isViewCharts ? 'Switch to Designer' : 'Switch to Viewer' }}
+      <span> {{ isViewCharts ? 'Switch to Designer' : 'Switch to Viewer' }}</span>
     </mat-slide-toggle>
   </div>
 </header>
