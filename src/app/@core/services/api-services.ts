@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
 
 export interface ApiResponse<T> {
   status: boolean;
@@ -14,8 +16,9 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class ApiServices {
+    private readonly baseUrl =  environment.apiUrl;;
   // private readonly baseUrl = 'http://localhost:3000';
-  private readonly baseUrl = 'http://172.16.50.100:3000';
+  // private readonly baseUrl = 'http://172.16.50.100:3000';
   // private readonly baseUrl = 'http://localhost:5025';
   // private readonly baseUrl = 'http://172.16.50.7:5025'; // Live
   constructor(private readonly http: HttpClient) { }

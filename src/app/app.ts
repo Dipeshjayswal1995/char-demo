@@ -12,7 +12,6 @@ import { ChartEventService } from './@core/services/chart-event-service';
   styleUrl: './app.scss'
 })
 export class App {
-  protected title = 'chart-dashboard';
   constructor(private readonly apiServices: ApiServices, private readonly storage: StorageService, private readonly chartEventService: ChartEventService) {
 
   }
@@ -25,8 +24,9 @@ export class App {
     this.apiServices.getConfig().subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.storage.setPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION, JSON.stringify(res.config));
-          console.log(res.config);
+          this.chartEventService.setConfig(res.config);
+          // this.storage.setPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION, JSON.stringify(res.config));
+          // console.log(res.config);
         }
       },
       error: (err) => {

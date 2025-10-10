@@ -7,7 +7,7 @@
 .mat-dialog-container {
   border-radius: 12px;
   padding: 0;
-  background-color: #fff;
+  background-color:var(--sidebar-bg, #fff);;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -19,8 +19,7 @@
   font-weight: 600;
   font-size: 18px;
   padding: 12px 20px;
-  border-bottom: 1px solid #eee;
-  background-color: #f9f9f9;
+  background-color:var(--sidebar-bg, #fff);;
 
   .dialog-icon {
     font-size: 24px;
@@ -36,17 +35,18 @@
 .dialog-content {
   padding: 16px 20px;
   font-size: 16px;
+  background-color: var(--sidebar-bg, #fff);
   text-align: justify;
-  color: #444;
+  color: var(--text-color, #fff);
   line-height: 1.5;
 }
 
 /* Compact Footer */
 .dialog-actions {
   padding: 12px 20px;
-  background-color: #f9f9f9;
-  border-top: 1px solid #eee;
-  
+  background-color: var(--sidebar-bg, #fff);
+  border-top: 1px solid var(--sidebar-bg, #fff);;
+
   button {
     min-width: 90px;
     font-size: 13px;
@@ -57,24 +57,24 @@
   }
 
   .mat-flat-button[color="primary"] {
-    background-color: #1565c0;
-    color: white;
+    background-color:var(--button-bg, #1565c0)!important;
+    color: var(--text-color, #fff)!important;
   }
 
   .mat-flat-button[color="primary"]:hover {
-    background-color: #0d47a1;
+    background-color:var(--button-bg, #1565c0)!important;
   }
 
   .mat-button {
-    color: #555;
+    color: var(--text-color, #555)!important;
   }
 
   .mat-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--button-bg, #1565c0)!important;
   }
 }
 
-::ng-deep .mat-mdc-dialog-content > * {
-  margin-top: 16px!important;
-  margin-bottom: 16px!important;
+::ng-deep .mat-mdc-dialog-content>* {
+  margin-top: 16px !important;
+  margin-bottom: 16px !important;
 }

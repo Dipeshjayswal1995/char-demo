@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideMarkdown(),
     provideToastr({
       timeOut: 3000,
-      positionClass: 'toast-top-right',
+      positionClass: 'toast-bottom-left',
       preventDuplicates: true,
     }),
   ]

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage-service';
 import { LOCAL_STORAGE_KEYS } from '../utils/local-storage-key.utility';
-import { color } from 'highcharts';
 import { ChartEventService } from './chart-event-service';
 
+declare var Highcharts: any;
 
 @Injectable({
   providedIn: 'root'
@@ -12,15 +12,7 @@ export class LoadChart {
   projectData: any = null;
   constructor(private readonly storage: StorageService, private readonly chartEventService: ChartEventService) {
     this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
-    this.chartEventService.updateProjectConfig.subscribe((data) => {
-      // if (data) {
-      //   console.log('🔥 New chart mode activated!', data);
-      //   this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
-      // }
-    });
   }
-
-
 
   getChartOptions(
     selectedChartCate: any,
@@ -28,6 +20,8 @@ export class LoadChart {
     rawData: any[],
     title: string,
     subTitle: string,
+    titleAlign: string,
+    subTitleAlign: string,
     xAxis: string,
     yAxis: string,
     zooming: string,
@@ -39,7 +33,7 @@ export class LoadChart {
     startAngle: number = 0,
     endAngle: number = 0,
     stacking?: string,
-    selectedSeriesFields?: { field: string; color: string }[]
+    selectedSeriesFields?: { field: string; color: string }[],
   ): any {
     let categories: any[] = [];
     let series: any[] = [];
@@ -91,7 +85,12 @@ export class LoadChart {
             enableMouseTracking,
             dataLabels: {
               enabled: dataLabel,
-              format: '<b>{point.name}</b>: {point.percentage:.1f}%'
+              format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+              style: {
+                color: this.projectData?.textColor || '#000000', // label text color
+                textOutline: 'none', // optional: removes white stroke around text
+                fontSize: '12px'
+              }
             },
             startAngle,
             endAngle,
@@ -99,7 +98,13 @@ export class LoadChart {
             data
           }];
           tooltip = {
-            pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})'
+            pointFormat: '<b>{point.percentage:.1f}%</b> ({point.y})',
+            style: {
+              color: this.projectData?.textColor || '#000000', // tooltip text color
+              fontSize: '13px'
+            },
+            backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+            borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff'
           };
           console.log("series==>", series);
         } else {
@@ -115,24 +120,65 @@ export class LoadChart {
             type: selectedChartType.type,
             stacking: stacking || undefined,
             name: yAxis,
-            dataLabels: { enabled: dataLabel },
+            dataLabels: {
+              enabled: dataLabel,
+              style: {
+                color: this.projectData?.textColor || '#000000', // label text color
+                fontSize: '12px'
+              }
+            },
             enableMouseTracking,
-            data: seriesData
+            data: seriesData,
           }];
           xAxisConfig = {
             categories,
-            // type: 'datetime',
+            title: {
+              // text: xAxis,
+              style: {
+                color: this.projectData?.textColor,
+                fontWeight: 'bold'
+              }
+            },
+            labels: {
+              style: {
+                color: this.projectData?.textColor,
+                fontSize: '12px'
+              }
+            },
+            lineColor: this.projectData.textColor,
+            tickColor: this.projectData.textColor,
             accessibility: {
               rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
             }
           };
-          yAxisConfig = undefined;
-
+          yAxisConfig = {
+            title: {
+              // text: yAxis,
+              style: {
+                color: this.projectData?.textColor,
+                fontWeight: 'bold'
+              }
+            },
+            labels: {
+              style: {
+                color: this.projectData?.textColor,
+                fontSize: '12px'
+              }
+            },
+          };
+          tooltip = {
+            style: {
+              color: this.projectData?.textColor || '#000000', // tooltip text color
+              fontSize: '13px'
+            },
+            backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+            borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff'
+          }
         }
 
         // XY CHARTS: spline, scatter
       } else if ([6].includes(selectedChartCate.id)) {
-
+        // console.log('x- aixi', x)
         if (!xAxis) {
           console.warn("⚠️ Missing xAxis  for  chart!");
           return this.getNoDataChart("xAxis not provided");
@@ -154,28 +200,64 @@ export class LoadChart {
           type: selectedChartType.type,
           stacking: stacking || undefined,
           name: field?.field,
-          dataLabels: { enabled: dataLabel },
+          dataLabels: {
+            enabled: dataLabel,
+            style: {
+              color: this.projectData?.textColor || '#000000', // label text color
+              fontSize: '12px'
+            }
+          },
           enableMouseTracking,
           color: field?.color,
           data: categories.map(c => grouped[c][field.field] ?? 0),
         }));
         xAxisConfig = {
           categories,
+          title: {
+            // text: xAxis,
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
+          lineColor: this.projectData?.textColor,
+          tickColor: this.projectData?.textColor,
           accessibility: {
             rangeDescription: `Range: ${categories[0]} to ${categories[categories.length - 1]}`
           }
         };
-        yAxisConfig = undefined;
+        yAxisConfig = {
+          title: {
+            // text: yAxis,
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
+        };
+        tooltip = {
+          style: {
+            color: this.projectData?.textColor || '#000000', // tooltip text color
+            fontSize: '13px'
+          },
+          backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+          borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff'
+        }
 
       } else if ([2].includes(selectedChartCate.id)) {
-        // const field = Array.isArray(yAxis) ? yAxis[0] : yAxis;
-        // const dataPoints: [number, number][] = rawData
-        //   .map(d => [Number(d[xAxis]), Number(d[field])] as [number, number])
-        //   .filter(([x, y]) => !isNaN(x) && !isNaN(y));
-
         const field = Array.isArray(yAxis) ? yAxis[0] : yAxis;
-
-        // ✅ Group by xAxis
         const grouped = rawData.reduce((acc: Record<number, number>, d) => {
           const x = Number(d[xAxis]);
           const y = Number(d[field]);
@@ -199,23 +281,60 @@ export class LoadChart {
           name: field,
           dataLabels: {
             enabled: dataLabel,
+            style: {
+              color: this.projectData?.textColor || '#000000', // tooltip text color
+
+            },
             format: `{point.y}`
           },
           enableMouseTracking,
           label: { enabled: true },
           data: dataPoints
         }];
+
         xAxisConfig = {
           reversed: false,
-          title: { enabled: true, text: xAxis },
+          title: {
+            text: xAxis,
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
+          lineColor: this.projectData?.textColor,
+          tickColor: this.projectData?.textColor,
         };
         yAxisConfig = {
-          title: { text: field },
+          title: {
+            text: field,
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
           lineWidth: 2
         };
         tooltip = {
           headerFormat: `<b>${xAxis} : ${Array.isArray(yAxis) ? yAxis.join(', ') : yAxis}</b><br/>`,
-          pointFormat: '{point.x} : {point.y}'
+          pointFormat: '{point.x} : {point.y}',
+          style: {
+            color: this.projectData?.textColor || '#000000', // tooltip text color
+            fontSize: '13px'
+          },
+          backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+          borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff'
         };
 
       } else if ([3].includes(selectedChartCate.id)) {
@@ -224,13 +343,6 @@ export class LoadChart {
           console.warn("⚠️ X, Y or Third argument missing for  chart");
           return this.getNoDataChart("⚠️ X, Y or Third argument missing for  chart");
         }
-        // const data: (string | number)[][] = rawData.map(item => [
-        //   item[xAxis],
-        //   item[yAxis],
-        //   item[thirdArgument]
-        // ]);
-
-        // ✅ Strong typing for accumulator
         const grouped: Record<string, { y: number; z: number }> = {};
 
         rawData.forEach(row => {
@@ -259,14 +371,59 @@ export class LoadChart {
           enableMouseTracking,
           dataLabels: {
             enabled: dataLabel,
-            format: `{point.y:.0f}`
-          },
-          tooltip: {
-            pointFormat: `${yAxis}: <b>{point.y}</b><br>` +
-              `${thirdArgument}: <b>{point.z}</b><br>`
+            format: `{point.y:.0f}`,
+            style: {
+              color: this.projectData?.textColor || '#000000', // tooltip text color
+
+            },
           }
         }];
-        xAxisConfig = { type: 'category' };
+        tooltip = {
+          pointFormat: `${yAxis}: <b>{point.y}</b><br>` +
+            `${thirdArgument}: <b>{point.z}</b><br>`,
+          style: {
+            color: this.projectData?.textColor || '#000000', // tooltip text color
+            fontSize: '13px'
+          },
+          backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+          borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff'
+        }
+
+        xAxisConfig = {
+          type: 'category',
+          title: {
+
+            // text: xAxis,
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
+          lineColor: this.projectData?.textColor,
+          tickColor: this.projectData?.textColor,
+        };
+        yAxisConfig = {
+          title: {
+            // text: field,
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
+          // lineWidth: 2
+        };
       }
     } catch (err) {
       console.error("❌ Error building chart options:", err);
@@ -276,16 +433,55 @@ export class LoadChart {
     // ✅ Final Safe Return
     return {
       chart: {
-        backgroundColor: this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : 'transparent',
+        backgroundColor: this.projectData?.chartBackgroundColor ? this.projectData?.chartBackgroundColor : 'transparent',
         zooming: { type: zooming }
       },
-      title: { text: title || '', align: 'left', style: { color: this.projectData.textColor } },
-      subtitle: { text: subTitle || '', align: 'left', style: { color: this.projectData.textColor } },
+      title: { text: title || '', align: titleAlign, style: { color: this.projectData?.textColor } },
+      subtitle: { text: subTitle || '', align: subTitleAlign, style: { color: this.projectData?.textColor } },
       xAxis: xAxisConfig,
       yAxis: yAxisConfig,
       tooltip,
-      legend: { enabled: showLegend },
+      legend: {
+        enabled: showLegend,
+        title: {
+          style: {
+            color: this.projectData?.textColor,
+            fontWeight: 'bold'
+          }
+        },
+        itemStyle: {
+          color: this.projectData?.textColor, // ✅ Legend text color
+          fontWeight: 'normal',              // Optional: make normal or bold
+          fontSize: '12px'                   // Optional: set font size
+        },
+        itemHoverStyle: {
+          color: this.projectData?.textColor // ✅ Color when hovering legend items
+        }
+      },
       series: series.length > 0 ? series : [],
+      credits: {
+        enabled: false,
+      },
+      exporting: {
+        buttons: {
+          contextButton: {
+            align: 'left',
+            verticalAlign: 'bottom',
+            // menuClassName: 'highcharts-scrollable-menu', // 👈 custom class
+            menuItems: [
+              'viewFullscreen',
+              'printChart',
+              'separator',
+              'downloadPNG',
+              'downloadJPEG',
+              'downloadPDF',
+              'separator',
+              'downloadCSV',
+              'downloadXLS'
+            ]
+          },
+        }
+      },
       lang: { noData: "No data available" },
       noData: {
         style: {
@@ -300,7 +496,7 @@ export class LoadChart {
   // ✅ Helper for "no data" charts
   getNoDataChart(message: string) {
     return {
-      chart: { backgroundColor: 'transparent' },
+      chart: { backgroundColor: this.projectData?.chartBackgroundColor ? this.projectData?.chartBackgroundColor : 'transparent', },
       title: { text: '', align: 'left' },
       series: [],
       lang: { noData: message },
@@ -308,9 +504,21 @@ export class LoadChart {
         style: {
           fontWeight: 'bold',
           fontSize: '14px',
-          color: '#666'
+          color: this.projectData?.textColor ? this.projectData?.textColor : '#666'
         }
-      }
+      },
+      credits: {
+        enabled: false,
+      },
+      exporting: {
+        enabled: false,
+        buttons: {
+          contextButton: {
+            align: 'left',
+            verticalAlign: 'bottom',
+          }
+        }
+      },
     };
   }
 
@@ -318,6 +526,8 @@ export class LoadChart {
   multiDiminonalChart(
     chatTitle: string,
     subTitle: string,
+    titleAlign: string,
+    subTitleAlign: string,
     rawData: any[],
     selectedArgumentField: string,
     yAxis: any[],
@@ -373,40 +583,95 @@ export class LoadChart {
     }));
     console.log("yAxisData ===> ", yAxisData);
 
-
     console.log(categories);
     console.log(series);
     return {
       chart: {
-        backgroundColor: this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : 'transparent',
+        backgroundColor: this.projectData?.chartBackgroundColor ? this.projectData?.chartBackgroundColor : 'transparent',
         zooming: {
           type: zooming
         }
       },
-      title: { text: chatTitle || '', align: 'left', style: { color: this.projectData.textColor } },
-      subtitle: { text: subTitle || '', align: 'left', style: { color: this.projectData.textColor } },
+      title: { text: chatTitle || '', align: titleAlign, style: { color: this.projectData?.textColor } },
+      subtitle: { text: subTitle || '', align: subTitleAlign, style: { color: this.projectData?.textColor } },
       xAxis: [{
         categories: categories,
+        title: {
+          style: {
+            color: this.projectData?.textColor,
+            fontWeight: 'bold'
+          }
+        },
+        labels: {
+          style: {
+            color: this.projectData?.textColor,
+            fontSize: '12px'
+          }
+        },
         crosshair: true
       }],
       yAxis: yAxisData,
       tooltip: {
-        shared: true
+        shared: true,
+        style: {
+          color: this.projectData?.textColor || '#000000', // tooltip text color
+          fontSize: '13px'
+        },
+        backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+        borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff'
       },
       legend: {
         enabled: showLegend,
+        title: {
+          style: {
+            color: this.projectData?.textColor,
+            fontWeight: 'bold'
+          }
+        },
+        itemStyle: {
+          color: this.projectData?.textColor, // ✅ Legend text color
+          fontWeight: 'normal',              // Optional: make normal or bold
+          fontSize: '12px'                   // Optional: set font size
+        },
+        itemHoverStyle: {
+          color: this.projectData?.textColor // ✅ Color when hovering legend items
+        }
       },
-      series: series
+      series: series,
+      credits: {
+        enabled: false,
+      },
+      exporting: {
+        buttons: {
+          contextButton: {
+            align: 'left',
+            verticalAlign: 'bottom',
+            menuItems: [
+              'viewFullscreen',
+              'printChart',
+              'separator',
+              'downloadPNG',
+              'downloadJPEG',
+              'downloadPDF',
+              'separator',
+              'downloadCSV',
+              'downloadXLS'
+            ]
+          },
+        }
+      },
     }
   }
 
-  async renderMapChart(
+  async renderMapChart123(
     selectedChartCate: any,
     selectedMapOption: any,
     selectedMatchValue: any,
     rawData: any[],
     title: string,
     subTitle: string,
+    titleAlign: string,
+    subTitleAlign: string,
     xAxis: string,
     showLegend: boolean = false,
     dataLabel: boolean = false,
@@ -419,21 +684,132 @@ export class LoadChart {
       code: (row[selectedMatchValue] || '').toUpperCase(),
       value: row[xAxis]
     }));
-
+    console.log("mapData===>", mapData);
     console.log(selectedMapOption?.uniqueValueMatch)
     console.log(mapData);
     console.log(topology);
     return {
       chart: {
         map: topology,
-        backgroundColor: this.projectData.chartBackgroundColor ? this.projectData.chartBackgroundColor : 'transparent',
+        backgroundColor: this.projectData?.chartBackgroundColor ? this.projectData?.chartBackgroundColor : 'transparent',
       },
-      title: { text: title || '', align: 'left', style: { color: this.projectData.textColor } },
-      subtitle: { text: subTitle || '', align: 'left', style: { color: this.projectData.textColor } },
+      title: { text: title || '', align: titleAlign, style: { color: this.projectData?.textColor } },
+      subtitle: { text: subTitle || '', align: subTitleAlign, style: { color: this.projectData?.textColor } },
       mapNavigation: {
         enabled: true
       },
+      // colorAxis: {
+      //   min: 1,
+      //   type: 'logarithmic',
+      //   minColor: '#EEEEFF',
+      //   maxColor: '#000022',
+      //   stops: [
+      //     [0, '#EFEFFF'],
+      //     [0.67, '#4444FF'],
+      //     [1, '#000022']
+      //   ]
+      // },
+      series: [{
+        data: rawData,
+        colorByPoint: true,
+        joinBy: [selectedMapOption?.uniqueValueMatch, selectedMatchValue],
+        name: xAxis,
+        dataLabels: {
+          enabled: true,
+          title: {
+            style: {
+              color: this.projectData?.textColor,
+              fontWeight: 'bold'
+            }
+          },
+          labels: {
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '12px'
+            }
+          },
+          formatter: function (this: any) {
+            return `${this.point[xAxis] ? this.point[xAxis] : ''}`;
+          },
+
+        },
+        tooltip: {
+          formatter: function (this: any) {
+            console.log(this.point);
+            return `${this.point[selectedMatchValue]}: ${this.point[xAxis]}`;
+          },
+
+        }
+      }],
+      credits: {
+        enabled: false,
+      },
+      exporting: {
+        buttons: {
+          contextButton: {
+            align: 'left',
+            verticalAlign: 'bottom',
+            menuItems: [
+              'viewFullscreen',
+              'printChart',
+              'separator',
+              'downloadPNG',
+              'downloadJPEG',
+              'downloadPDF',
+              'separator',
+              'downloadCSV',
+              'downloadXLS'
+            ]
+          },
+        }
+      },
+    }
+  }
+
+  async renderMapChart(
+    selectedChartCate: any,
+    selectedMapOption: any,
+    selectedMatchValue: any, // e.g., 'code' or 'postal-code'
+    rawData: any[],
+    title: string,
+    subTitle: string,
+    titleAlign: string,
+    subTitleAlign: string,
+    xAxis: string, // e.g., 'RevenueQTD'
+    showLegend: boolean = false,
+    dataLabel: boolean = true,
+    enableMouseTracking: boolean = true,
+  ) {
+    const mapUrl: any = selectedMapOption?.json_file;
+    const topology = await fetch(mapUrl).then(response => response.json());
+
+    // ✅ Create simplified map data
+    const mapData = rawData.map((row, index) => ({
+      [selectedMatchValue]: (row[selectedMatchValue] || '').toUpperCase(),
+      value: row[xAxis],
+      color: Highcharts.getOptions().colors[index % Highcharts.getOptions().colors.length], // distinct colors
+    }));
+    console.log("mapData =>", mapData);
+    return {
+      chart: {
+        map: topology,
+        backgroundColor: this.projectData?.chartBackgroundColor || 'transparent',
+      },
+
+      title: {
+        text: title || '',
+        align: titleAlign,
+        style: { color: this.projectData?.textColor },
+      },
+      subtitle: {
+        text: subTitle || '',
+        align: subTitleAlign,
+        style: { color: this.projectData?.textColor },
+      },
+
+      mapNavigation: { enabled: true },
       colorAxis: {
+        showInLegend: false,
         min: 1,
         type: 'logarithmic',
         minColor: '#EEEEFF',
@@ -442,28 +818,63 @@ export class LoadChart {
           [0, '#EFEFFF'],
           [0.67, '#4444FF'],
           [1, '#000022']
-        ]
+        ],
       },
-      series: [{
-        data: rawData,
-        colorByPoint: true,
-        joinBy: [selectedMapOption?.uniqueValueMatch, selectedMatchValue],
-        name: xAxis,
-        dataLabels: {
-          enabled: true,
-          formatter: function (this: any) {
-            return `${this.point[xAxis] ? this.point[xAxis] : ''}`;
-          }
+
+      // ✅ Tooltip should be at chart level
+      tooltip: {
+        enabled: true,
+        useHTML: true,
+        backgroundColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff', // optional
+        borderColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff',
+        style: { color: this.projectData?.textColor ? this.projectData?.textColor : '#fff' },
+      },
+      series: [
+        {
+          data: mapData,
+          joinBy: [selectedMapOption?.uniqueValueMatch, selectedMatchValue],
+          name: xAxis,
+          enableMouseTracking: true,
+          showInLegend: false,
+
+          // ✅ Enable and style data labels
+          dataLabels: {
+            enabled: true,
+            formatter: function (this: any) {
+              return this.point.value ? this.point.value : '';
+            },
+            style: {
+              color: this.projectData?.textColor || '#fff',
+              fontSize: '10px',
+              fontWeight: 'bold',
+            },
+          },
         },
-        tooltip: {
-          formatter: function (this: any) {
-            console.log(this.point);
-            return `${this.point[selectedMatchValue]}: ${this.point[xAxis]}`;
-          }
-        }
-      }]
-    }
+      ],
+
+      credits: { enabled: false },
+      exporting: {
+        buttons: {
+          contextButton: {
+            align: 'left',
+            verticalAlign: 'bottom',
+            menuItems: [
+              'viewFullscreen',
+              'printChart',
+              'separator',
+              'downloadPNG',
+              'downloadJPEG',
+              'downloadPDF',
+              'separator',
+              'downloadCSV',
+              'downloadXLS',
+            ],
+          },
+        },
+      },
+    };
   }
+
 
 
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiServices } from '../../../../@core/services/api-services';
 import { CommonModule } from '@angular/common';
@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { StorageService } from '../../../../@core/services/storage-service';
 import { ChartEventService } from '../../../../@core/services/chart-event-service';
-import { LOCAL_STORAGE_KEYS } from '../../../../@core/utils/local-storage-key.utility';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,17 +17,15 @@ import { LOCAL_STORAGE_KEYS } from '../../../../@core/utils/local-storage-key.ut
   styleUrl: './sidebar.scss',
   standalone: true,
 })
-export class Sidebar {
+export class Sidebar implements OnInit, OnDestroy {
   files: { filename: string; createdAt?: string, id: string, updatedAt?: string, displayName: string }[] = [];
   selectedTab: string = '';
   sidebarVisible = true;
   projectData: any = null;
+  private destroy$ = new Subject<void>();
   constructor(private readonly router: Router, private readonly apiServices: ApiServices, private readonly route: ActivatedRoute, private readonly storage: StorageService,
     private readonly chartEventService: ChartEventService,
   ) {
-    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
-    console.log('this.projectData==>', this.projectData);
-
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       this.sidebarVisible = mode !== 'designer';
@@ -38,7 +36,6 @@ export class Sidebar {
         this.loadFileList(data);
       }
     });
-    this.setDynamicThemeing();
   }
 
   setDynamicThemeing() {
@@ -51,8 +48,23 @@ export class Sidebar {
   }
 
   ngOnInit() {
+    this.chartEventService.config$
+      .pipe(takeUntil(this.destroy$))   // 👈 auto unsubscribe
+      .subscribe(config => {
+        if (config) {
+          this.projectData = config;
+          this.setDynamicThemeing();
+        }
+      });
+    this.chartEventService.loadConfigFromStorage();
     this.loadFileList();
   }
+
+  ngOnDestroy() {
+    this.destroy$.next();      // 👈 emit on destroy
+    this.destroy$.complete();  // 👈 cleanup
+  }
+
 
   getCleanFileName(name: string): string {
     return name.replace(/[^a-zA-Z0-9-]/g, '-');

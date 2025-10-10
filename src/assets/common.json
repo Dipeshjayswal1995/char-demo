@@ -1,6 +1,6 @@
 [
     {
-        "name": "Singal Level Charts",
+        "name": "Single Level Charts",
         "id": 1,
         "chartOption": [
             {
@@ -268,7 +268,7 @@
         "isVisableMapOption": true,
         "isVisableMatchFeild": true,
         "xAxis": true,
-        "yAxis": true,
+        "yAxis": false,
         "isVisiableSeriesField": false,
         "dataLabel": true,
         "enableMouseTracking": true,

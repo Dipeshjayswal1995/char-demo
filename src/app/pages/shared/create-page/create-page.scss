@@ -1,0 +1,55 @@
+/* Dialog surface background and font color */
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: var(--sidebar-bg, #1e1e2f);
+  /* dark background */
+  color: var(--text-color, #ffffff);
+  /* white text */
+  border-radius: 12px;
+  padding: 8px;
+}
+
+/* Form field text and labels */
+.report-dialog-content {
+  color: var(--text-color, #ffffff);
+
+  p {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  mat-form-field {
+    --mdc-outlined-text-field-outline-color: #888;
+    --mdc-outlined-text-field-label-text-color: #ccc;
+    --mdc-outlined-text-field-input-text-color: #fff;
+    --mdc-outlined-text-field-focus-outline-color: #4db6ac;
+    /* teal focus */
+  }
+}
+
+/* Action buttons */
+.report-dialog-actions {
+  padding: 10px 16px;
+}
+
+/* Cancel button */
+.cancel-btn {
+  color: var(--text-color, #ffffff);
+  /* white text */
+  font-weight: 500;
+}
+
+/* Ok button */
+.ok-btn {
+  background-color: var(--active-link-bg, #4db6ac )!important;
+  /* teal background */
+  color:var(--text-color, #ffffff); /* white text */
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 4px 16px;
+  transition: background 0.3s;
+}
+
+.ok-btn:hover {
+  background-color: var(--active-link-bg, #4db6ac )!important;
+}

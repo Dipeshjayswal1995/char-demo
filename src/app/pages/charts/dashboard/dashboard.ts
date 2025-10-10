@@ -8,6 +8,7 @@ import {
   OnInit,
   AfterViewInit,
   ViewEncapsulation,
+  OnDestroy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +27,7 @@ import {
 import { MarkdownModule } from 'ngx-markdown';
 import { ApiServices } from '../../../@core/services/api-services';
 import { ChartEventService } from '../../../@core/services/chart-event-service';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { SidePannel } from '../../shared/components/side-pannel/side-pannel';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationMassageService } from '../../../@core/services/notification-massage-service';
@@ -35,9 +36,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { CreatePage } from '../../shared/create-page/create-page';
-import { LOCAL_STORAGE_KEYS } from '../../../@core/utils/local-storage-key.utility';
 import { StorageService } from '../../../@core/services/storage-service';
-
+import { firstValueFrom, Observable, Subject, takeUntil, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { ConfirmationDialog } from '../../shared/components/confirmation-dialog/confirmation-dialog';
 
 declare var Highcharts: any;
 
@@ -62,7 +64,7 @@ declare var Highcharts: any;
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class Dashboard implements OnInit, AfterViewInit {
+export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   options: GridsterConfig = {};
   dashboard: Array<GridsterItem> = [];
   charts: any[] = [];
@@ -75,7 +77,7 @@ export class Dashboard implements OnInit, AfterViewInit {
   searchText = '';
   createNewFiles = '';
   projectData: any = null;
-
+  private readonly destroy$ = new Subject<void>();
   // @HostListener('window:resize')
   // onWindowResize() {
   //   // if (this.options?.api?.resize) {
@@ -96,7 +98,6 @@ export class Dashboard implements OnInit, AfterViewInit {
     private readonly breakpointObserver: BreakpointObserver, private readonly notifyService: NotificationMassageService, private readonly chartBuilderService: LoadChart,
     private readonly storage: StorageService
   ) {
-    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       console.log('Query param mode:', mode);
@@ -116,10 +117,6 @@ export class Dashboard implements OnInit, AfterViewInit {
       setTimeout(() => {
         this.cdr.detectChanges(); // ✅ runs in next tick, no assertion error
       });
-      //       this.zone.run(() => {
-      //   this.isViewCharts = params['mode'] !== 'designer';
-      // });
-      // this.cdr.detectChanges();
       console.log('isViewCharts set to:', this.isViewCharts);
     });
 
@@ -129,7 +126,6 @@ export class Dashboard implements OnInit, AfterViewInit {
         console.log('Selected file:', data);
         const tempData = JSON.stringify(data)
         this.selectedChartFiles = JSON.parse(tempData);
-        // this.loadChartCategories();
         this.getFilesData();
       }
     });
@@ -145,7 +141,47 @@ export class Dashboard implements OnInit, AfterViewInit {
         this.addItem();
       }
     })
-    this.setDynamicThemeing();
+  }
+
+  ngOnInit(): void {
+    this.options = {
+      gridType: GridType.Fit,
+      compactType: 'compactUp',
+      displayGrid: DisplayGrid.None,
+      initCallback: Dashboard.gridInit,
+      margin: 5,
+      outerMargin: true,
+      destroyCallback: Dashboard.gridDestroy,
+      gridSizeChangedCallback: Dashboard.gridSizeChanged,
+      itemChangeCallback: Dashboard.itemChange,
+      itemResizeCallback: Dashboard.itemResize,
+      itemInitCallback: Dashboard.itemInit,
+      itemRemovedCallback: Dashboard.itemRemoved,
+      itemValidateCallback: Dashboard.itemValidate,
+      pushItems: true,
+      draggable: { enabled: !this.isViewCharts },
+      resizable: { enabled: !this.isViewCharts },
+    };
+    console.log('isViewCharts on init:', this.options);
+    this.cdr.detectChanges();
+
+    this.chartEventService.config$
+      .pipe(takeUntil(this.destroy$))   // 👈 auto unsubscribe
+      .subscribe(config => {
+        if (config) {
+          this.projectData = config;
+          this.setDynamicThemeing();
+        }
+      });
+    this.chartEventService.loadConfigFromStorage();
+  }
+
+  ngOnDestroy(): void {
+    this.charts.forEach(c => c?.destroy?.());
+    this.charts = [];
+    this.allDataFromChart = null;
+    this.destroy$.next();      // 👈 emit on destroy
+    this.destroy$.complete();  // 👈 cleanup
   }
 
 
@@ -160,9 +196,6 @@ export class Dashboard implements OnInit, AfterViewInit {
       document.documentElement.style.setProperty('--card-text', this.projectData.mainBackgroundColor || '#333');
     }
   }
-
-
-
 
   editNameOfReportFiles(reportName: string) {
     console.log('Create New Chart');
@@ -190,13 +223,7 @@ export class Dashboard implements OnInit, AfterViewInit {
     console.log("Creating dashboard:", this.dashboardName, "with", this.selectedDataSource);
   }
 
-  ngOnDestroy(): void {
-    // destroy all charts
 
-    this.charts.forEach(c => c?.destroy?.());
-    this.charts = [];
-    this.allDataFromChart = null;
-  }
 
   static itemChange(item: GridsterItem, itemComponent: GridsterItemComponentInterface): void {
     // console.info('itemChanged', item, itemComponent);
@@ -223,46 +250,17 @@ export class Dashboard implements OnInit, AfterViewInit {
     // console.info('gridSizeChanged', grid);
   }
 
-  ngOnInit(): void {
-    this.options = {
-      gridType: GridType.Fit,
-      compactType: 'compactUp',
-      displayGrid: DisplayGrid.None,
-      initCallback: Dashboard.gridInit,
-      margin: 5,
-      outerMargin: true,
-      destroyCallback: Dashboard.gridDestroy,
-      gridSizeChangedCallback: Dashboard.gridSizeChanged,
-      itemChangeCallback: Dashboard.itemChange,
-      itemResizeCallback: Dashboard.itemResize,
-      itemInitCallback: Dashboard.itemInit,
-      itemRemovedCallback: Dashboard.itemRemoved,
-      itemValidateCallback: Dashboard.itemValidate,
-      pushItems: true,
-      draggable: { enabled: !this.isViewCharts },
-      resizable: { enabled: !this.isViewCharts },
-    };
-    // this.options = {
-    //   draggable: { enabled: !this.isViewCharts },
-    //   resizable: { enabled: !this.isViewCharts },
-    //   // displayGrid: 'always',
-    //   displayGrid: DisplayGrid.None,
-    //   pushItems: true,
-    //   gridType: GridType.Fit,
-    //   compactType: 'compactUp',
-    //   margin: 5,
-    // };
-    console.log('isViewCharts on init:', this.options);
-    this.cdr.detectChanges();
-  }
 
   openModal(groupItem?: any, index?: any): void {
-    this.dialog.open(SidePannel, { data: { cfg: groupItem, sourceData: this.allDataFromChart.sourceData }, panelClass: ['modal-fullscreen-right', 'modal-md'], disableClose: true }).afterClosed().subscribe((data) => {
+    this.dialog.open(SidePannel, { data: { cfg: groupItem, sourceData: JSON.stringify(this.allDataFromChart.sourceData) }, panelClass: ['modal-fullscreen-right', 'modal-md'], disableClose: true }).afterClosed().subscribe((data) => {
       if (data) {
-        this.dashboard[index]['chartConfig'] = data;
+        this.dashboard[index]['chartConfig'] = data.chartData;
+        this.allDataFromChart.sourceData = data.sourceData;
         this.cdr.detectChanges();
         this.renderChart(index);
-        console.log('Dialog result:', this.dashboard[index]);
+        console.log('this.dashboard', this.dashboard);
+        console.log('this.dashboard', data);
+        console.log('this.dashboard', this.allDataFromChart.sourceData);
       }
     });
   }
@@ -283,9 +281,7 @@ export class Dashboard implements OnInit, AfterViewInit {
         this.dashboard = data.data.listOfChartOption;
         console.log("Fetched file data:", data);
         this.cdr.detectChanges();
-        // if (this.allDataFromChart.length) {
         setTimeout(() => this.loadAllCharts(), 20);
-        // }
         console.log('Loaded chart categories:', this.dashboard);
         console.log("Fetched file data:", data);
       },
@@ -316,39 +312,20 @@ export class Dashboard implements OnInit, AfterViewInit {
     this.dashboard.forEach((_, i) => this.renderChart(i));
   }
 
-  loadChart(index: number): void {
-    const container = document.getElementById('chart-container' + index);
-    if (!container) return;
-    let chart;
-    if (this.dashboard[index]['type'] == 'map') {
-      chart = Highcharts.mapChart(container, this.dashboard[index]);
-    } else {
-      chart = Highcharts.chart(container, this.dashboard[index]);
-    }
-    this.charts[index] = chart;
-  }
-
   async renderChart(index: number): Promise<void> {
-    // console.log('selectedChartType', this.selectedChartType);
     const cfg: any = this.dashboard[index];
     if (!cfg.chartConfig) return;
-
 
     if (this.charts[index]) {
       try { this.charts[index].destroy(); } catch (e) { /* ignore */ }
       this.charts[index] = null;
     }
 
-    // if (this.currentChart) {
-    //   this.currentChart.destroy();
-    // }
-
     const container = document.getElementById('chart-container' + index);
     if (!container) {
       console.warn('Missing container for', 'chart-container' + index);
       return;
     }
-
 
     try {
       switch (cfg.chartConfig.selectedChartCate?.id) {
@@ -377,40 +354,81 @@ export class Dashboard implements OnInit, AfterViewInit {
     }
   }
 
+  getDataReturnFuction(cfg: any): Observable<any[]> {
+    console.log(this.allDataFromChart.sourceData);
+    const index = this.allDataFromChart.sourceData.findIndex(
+      (data: any) => data.name === cfg.rawData
+    );
+
+    if (index === -1) {
+      console.warn(`No source found for ${cfg.rawData}`);
+      return of([]);
+    }
+
+    const rawData = this.allDataFromChart.sourceData[index];
+
+    // ✅ Return cached data if available
+    if (rawData.data && rawData.data.length) {
+      return of(rawData.data);
+    }
+
+    // ✅ Otherwise fetch and update the object in sourceData
+    return this.http.get<any[]>(rawData.sourceFile).pipe(
+      map((fetchedData: any[]) => {
+        // update the matched object in the array
+        this.allDataFromChart.sourceData[index] = {
+          ...rawData,
+          data: fetchedData
+        };
+        return fetchedData;
+      }),
+      catchError((error: any) => {
+        this.notifyService.error('Failed to load data.', 'Error');
+        console.error('Data Load Error:', error);
+        return of([]);
+      })
+    );
+  }
+
+
 
   async renderSingleAndTwoLevelChart(index: number, cfg: any, container: HTMLElement) {
     if (!cfg.selectedXAxis && cfg.selectedYAxis) {
       console.warn('Select at least one series field and argument field');
       return;
     }
-    const rawData = this.allDataFromChart.sourceData.find((data: any) => data.name === cfg.rawData);
-    const chartOptions = this.chartBuilderService.getChartOptions(
-      cfg.selectedChartCate,
-      cfg.selectedChartType,
-      rawData.data,
-      cfg.title,
-      cfg.subTitle,
-      cfg.selectedXAxis,
-      cfg.selectedYAxis,
-      cfg.zooming,
-      cfg.showLengend,
-      cfg.dataLabel,
-      cfg.enableMouseTracking,
-      cfg.selectedThirdArgument,
-      cfg.pieInnerSize,
-      cfg.pieStartAngal,
-      cfg.pieENDAngal,
-      cfg.stacking,
-    );
 
     try {
+      const rawData = await firstValueFrom(this.getDataReturnFuction(cfg));
+      const chartOptions = this.chartBuilderService.getChartOptions(
+        cfg.selectedChartCate,
+        cfg.selectedChartType,
+        rawData,
+        cfg.title,
+        cfg.subTitle,
+        cfg.titleAlign,
+        cfg.subTitleAlign,
+        cfg.selectedXAxis,
+        cfg.selectedYAxis,
+        cfg.zooming,
+        cfg.showLengend,
+        cfg.dataLabel,
+        cfg.enableMouseTracking,
+        cfg.selectedThirdArgument,
+        cfg.pieInnerSize,
+        cfg.pieStartAngal,
+        cfg.pieENDAngal,
+        cfg.stacking,
+      );
+
       this.charts[index] = Highcharts.chart(container as any, chartOptions);
+      console.log("this.currentChart =>", chartOptions);
+
     } catch (error) {
-      console.error('Highcharts error:', error);
+      console.error('Render chart error:', error);
       this.charts[index] = null;
       this.notifyService.error('Unable to render chart. Check config/data.', 'Error');
     }
-    console.log("this.currentChart =>", chartOptions);
   }
 
   async renderthreeAndFourLevelChart(index: number, cfg: any, container: HTMLElement) {
@@ -419,13 +437,15 @@ export class Dashboard implements OnInit, AfterViewInit {
   }
 
   async rendertSeriesChart(index: number, cfg: any, container: HTMLElement) {
-    const rawData = this.allDataFromChart.sourceData.find((data: any) => data.name === cfg.rawData);
+    const rawData = await firstValueFrom(this.getDataReturnFuction(cfg));
     const chartOptions = this.chartBuilderService.getChartOptions(
       cfg.selectedChartCate,
       cfg.selectedChartType,
-      rawData.data,
+      rawData,
       cfg.title,
       cfg.subTitle,
+      cfg.titleAlign,
+      cfg.subTitleAlign,
       cfg.selectedXAxis,
       cfg.selectedYAxis,
       cfg.zooming,
@@ -451,11 +471,13 @@ export class Dashboard implements OnInit, AfterViewInit {
 
 
   async multiDiminonalChart(index: number, cfg: any, container: HTMLElement) {
-    const rawData = this.allDataFromChart.sourceData.find((data: any) => data.name === cfg.rawData);
+    const rawData = await firstValueFrom(this.getDataReturnFuction(cfg));
     const chartOptions = this.chartBuilderService.multiDiminonalChart(
       cfg.title,
       cfg.subTitle,
-      rawData.data,
+      cfg.titleAlign,
+      cfg.subTitleAlign,
+      rawData,
       cfg.selectedXAxis,
       cfg.yAxes,
       cfg.zooming,
@@ -475,21 +497,24 @@ export class Dashboard implements OnInit, AfterViewInit {
 
   async rendertMapChart(index: number, cfg: any, container: HTMLElement) {
     // chartBuilderService.renderMapChart is async (loads map JSON etc)
-    const rawData = this.allDataFromChart.sourceData.find((data: any) => data.name === cfg.rawData);
+    const rawData = await firstValueFrom(this.getDataReturnFuction(cfg));
     try {
       const chartOptions = await this.chartBuilderService.renderMapChart(
         cfg.selectedChartCate,
         cfg.selectedMapOption,
         cfg.selectedMatchValue,
-        rawData.data,
+        rawData,
         cfg.title,
         cfg.subTitle,
+        cfg.titleAlign,
+        cfg.subTitleAlign,
         cfg.selectedXAxis,
         cfg.showLengend,
         cfg.dataLabel,
         cfg.enableMouseTracking,
       );
       this.charts[index] = Highcharts.mapChart(container as any, chartOptions);
+      console.log("Map chartOptions =>", chartOptions);
     } catch (err) {
       console.error(err);
       this.charts[index] = null;
@@ -546,7 +571,7 @@ export class Dashboard implements OnInit, AfterViewInit {
   createFiles() {
     this.apiServices.saveJson(this.createNewFiles, {
       listOfChartOption: this.dashboard ? this.dashboard : [],
-      sourceData: this.allDataFromChart.sourceData ? this.allDataFromChart.sourceData : []
+      sourceData: this.getProcessedSourceData()
     }).subscribe({
       next: (res: any) => {
         if (res.status) {
@@ -565,11 +590,24 @@ export class Dashboard implements OnInit, AfterViewInit {
     });
   }
 
+  getProcessedSourceData(): any[] {
+    // Fallback to [] if sourceData is missing
+    const sourceData = this.allDataFromChart?.sourceData
+      ? this.allDataFromChart.sourceData
+      : [];
+
+    return sourceData.map((item: any) => {
+      if (item.sourceType == 1) {
+        return { ...item, data: [] };  // overwrite data
+      }
+      return item; // keep as is
+    });
+  }
+
   updatFileName() {
-    // console.log('uploadedFileName', this.selectedChartFiles.name);
     this.apiServices.updateFile(this.selectedChartFiles.id, {
       listOfChartOption: this.dashboard,
-      sourceData: this.allDataFromChart.sourceData
+      sourceData: this.getProcessedSourceData()
     }, this.selectedChartFiles.displayName).subscribe({
       next: (res: any) => {
         if (res.status) {
@@ -583,6 +621,48 @@ export class Dashboard implements OnInit, AfterViewInit {
       },
       complete: () => {
         console.log('Request completed.');
+      }
+    });
+  }
+
+  deleteChartReport() {
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      width: '420px',
+      disableClose: true,
+      data: {
+        title: `Confirm Deletion`,
+        message: `Are you sure you want to delete "${this.selectedChartFiles?.displayName}"? This action cannot be undone.`,
+        confirmButtonText: 'Delete',
+        confirmButtonColor: 'warn',
+        cancelButtonText: 'Cancel',
+        cancelButtonColor: '',
+        icon: 'delete_forever'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.performDelete();
+      } else {
+        this.notifyService.info('Deletion cancelled.');
+      }
+    });
+  }
+
+  performDelete() {
+    this.apiServices.deleteFile(this.selectedChartFiles.id).subscribe({
+      next: (res: any) => {
+        if (res.status) {
+          // location.reload();
+          this.notifyService.success('Chart report deleted successfully.', 'success');
+        }
+      },
+      error: (err) => {
+        console.error('HTTP Error:', err);
+        this.notifyService.error(err.error.message, 'error');
+      },
+      complete: () => {
+        console.log('Delete request completed.');
       }
     });
   }

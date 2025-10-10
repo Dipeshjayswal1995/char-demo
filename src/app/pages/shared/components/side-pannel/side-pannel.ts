@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, NgZone } from '@angular/core';
+import { AfterViewInit, Component, Inject, NgZone, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChartEventService } from '../../../../@core/services/chart-event-service';
 import { NotificationMassageService } from '../../../../@core/services/notification-massage-service';
@@ -24,7 +24,7 @@ declare const Highcharts: any;
   templateUrl: './side-pannel.html',
   styleUrl: './side-pannel.scss'
 })
-export class SidePannel {
+export class SidePannel implements OnInit, AfterViewInit {
   apiUrl: string = '';
   isLoading = false;
   rawData: string = '';
@@ -77,7 +77,11 @@ export class SidePannel {
   addNewSource = false;
   sourceName: string = '';
   projectData: any = null;
-
+  sourceData: any = [];
+  titleAlign: 'left' | 'center' | 'right' = 'center';
+  isTitleAlignOpen = false;
+  subTitleAlign: 'left' | 'center' | 'right' = 'center';
+  isSubTitleAlignOpen = false;
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private readonly ngZone: NgZone,
     private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
     private readonly chartEventService: ChartEventService, private readonly route: ActivatedRoute, public dialogRef: MatDialogRef<SidePannel>,
@@ -99,7 +103,35 @@ export class SidePannel {
       document.documentElement.style.setProperty('--button-bg-hover', this.projectData.mainBackgroundColor || '#145a9e');
       document.documentElement.style.setProperty('--card-bg', this.projectData.mainBackgroundColor || '#fff');
       document.documentElement.style.setProperty('--card-text', this.projectData.mainBackgroundColor || '#333');
+      document.documentElement.style.setProperty('--sidebar-bg', this.projectData.sidebarBackgroundColor || this.projectData.mainBackgroundColor || '#1e1e1e');
+
     }
+  }
+
+  setTitleAlign(item: 'left' | 'center' | 'right') {
+    this.titleAlign = item;
+    this.isTitleAlignOpen = false;
+  }
+
+  toggleTitleAlignMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.isTitleAlignOpen = !this.isTitleAlignOpen;
+  }
+
+  setSubTitleAlign(item: 'left' | 'center' | 'right') {
+    this.subTitleAlign = item;
+    this.isSubTitleAlignOpen = false;
+  }
+
+  toggleSubTitleAlignMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.isSubTitleAlignOpen = !this.isSubTitleAlignOpen;
+  }
+
+  @HostListener('document:click')
+  closeAlignPopover() {
+    this.isTitleAlignOpen = false;
+    this.isSubTitleAlignOpen = false;
   }
 
   ngAfterViewInit(): void {
@@ -110,16 +142,8 @@ export class SidePannel {
     this.http.get<any>('assets/common.json').subscribe(
       data => {
         this.chartCategories = data;
-        console.log('Loaded chart categories:', this.chartCategories);
-        console.log('Loaded chart categories:', this.selectedChartFiles);
-        // if (this.selectedChartFiles) {
-        //   this.newFileName = this.selectedChartFiles?.name;
-        //   this.getFilesData();
-        // }
         console.log('modalData =>', this.modalData);
-        if (this.modalData?.cfg) {
-          this.getFilesData();
-        }
+        this.getFilesData();
       },
       error => {
         console.error('Error loading common.json:', error);
@@ -127,14 +151,61 @@ export class SidePannel {
     );
   }
 
+
   changeSource() {
-    const sourceData = this.modalData.sourceData.find((data: any) => data.name === this.rawData);
-    console.log("Fetched file data:", sourceData.data);
-    if (!sourceData.data.length) {
-      console.error("No data found");
+    const index = this.sourceData.findIndex((data: any) => data.name === this.rawData);
+
+    if (index === -1) {
+      console.error("No source found");
       return;
     }
-    this.allFields = Object.keys(sourceData.data[0]);
+
+    const sourceData = this.sourceData[index];
+    console.log("Selected Source:", sourceData);
+
+    // ✅ If data is empty, fetch from API
+    if (!sourceData.data || sourceData.data.length === 0) {
+      console.warn("No local data found, fetching from API:", sourceData.sourceFile);
+
+      const isCSV = sourceData.sourceFile.trim().toLowerCase().endsWith('.csv');
+
+      if (isCSV) {
+        this.fetchAndConvertCSVtoJSON(sourceData.sourceFile).then(data => {
+          this.sourceData[index] = { ...sourceData, data };
+          this.processLoadedData(data);
+        }).catch(error => {
+          this.isLoading = false;
+          this.notifyService.error('Failed to load or parse CSV file.', 'Error');
+          console.error('CSV Load Error:', error);
+        });
+      } else {
+        this.http.get<any[]>(sourceData.sourceFile).subscribe(data => {
+          this.sourceData[index] = { ...sourceData, data };
+          this.processLoadedData(data);
+        }, error => {
+          this.isLoading = false;
+          this.notifyService.error('Failed to load data.', 'Error');
+          console.error('JSON Load Error:', error);
+        });
+      }
+
+      return;
+    }
+    this.processLoadedData(sourceData.data);
+  }
+
+  private processLoadedData(data: any[]): void {
+    if (!data || !data.length) {
+      console.error("No data found even after fetch");
+      return;
+    }
+
+    console.log("Fetched file data:", data);
+    this.allFields = Object.keys(data[0]);
+    this.resetChartConfig();
+  }
+
+  resetChartConfig() {
     this.selectedChartCate = null;
     this.selectedChartType = null;
     this.selectedMatchValue = '';
@@ -152,40 +223,53 @@ export class SidePannel {
     this.stacking = '';
     this.selectedSeriesFields = [];
     this.yAxes = [];
-
   }
 
   getFilesData(): void {
-    // console.log("this.selectedChartFiles =>", this.modalData.cfg);
-    this.selectedChartCate = this.modalData.cfg.selectedChartCate || null;
-    this.selectedChartType = this.modalData.cfg.selectedChartType || null;
-    this.selectedMatchValue = this.modalData.cfg.selectedMatchValue || '';
-    this.selectedMapOption = this.modalData.cfg.selectedMapOption || null;
-    this.rawData = this.modalData.cfg.rawData || '';
-    this.selectedData = this.modalData.cfg.selectedData || '';
-    this.title = this.modalData.cfg.title || '';
-    this.subTitle = this.modalData.cfg.subTitle || '';
-    this.selectedXAxis = this.modalData.cfg.selectedXAxis || '';
-    this.selectedYAxis = this.modalData.cfg.selectedYAxis || '';
-    this.zooming = this.modalData.cfg.zooming || '';
-    this.showLengend = !!this.modalData.cfg.showLengend;
-    this.dataLabel = !!this.modalData.cfg.dataLabel;
-    this.enableMouseTracking = !!this.modalData.cfg.enableMouseTracking;
-    this.selectedThirdArgument = this.modalData.cfg.selectedThirdArgument || '';
-    this.pieInnerSize = this.modalData.cfg.pieInnerSize || 0;
-    this.pieStartAngal = this.modalData.cfg.pieStartAngal || 0;
-    this.pieENDAngal = this.modalData.cfg.pieENDAngal || 0;
-    this.stacking = this.modalData.cfg.stacking || '';
-    this.selectedSeriesFields = this.modalData.cfg.selectedSeriesFields || [];
-    this.yAxes = this.modalData.cfg.yAxes || [];
-    const sourceData = this.modalData.sourceData.find((data: any) => data.name === this.rawData);
-    console.log("Fetched file data:", sourceData.data);
-    if (!sourceData.data.length) {
-      console.error("No data found");
-      return;
+    this.selectedChartCate = this.modalData?.cfg?.selectedChartCate || null;
+    this.selectedChartType = this.modalData?.cfg?.selectedChartType || null;
+    this.selectedMatchValue = this.modalData?.cfg?.selectedMatchValue || '';
+    this.selectedMapOption = this.modalData?.cfg?.selectedMapOption || null;
+    this.rawData = this.modalData?.cfg?.rawData || '';
+    this.selectedData = this.modalData?.cfg?.selectedData || '';
+    this.title = this.modalData?.cfg?.title || '';
+    this.subTitle = this.modalData?.cfg?.subTitle || '';
+    this.titleAlign = this.modalData?.cfg?.titleAlign || 'center';
+    this.subTitleAlign = this.modalData?.cfg?.subTitleAlign || 'center';
+    this.selectedXAxis = this.modalData?.cfg?.selectedXAxis || '';
+    this.selectedYAxis = this.modalData?.cfg?.selectedYAxis || '';
+    this.zooming = this.modalData?.cfg?.zooming || '';
+    this.showLengend = !!this.modalData?.cfg?.showLengend;
+    this.dataLabel = !!this.modalData?.cfg?.dataLabel;
+    this.enableMouseTracking = !!this.modalData?.cfg?.enableMouseTracking;
+    this.selectedThirdArgument = this.modalData?.cfg?.selectedThirdArgument || '';
+    this.pieInnerSize = this.modalData?.cfg?.pieInnerSize || 0;
+    this.pieStartAngal = this.modalData?.cfg?.pieStartAngal || 0;
+    this.pieENDAngal = this.modalData?.cfg?.pieENDAngal || 0;
+    this.stacking = this.modalData?.cfg?.stacking || '';
+    this.selectedSeriesFields = this.modalData?.cfg?.selectedSeriesFields || [];
+    this.yAxes = this.modalData?.cfg?.yAxes || [];
+    if (this.modalData?.sourceData) {
+      try {
+        this.sourceData = JSON.parse(this.modalData.sourceData);
+        console.log('Source data:', this.sourceData);
+
+        const data = this.sourceData.find((d: any) => d.name === this.rawData);
+        console.log('Fetched file data:', data);
+
+        if (!data || !data.data || !data.data.length) {
+          console.error('No data found');
+          return;
+        }
+
+        this.addNewSource = false;
+        this.allFields = Object.keys(data.data[0]);
+      } catch (err) {
+        console.error('Error parsing sourceData:', err);
+      }
+    } else {
+      console.error('modalData.sourceData not found');
     }
-    this.addNewSource = false;
-    this.allFields = Object.keys(sourceData.data[0]);
     console.log(this.allFields);
   }
 
@@ -318,30 +402,6 @@ export class SidePannel {
     reader.readAsBinaryString(target.files[0]);
   }
 
-  detectColumnTypes(data: any[][]): void {
-    const headers = data[0];
-    const rows = data.slice(1);
-
-    const columnTypes: Record<string, string> = {};
-
-    headers.forEach((header: string, colIndex: number) => {
-      const values = rows.map(r => r[colIndex]).filter(v => v !== undefined && v !== null && v !== '');
-
-      if (values.every(v => !isNaN(Date.parse(v)))) {
-        columnTypes[header] = 'date';
-      } else if (values.every(v => typeof v === 'number' || !isNaN(Number(v)))) {
-        columnTypes[header] = 'number';
-      } else if (values.every(v => typeof v === 'boolean' || v === 'true' || v === 'false')) {
-        columnTypes[header] = 'boolean';
-      } else {
-        columnTypes[header] = 'string';
-      }
-    });
-
-    console.log('Detected Column Types:', columnTypes);
-  }
-
-
   removeFile(): void {
     this.uploadedFileName = '';
   }
@@ -428,20 +488,18 @@ export class SidePannel {
   }
 
 
+
+
   handleLoadedData(data: any[]): void {
     this.isLoading = false;
-    // if (!this.validateRowData(data)) {
-    //   this.notifyService.error('Row data not valid', 'Validation Failed', { timeOut: 5000 });
-    //   return;
-    // }else
-    if (this.modalData.sourceData.some((item: any) => item.name === this.sourceName)) {
+    if (this.sourceData.some((item: any) => item.name === this.sourceName)) {
       this.notifyService.error('Source name already used can please use differnt', 'Failed', { timeOut: 5000 });
       return;
     }
     this.addNewSource = false;
     this.rawData = this.sourceName;
-    this.modalData.sourceData.push({ name: this.sourceName, data: data });
-    this.apiUrl = '';
+    this.sourceData.push({ name: this.sourceName, data: data, sourceType: this.sourceType, sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName });
+    // this.apiUrl = ;
     this.uploadedExcelData = null;
     this.uploadedFileName = '';
     this.sourceName = '';
@@ -505,6 +563,7 @@ export class SidePannel {
   resetOptions() {
     this.addNewSource = true;
     this.rawData = '';
+    this.apiUrl = '';
   }
 
   changeSourceType() {
@@ -522,31 +581,36 @@ export class SidePannel {
 
 
   onApply() {
-    const chartData = {
-      sourceType: this.sourceType,
-      sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
-      selectedChartCate: this.selectedChartCate,
-      selectedChartType: this.selectedChartType,
-      selectedMatchValue: this.selectedMatchValue,
-      selectedMapOption: this.selectedMapOption,
-      rawData: this.rawData,
-      title: this.title,
-      subTitle: this.subTitle,
-      selectedXAxis: this.selectedXAxis,
-      selectedYAxis: this.selectedYAxis,
-      zooming: this.zooming,
-      showLengend: this.showLengend,
-      dataLabel: this.dataLabel,
-      enableMouseTracking: this.enableMouseTracking,
-      selectedThirdArgument: this.selectedThirdArgument,
-      pieInnerSize: this.pieInnerSize,
-      pieStartAngal: this.pieStartAngal,
-      pieENDAngal: this.pieENDAngal,
-      stacking: this.stacking,
-      selectedSeriesFields: this.selectedSeriesFields,
-      yAxes: this.yAxes
-    };
-    this.dialogRef.close(chartData);
+    const data = {
+      chartData: {
+        sourceType: this.sourceType,
+        sourceFile: this.sourceType == 1 ? this.apiUrl : this.uploadedFileName,
+        selectedChartCate: this.selectedChartCate,
+        selectedChartType: this.selectedChartType,
+        selectedMatchValue: this.selectedMatchValue,
+        selectedMapOption: this.selectedMapOption,
+        rawData: this.rawData,
+        title: this.title,
+        subTitle: this.subTitle,
+        titleAlign: this.titleAlign,
+        subTitleAlign: this.subTitleAlign,
+        selectedXAxis: this.selectedXAxis,
+        selectedYAxis: this.selectedYAxis,
+        zooming: this.zooming,
+        showLengend: this.showLengend,
+        dataLabel: this.dataLabel,
+         enableMouseTracking: this.enableMouseTracking,
+        selectedThirdArgument: this.selectedThirdArgument,
+        pieInnerSize: this.pieInnerSize,
+        pieStartAngal: this.pieStartAngal,
+        pieENDAngal: this.pieENDAngal,
+        stacking: this.stacking,
+        selectedSeriesFields: this.selectedSeriesFields,
+        yAxes: this.yAxes
+      },
+      sourceData: this.sourceData
+    }
+    this.dialogRef.close(data);
   }
 
 }

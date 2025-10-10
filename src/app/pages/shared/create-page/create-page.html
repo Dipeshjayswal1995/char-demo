@@ -1,4 +1,4 @@
-<mat-dialog-content [formGroup]="reportForm">
+<mat-dialog-content [formGroup]="reportForm" class="report-dialog-content">
   <p>Enter Report Name</p>
   <mat-form-field appearance="outline" style="width: 100%">
     <mat-label>Report Name</mat-label>
@@ -14,9 +14,17 @@
     </mat-error>
   </mat-form-field>
 </mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="selectName()" [disabled]="reportForm.invalid" cdkFocusInitial>
-    Ok
+
+<mat-dialog-actions align="end" class="report-dialog-actions">
+  <button mat-button class="cancel-btn" (click)="cancel()">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    class="ok-btn"
+    (click)="selectName()"
+    [disabled]="reportForm.invalid"
+    cdkFocusInitial
+  >
+    Save
   </button>
 </mat-dialog-actions>

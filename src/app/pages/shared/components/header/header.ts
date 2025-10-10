@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ChartEventService } from '../../../../@core/services/chart-event-service';
 import { CreatePage } from '../../create-page/create-page';
 import { ProjectConfiguration } from '../project-configuration/project-configuration';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -19,23 +20,40 @@ import { ProjectConfiguration } from '../project-configuration/project-configura
   styleUrl: './header.scss',
   standalone: true,
 })
-export class Header {
+export class Header implements OnInit, OnDestroy {
   @Output() sidebarToggle = new EventEmitter<void>();
   filesList = [];
   isViewCharts = true;
   projectData: any = null;
   // isDesignerMode = false;
   // selectedTab = '';
+  private readonly destroy$ = new Subject<void>();
   constructor(private readonly dialog: MatDialog, private readonly router: Router, private readonly storage: StorageService, private readonly route: ActivatedRoute,
     private readonly chartEventService: ChartEventService,
   ) {
     this.filesList = JSON.parse(storage.getPersistentItem(LOCAL_STORAGE_KEYS.FILELIST));
-    this.projectData = this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION) ? JSON.parse(this.storage.getPersistentItem(LOCAL_STORAGE_KEYS.PROJECTCONFIGURATION)) : null;
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       this.isViewCharts = mode !== 'designer';
     });
-    this.setDynamicThemeing();
+    // this.setDynamicThemeing();
+  }
+
+  ngOnInit() {
+    this.chartEventService.config$
+      .pipe(takeUntil(this.destroy$))   // 👈 auto unsubscribe
+      .subscribe(config => {
+        if (config) {
+          this.projectData = config;
+          this.setDynamicThemeing();
+        }
+      });
+    this.chartEventService.loadConfigFromStorage();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();      // 👈 emit on destroy
+    this.destroy$.complete();  // 👈 cleanup
   }
 
 
