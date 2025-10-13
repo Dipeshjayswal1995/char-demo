@@ -327,8 +327,8 @@
   width: 320px;
   background: var(--bg-color, #fff);
   padding: 1.2rem;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  // border-radius: 10px;
+  // border: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -498,12 +498,12 @@
 }
 
 .sidebar-footer .cancel-btn {
-  background-color: #f1f1f1;
-  color: #444;
+  background-color: var(--bg-color, #fff);
+  color: var(--color-text, #fff);
 }
 
 .sidebar-footer .cancel-btn:hover {
-  background-color: #e0e0e0;
+  background-color: var(--bg-color, #fff);
 }
 
 .sidebar-footer .apply-btn {
@@ -514,4 +514,18 @@
 .sidebar-footer .apply-btn:hover {
   color: var(--color-text, #fff);
   background: var(--button-bg, #fff);
+}
+
+
+.sheet-select-box {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheet-select-box select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }

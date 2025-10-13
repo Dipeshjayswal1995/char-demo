@@ -128,10 +128,14 @@ input[type="color"] {
 
 mat-card-actions {
   padding: 16px;
-  border-top: 1px solid #eee;
+  // border-top: 1px solid #eee;
 }
 
 .add-button {
   color: var(--color-text, #fff);
   background: var(--button-bg, #fff);
+}
+
+.cancel-button {
+  color: var(--color-text, #fff);
 }

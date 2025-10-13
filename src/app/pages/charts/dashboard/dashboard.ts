@@ -187,13 +187,13 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   setDynamicThemeing() {
     if (this.projectData) {
-      document.documentElement.style.setProperty('--header-bg', this.projectData.mainBackgroundColor || '#fff');
-      document.documentElement.style.setProperty('--color-text', this.projectData.textColor || '#333');
-      document.documentElement.style.setProperty('--button-bg', this.projectData.selectedColor || '#1976d2');
-      document.documentElement.style.setProperty('--chart-background', this.projectData.chartBackgroundColor || '#fff');
-      document.documentElement.style.setProperty('--button-bg-hover', this.projectData.mainBackgroundColor || '#145a9e');
-      document.documentElement.style.setProperty('--card-bg', this.projectData.mainBackgroundColor || '#fff');
-      document.documentElement.style.setProperty('--card-text', this.projectData.mainBackgroundColor || '#333');
+      document.documentElement.style.setProperty('--header-bg', this.projectData?.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--color-text', this.projectData?.textColor || '#333');
+      document.documentElement.style.setProperty('--button-bg', this.projectData?.selectedColor || '#1976d2');
+      document.documentElement.style.setProperty('--chart-background', this.projectData?.chartBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--button-bg-hover', this.projectData?.mainBackgroundColor || '#145a9e');
+      document.documentElement.style.setProperty('--card-bg', this.projectData?.mainBackgroundColor || '#fff');
+      document.documentElement.style.setProperty('--card-text', this.projectData?.mainBackgroundColor || '#333');
     }
   }
 

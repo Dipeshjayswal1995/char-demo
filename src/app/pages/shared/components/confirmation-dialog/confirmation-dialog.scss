@@ -7,7 +7,8 @@
 .mat-dialog-container {
   border-radius: 12px;
   padding: 0;
-  background-color:var(--sidebar-bg, #fff);;
+  background-color: var(--sidebar-bg, #fff);
+  ;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -19,7 +20,8 @@
   font-weight: 600;
   font-size: 18px;
   padding: 12px 20px;
-  background-color:var(--sidebar-bg, #fff);;
+  background-color: var(--sidebar-bg, #fff);
+  color: var(--text-color, #fff);
 
   .dialog-icon {
     font-size: 24px;
@@ -45,7 +47,7 @@
 .dialog-actions {
   padding: 12px 20px;
   background-color: var(--sidebar-bg, #fff);
-  border-top: 1px solid var(--sidebar-bg, #fff);;
+  border-top: 1px solid var(--sidebar-bg, #fff);
 
   button {
     min-width: 90px;
@@ -54,24 +56,37 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.6px;
+    color: var(--text-color, #fff) !important;
   }
 
-  .mat-flat-button[color="primary"] {
-    background-color:var(--button-bg, #1565c0)!important;
-    color: var(--text-color, #fff)!important;
+  .config-button {
+    background-color: var(--button-bg, #fff);
   }
 
-  .mat-flat-button[color="primary"]:hover {
-    background-color:var(--button-bg, #1565c0)!important;
+  .cancel-button {
+    background-color: var(--sidebar-bg, #fff) !important;
   }
 
-  .mat-button {
-    color: var(--text-color, #555)!important;
+  .cancel-button:hover {
+    background-color: var(--sidebar-bg, #fff) !important;
   }
 
-  .mat-button:hover {
-    background-color: var(--button-bg, #1565c0)!important;
-  }
+  // .mat-flat-button {
+  //   background-color:var(--button-bg, #1565c0)!important;
+  //   // color: var(--text-color, #fff)!important;
+  // }
+
+  // .mat-flat-button[color="primary"]:hover {
+  //   background-color:var(--button-bg, #1565c0)!important;
+  // }
+
+  // .mat-button {
+  //   color: var(--text-color, #555)!important;
+  // }
+
+  // .mat-button:hover {
+  //   background-color: var(--button-bg, #1565c0)!important;
+  // }
 }
 
 ::ng-deep .mat-mdc-dialog-content>* {

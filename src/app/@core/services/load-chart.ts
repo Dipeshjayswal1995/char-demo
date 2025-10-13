@@ -698,22 +698,24 @@ export class LoadChart {
       mapNavigation: {
         enabled: true
       },
-      // colorAxis: {
-      //   min: 1,
-      //   type: 'logarithmic',
-      //   minColor: '#EEEEFF',
-      //   maxColor: '#000022',
-      //   stops: [
-      //     [0, '#EFEFFF'],
-      //     [0.67, '#4444FF'],
-      //     [1, '#000022']
-      //   ]
-      // },
+      colorAxis: {
+        min: 1,
+        type: 'logarithmic',
+        minColor: '#EEEEFF',
+        maxColor: '#000022',
+        nullColor: '#d3d3d3',
+        stops: [
+          [0, '#EFEFFF'],
+          [0.67, '#4444FF'],
+          [1, '#000022']
+        ]
+      },
       series: [{
         data: rawData,
         colorByPoint: true,
         joinBy: [selectedMapOption?.uniqueValueMatch, selectedMatchValue],
         name: xAxis,
+        // nullColor: '#d3d3d3',
         dataLabels: {
           enabled: true,
           title: {
@@ -836,6 +838,7 @@ export class LoadChart {
           name: xAxis,
           enableMouseTracking: true,
           showInLegend: false,
+          nullColor: this.projectData?.sidebarColor ? this.projectData?.sidebarColor : '#ffffff',
 
           // ✅ Enable and style data labels
           dataLabels: {

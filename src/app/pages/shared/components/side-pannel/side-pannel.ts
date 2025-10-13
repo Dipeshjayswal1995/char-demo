@@ -82,6 +82,10 @@ export class SidePannel implements OnInit, AfterViewInit {
   isTitleAlignOpen = false;
   subTitleAlign: 'left' | 'center' | 'right' = 'center';
   isSubTitleAlignOpen = false;
+  sheetNames: string[] = [];
+  selectedSheet: string = '';
+  showSheetSelector: boolean = false;
+  tempWorkbook: any;
   constructor(private readonly http: HttpClient, private readonly chartBuilderService: LoadChart, public aggregation: Aggregation, private readonly ngZone: NgZone,
     private readonly notifyService: NotificationMassageService, private readonly apiServices: ApiServices, private readonly storage: StorageService,
     private readonly chartEventService: ChartEventService, private readonly route: ActivatedRoute, public dialogRef: MatDialogRef<SidePannel>,
@@ -356,11 +360,80 @@ export class SidePannel implements OnInit, AfterViewInit {
     const file: File = target.files[0];
     const reader: FileReader = new FileReader();
     this.uploadedFileName = file.name;
+
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+      this.sheetNames = wb.SheetNames;
+      console.log("Available sheets:", this.sheetNames);
+
+      if (this.sheetNames.length === 1) {
+        this.selectedSheet = this.sheetNames[0];
+        this.loadSelectedSheet(wb, this.selectedSheet);
+      } else {
+        this.showSheetSelector = true;
+        this.selectedSheet = this.sheetNames[0];
+        this.tempWorkbook = wb;
+        this.loadSelectedSheet(wb, this.selectedSheet);
+
+      }
+    };
+
+    reader.readAsBinaryString(file);
+  }
+
+  loadSelectedSheet(wb: XLSX.WorkBook, sheetName: string) {
+    const ws: XLSX.WorkSheet = wb.Sheets[sheetName];
+    const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as any[][];
+    const filteredRows = data.filter(row => row.some(cell => cell !== ''));
+    const [headerRow, ...rows] = filteredRows;
+
+    const cleanJson = rows.map((row, rowIndex) => {
+      const obj: any = {};
+      headerRow.forEach((header, colIndex) => {
+        const cellAddress = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex });
+        const cell = ws[cellAddress];
+
+        if (!cell) {
+          obj[header] = null;
+          return;
+        }
+
+        if (cell.w && isNaN(Number(cell.w))) {
+          obj[header] = cell.w;
+        } else if (cell.t === 'n') {
+          obj[header] = Number(cell.v);
+        } else if (cell.t === 's' || cell.t === 'str') {
+          obj[header] = String(cell.v);
+        } else if (cell.t === 'b') {
+          obj[header] = Boolean(cell.v);
+        } else {
+          obj[header] = cell.v;
+        }
+      });
+      return obj;
+    });
+
+    console.log('Loaded sheet:', sheetName, cleanJson);
+    this.uploadedExcelData = cleanJson;
+    this.showSheetSelector = false;
+  }
+
+  onFileChange123(event: any): void {
+    const target: DataTransfer = <DataTransfer>(event.target);
+    if (target.files.length !== 1) throw new Error('Cannot use multiple files');
+
+    const file: File = target.files[0];
+    const reader: FileReader = new FileReader();
+    this.uploadedFileName = file.name;
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
 
       const wsname: string = wb.SheetNames[0];
+      console.log("wsname ==>", wsname);
+      console.log("wb.SheetNames==>", wb.SheetNames);
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
       const data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as any[][];
@@ -599,7 +672,7 @@ export class SidePannel implements OnInit, AfterViewInit {
         zooming: this.zooming,
         showLengend: this.showLengend,
         dataLabel: this.dataLabel,
-         enableMouseTracking: this.enableMouseTracking,
+        enableMouseTracking: this.enableMouseTracking,
         selectedThirdArgument: this.selectedThirdArgument,
         pieInnerSize: this.pieInnerSize,
         pieStartAngal: this.pieStartAngal,
