@@ -529,3 +529,9 @@
   border-radius: 4px;
   border: 1px solid #ccc;
 }
+
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  transition: none !important;
+  background-color: var(--sidebar-bg, #1b263b) !important;
+  border-radius: 0 !important;
+}

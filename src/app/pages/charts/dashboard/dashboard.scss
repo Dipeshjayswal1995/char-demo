@@ -12,7 +12,6 @@
   margin-bottom: 15px;
   padding: 8px 12px;
   background: var(--chart-background, #fff);
-  // background: #fff;
   color: var(--color-text, #333);
   border-radius: 6px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
@@ -50,6 +49,7 @@
 
 .file-name {
   font-size: 14px;
+  font-weight: 500;
   color: var(--color-text, #333);
 }
 
@@ -62,6 +62,10 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
+}
+
+::ng-deep .gridster {
+  background: var(--header-bg, #fff)!important;
 }
 
 gridster-item {

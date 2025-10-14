@@ -1,5 +1,3 @@
-<!-- <div class="main-container"> -->
-
 @if (selectedChartFiles || createNewFiles) {
 <div class="dashboard-header">
   <div class="left-controls">
@@ -10,11 +8,11 @@
     <button class="save-btn" (click)="saveData()">Save</button>
     }
   </div>
+  <span class="file-name">
+    {{selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles}}
+  </span>
 
   <div class="file-info">
-    <span class="file-name">
-      {{selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles}}
-    </span>
     @if(!isViewCharts) {
     <button mat-mini-fab class="add-button"
       (click)="editNameOfReportFiles(selectedChartFiles?.displayName ? selectedChartFiles?.displayName : createNewFiles)">
@@ -29,7 +27,7 @@
   </div>
 </div>
 }
-
+<!-- <div style="height: 90%;"> -->
 @if (!remove) {
 <gridster [options]="options" (resize)="onResize()">
   @for (item of dashboard; track item; let i = $index) {

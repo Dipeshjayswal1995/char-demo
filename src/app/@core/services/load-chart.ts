@@ -458,11 +458,25 @@ export class LoadChart {
           color: this.projectData?.textColor // ✅ Color when hovering legend items
         }
       },
+      plotOptions: {
+        series: {
+          label: {
+            enabled: true,
+            style: {
+              color: this.projectData?.textColor,
+              fontSize: '14px',
+              fontWeight: 'bold',
+              textOutline: 'none'
+            }
+          }
+        }
+      },
       series: series.length > 0 ? series : [],
       credits: {
         enabled: false,
       },
       exporting: {
+        // filename: , // file name
         buttons: {
           contextButton: {
             align: 'left',
@@ -809,7 +823,36 @@ export class LoadChart {
         style: { color: this.projectData?.textColor },
       },
 
-      mapNavigation: { enabled: true },
+      // mapNavigation: { enabled: true },
+      mapNavigation: {
+        enabled: true,
+        buttonOptions: {
+          verticalAlign: 'top',
+          align: 'left',
+          symbolFill: this.projectData?.textColor ?? '#000000',
+          symbolStroke: this.projectData?.textColor ?? '#000000',
+
+          theme: {
+            fill: this.projectData?.selectedColor ?? '#ffffff',
+            stroke: 'none',
+            'stroke-width': 0,
+            r: 6,
+            style: {
+              color: this.projectData?.textColor ?? '#000000',
+              fontWeight: 'bold',
+              fontSize: '16px',
+            },
+            states: {
+              hover: {
+                fill: this.projectData?.selectedColor ?? '#00bcd4',
+              },
+              select: {
+                fill: this.projectData?.selectedColor ?? '#00bcd4',
+              },
+            },
+          },
+        },
+      },
       colorAxis: {
         showInLegend: false,
         min: 1,

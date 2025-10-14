@@ -139,3 +139,10 @@ mat-card-actions {
 .cancel-button {
   color: var(--color-text, #fff);
 }
+
+
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  transition: none !important;
+  background-color: var(--header-bg, #1b263b) !important;
+  border-radius: 0 !important;
+}

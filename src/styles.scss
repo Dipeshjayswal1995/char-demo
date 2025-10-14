@@ -188,11 +188,18 @@ body {
   color: var(--color-text, #fff) !important;
 }
 
-._mat-animation-noopable .mat-mdc-dialog-surface {
-  transition: none;
-  background-color: var(--sidebar-bg, #1b263b);
-  border-radius: 0 !important;
-}
+// ._mat-animation-noopable .mat-mdc-dialog-surface {
+//   transition: none;
+//   background-color: var(--sidebar-bg, #1b263b)!important;
+//   border-radius: 0 !important;
+// }
+
+
+
+// ::ng-deep .mdc-dialog--open .mat-mdc-dialog-surface
+// {
+//    background-color: var(--sidebar-bg, #1b263b);
+// }
 
 
 

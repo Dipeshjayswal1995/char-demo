@@ -43,7 +43,7 @@
     @if (sourceType == 2) {
     <div class="form-group">
 
-      @if (showSheetSelector) {
+      <!-- @if (showSheetSelector) {
       <div *ngIf="showSheetSelector" class="sheet-select-box">
         <label>Select Sheet:</label>
         <select [(ngModel)]="selectedSheet" (change)="loadSelectedSheet(tempWorkbook, selectedSheet)">
@@ -51,7 +51,7 @@
           <option *ngFor="let sheet of sheetNames" [value]="sheet">{{ sheet }}</option>
         </select>
       </div>
-      } @else {
+      } @else { -->
       <div class="file-upload-box" (click)="fileInput.click()" [class.uploaded]="uploadedFileName">
         <div *ngIf="uploadedFileName" class="uploaded-file-icon">
           <div class="file-icon-container">
@@ -78,7 +78,7 @@
         </div>
         <input type="file" #fileInput (change)="onFileChange($event)" accept=".xlsx, .xls, .csv" style="display: none;">
       </div>
-      }
+      <!-- } -->
 
     </div>
     }

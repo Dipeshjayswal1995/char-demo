@@ -653,7 +653,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.apiServices.deleteFile(this.selectedChartFiles.id).subscribe({
       next: (res: any) => {
         if (res.status) {
-          // location.reload();
+          location.reload();
           this.notifyService.success('Chart report deleted successfully.', 'success');
         }
       },
